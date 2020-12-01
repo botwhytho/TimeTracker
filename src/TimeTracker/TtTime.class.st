@@ -19,5 +19,5 @@ TtTime >> TtTimeDashboard: aView [
 
 { #category : #accessing }
 TtTime >> days [
-	^ days ifNil: [ days := OrderedCollection new]
+	^ days ifNil: [ days := SortedCollection sortUsing: [:a :b | a date > b date] ]
 ]
