@@ -15,8 +15,9 @@ TtDay >> TtDayDashboard: aView [
 		title: 'Dashboard' translated;
 		priority: 1;
 		items: [ self entries ];
-		column: 'Time' text: [ :anEntry | anEntry span ];
-		column: 'Activities' text: [ :anEntry | anEntry activities ]
+		column: 'Time' text: [ :anEntry | anEntry span start asTime printMinutes , '-' , anEntry span end asTime printMinutes ];
+		column: 'Activities' text: [ :anEntry | anEntry activities ];
+		column: 'Categories' text: [ :anEntry | ', ' join: anEntry categories ]
 ]
 
 { #category : #accessing }
@@ -31,5 +32,5 @@ TtDay >> date: aDate [
 
 { #category : #accessing }
 TtDay >> entries [
-	^ entries ifNil: [ entries := SortedCollection sortUsing: [:a :b | a span < b span] ]
+	^ entries ifNil: [ entries := SortedCollection sortUsing: [:a :b | a span start < b span start] ]
 ]

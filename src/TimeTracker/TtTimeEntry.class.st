@@ -3,10 +3,22 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'span',
-		'activities'
+		'activities',
+		'categories'
 	],
 	#category : #TimeTracker
 }
+
+{ #category : #accessing }
+TtTimeEntry >> TtTimeEntryDashboard: aView [
+	<gtView>
+	^ aView columnedList
+		title: (self span start asTime printMinutes , '-' , self span end asTime printMinutes);
+		priority: 1;
+		items: [ { self } ];
+		column: 'Activities' text: [ :anEntry | anEntry activities ];
+		column: 'Categories' text: [ :anEntry | ', ' join: anEntry categories ]
+]
 
 { #category : #accessing }
 TtTimeEntry >> activities [
@@ -16,6 +28,11 @@ TtTimeEntry >> activities [
 { #category : #accessing }
 TtTimeEntry >> activities: someActivities [
 	activities := someActivities
+]
+
+{ #category : #accessing }
+TtTimeEntry >> categories [
+	^ categories ifNil: [ categories := OrderedCollection new ]
 ]
 
 { #category : #accessing }
