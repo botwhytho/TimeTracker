@@ -8,6 +8,28 @@ Class {
 }
 
 { #category : #accessing }
+TtCategories >> Categories: aView [
+	<gtView>
+	^ aView mondrian
+		title: 'Categories' translated;
+		priority: '10';
+		painting: [ :view |
+			view nodes
+				shape: [ :aCategory |
+					BlTextElement new
+						text: aCategory name asRopedText;
+						border: (BlBorder paint: Color gray width: 1);
+						constraintsDo: [ :c |
+							c padding: (BlInsets all: 10) ] ]; 
+				with: self categories.
+			view edges
+				fromRightCenter;
+				toLeftCenter;
+				connectFromAll: #parent.
+			view layout horizontalTree ].
+]
+
+{ #category : #accessing }
 TtCategories >> categories [
 	^ categories ifNil: [ categories := OrderedCollection new ]
 ]

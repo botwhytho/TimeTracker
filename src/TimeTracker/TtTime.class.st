@@ -16,9 +16,9 @@ TtTime >> Categories: aView [
 		priority: '11';
 		painting: [ :view |
 			view nodes
-				shape: [ :aClass |
+				shape: [ :aCategory |
 					BlTextElement new
-						text: aClass name asRopedText;
+						text: aCategory name asRopedText;
 						border: (BlBorder paint: Color gray width: 1);
 						constraintsDo: [ :c |
 							c padding: (BlInsets all: 10) ] ]; 
