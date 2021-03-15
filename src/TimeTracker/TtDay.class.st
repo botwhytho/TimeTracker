@@ -3,12 +3,13 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'date',
-		'entries'
+		'entries',
+		'comments'
 	],
 	#category : #TimeTracker
 }
 
-{ #category : #accessing }
+{ #category : #view }
 TtDay >> TtDayDashboard: aView [
 	<gtView>
 	^ aView columnedList
@@ -18,6 +19,16 @@ TtDay >> TtDayDashboard: aView [
 		column: 'Time' text: [ :anEntry | anEntry span start asTime printMinutes , '-' , anEntry span end asTime printMinutes ];
 		column: 'Activities' text: [ :anEntry | anEntry activities ];
 		column: 'Categories' text: [ :anEntry | ', ' join: anEntry categories ]
+]
+
+{ #category : #accessing }
+TtDay >> comments [
+	^ comments
+]
+
+{ #category : #accessing }
+TtDay >> comments: aComment [
+	comments := aComment
 ]
 
 { #category : #accessing }

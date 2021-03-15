@@ -9,7 +9,7 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #accessing }
+{ #category : #view }
 TtTimeEntry >> TtTimeEntryDashboard: aView [
 	<gtView>
 	^ aView columnedList
