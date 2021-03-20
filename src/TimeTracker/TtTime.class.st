@@ -8,7 +8,7 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #accessing }
+{ #category : #view }
 TtTime >> Categories: aView [
 	<gtView>
 	^ aView mondrian
@@ -30,17 +30,17 @@ TtTime >> Categories: aView [
 			view layout horizontalTree ].
 ]
 
-{ #category : #accessing }
+{ #category : #view }
 TtTime >> TtTimeDashboard: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Dashboard' translated;
 		priority: 10;
-		items: [ self days ];
+		items: [ self days values sorted: [ :a :b | a date > b date ] ];
 		column: 'Days' text: [ :aDay | aDay date ]
 ]
 
-{ #category : #accessing }
+{ #category : #example }
 TtTime >> aTimeExample [
 	"An example TtTime with sample categories"
 	<gtExample>
@@ -67,5 +67,14 @@ TtTime >> cetagories: aCategoryHierarchy [
 
 { #category : #accessing }
 TtTime >> days [
-	^ days ifNil: [ days := SortedCollection sortUsing: [:a :b | a date > b date] ]
+	^ days ifNil: [ days := Dictionary new ]
+]
+
+{ #category : #import }
+TtTime >> import [
+	| data |
+	data := TtTrelloImporter fetch.
+	data
+		associationsDo:
+			[ :day | self days at: day key ifAbsentPut: (TtTrelloDayParser new import: day) ]
 ]
