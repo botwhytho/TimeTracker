@@ -12,13 +12,29 @@ Class {
 { #category : #view }
 TtDay >> TtDayDashboard: aView [
 	<gtView>
-	^ aView columnedList
+	^ aView columnedTree
+		expandAll;
 		title: 'Dashboard' translated;
 		priority: 1;
 		items: [ self entries ];
-		column: 'Time' text: [ :anEntry | anEntry span start asTime printMinutes , '-' , anEntry span end asTime printMinutes ];
-		column: 'Activities' text: [ :anEntry | anEntry activities ];
-		column: 'Categories' text: [ :anEntry | ', ' join: anEntry categories ]
+		children: [ :each | 
+			(each isString not and: [ each activities size > 1 ])
+				ifTrue: [ each activities ]
+				ifFalse: [ #() ] ];
+		column: 'Time'
+			text: [ :anEntry | 
+			anEntry isString
+				ifTrue: [ '' ]
+				ifFalse: [ anEntry span start asTime printMinutes , '-'
+						, anEntry span end asTime printMinutes ] ];
+		column: 'Activities'
+			text: [ :anEntry | 
+			anEntry isString
+				ifTrue: [ anEntry ]
+				ifFalse: [ anEntry activities size > 1
+						ifTrue: [ '' ]
+						ifFalse: [ anEntry activities first ] ] ];
+		column: 'Categories' text: ''
 ]
 
 { #category : #accessing }
