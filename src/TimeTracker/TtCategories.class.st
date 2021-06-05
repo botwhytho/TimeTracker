@@ -7,7 +7,7 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #accessing }
+{ #category : #view }
 TtCategories >> Categories: aView [
 	<gtView>
 	^ aView mondrian

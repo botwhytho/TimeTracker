@@ -18,23 +18,29 @@ TtDay >> TtDayDashboard: aView [
 		priority: 1;
 		items: [ self entries ];
 		children: [ :each | 
-			(each isString not and: [ each activities size > 1 ])
+			((each isKindOf: TtTimeEntry) and: [ each activities size > 1 ])
 				ifTrue: [ each activities ]
 				ifFalse: [ #() ] ];
 		column: 'Time'
 			text: [ :anEntry | 
-			anEntry isString
+			(anEntry isKindOf: Association)
 				ifTrue: [ '' ]
 				ifFalse: [ anEntry span start asTime printMinutes , '-'
 						, anEntry span end asTime printMinutes ] ];
 		column: 'Activities'
 			text: [ :anEntry | 
-			anEntry isString
-				ifTrue: [ anEntry ]
-				ifFalse: [ anEntry activities size > 1
+			(anEntry isKindOf: TtTimeEntry)
+				ifTrue: [ anEntry activities size > 1
 						ifTrue: [ '' ]
-						ifFalse: [ anEntry activities first ] ] ];
-		column: 'Categories' text: ''
+						ifFalse: [ anEntry activities first key ] ]
+				ifFalse: [ anEntry key ] ];
+		column: 'Categories'
+			text: [ :anEntry | 
+			(anEntry isKindOf: TtTimeEntry)
+				ifTrue: [ anEntry activities size > 1
+						ifTrue: [ '' ]
+						ifFalse: [ anEntry activities first value ] ]
+				ifFalse: [ anEntry value ] ]
 ]
 
 { #category : #accessing }

@@ -24,7 +24,7 @@ TtTrelloDayParser >> import: anAssociation [
 						add:
 							(TtTimeEntry new
 								span: (self parseTimeSpan: parsed first date: anAssociation key);
-								activities: (($; split: parsed second) collect: #trim);
+								activities: (($; split: parsed second) collect: [ :each | each trim -> nil ]);
 								yourself) ]
 				ifFalse: [ metadata add: parsed ] ].
 	day comments: metadata.

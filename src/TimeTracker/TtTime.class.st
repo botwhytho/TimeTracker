@@ -36,7 +36,7 @@ TtTime >> TtTimeDashboard: aView [
 	^ aView columnedList
 		title: 'Dashboard' translated;
 		priority: 10;
-		items: [ self days values sorted: [ :a :b | a date > b date ] ];
+		items: [ self days values sorted: #date descending ];
 		column: 'Days' text: [ :aDay | aDay date ]
 ]
 
