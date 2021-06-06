@@ -16,10 +16,9 @@ TtTimeEntry >> TtTimeEntryDashboardFor: aView [
 			self span start asTime printMinutes , '-'
 				, self span end asTime printMinutes;
 		priority: 1;
-		items: [ {self} ];
-		column: 'Activities' text: [ :anEntry | anEntry activities key ];
-		column: 'Categories'
-			text: [ :anEntry | ', ' join: anEntry activities value ]
+		items: [ self activities ];
+		column: 'Activities' text: [ :anEntry | anEntry key ];
+		column: 'Categories' text: [ :anEntry | anEntry value name ]
 ]
 
 { #category : #accessing }
