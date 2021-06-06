@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #view }
-TtTimeEntry >> TtTimeEntryDashboard: aView [
+TtTimeEntry >> TtTimeEntryDashboardFor: aView [
 	<gtView>
 	^ aView columnedList
 		title:

@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #view }
-TtDay >> TtDayDashboard: aView [
+TtDay >> TtDayDashboardFor: aView [
 	<gtView>
 	^ aView columnedTree
 		expandAll;
@@ -66,4 +66,10 @@ TtDay >> date: aDate [
 { #category : #accessing }
 TtDay >> entries [
 	^ entries ifNil: [ entries := SortedCollection sortUsing: [:a :b | a span start < b span start] ]
+]
+
+{ #category : #printing }
+TtDay >> printOn: aStream [
+	super printOn: aStream.
+	aStream nextPutAll: ' (' , self date asString , ')'
 ]

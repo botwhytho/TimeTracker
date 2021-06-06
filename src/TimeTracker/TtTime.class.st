@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #view }
-TtTime >> Categories: aView [
+TtTime >> TtCategoriesFor: aView [
 	<gtView>
 	^ aView mondrian
 		title: 'Categories' translated;
@@ -31,7 +31,7 @@ TtTime >> Categories: aView [
 ]
 
 { #category : #view }
-TtTime >> TtTimeDashboard: aView [
+TtTime >> TtTimeDashboardFor: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Dashboard' translated;

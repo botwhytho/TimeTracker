@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #view }
-TtCategories >> Categories: aView [
+TtCategories >> TtCategoriesFor: aView [
 	<gtView>
 	^ aView mondrian
 		title: 'Categories' translated;
