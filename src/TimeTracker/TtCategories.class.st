@@ -4,8 +4,16 @@ Class {
 	#instVars : [
 		'categories'
 	],
+	#classInstVars : [
+		'testInstance'
+	],
 	#category : #TimeTracker
 }
+
+{ #category : #'building ui' }
+TtCategories class >> testInstance [
+	^ testInstance ifNil: [ testInstance := self new ]
+]
 
 { #category : #view }
 TtCategories >> TtCategoriesFor: aView [
