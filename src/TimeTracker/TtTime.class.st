@@ -54,7 +54,8 @@ TtTime class >> initialize [
 { #category : #accessing }
 TtTime class >> saveToDisk [
 
-	Cache serializeToFileNamed: (Directory / 'test.fuel') pathString
+	Cache serializeToFileNamed:
+		(Directory / 'TimeTracker.fuel') pathString
 ]
 
 { #category : #accessing }
