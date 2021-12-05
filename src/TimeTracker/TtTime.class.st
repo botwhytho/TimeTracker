@@ -13,6 +13,17 @@ Class {
 }
 
 { #category : #accessing }
+TtTime class >> cache [
+	^ Cache
+]
+
+{ #category : #accessing }
+TtTime class >> cache: anImport [
+
+	Cache := anImport
+]
+
+{ #category : #accessing }
 TtTime class >> initialize [
 
 	| settings |
@@ -21,24 +32,29 @@ TtTime class >> initialize [
 	            / 'settings.json'.
 	settings exists ifFalse: [ 
 		settings ensureCreateFile.
-		STON
-			put: { (#cacheDirectory -> nil) } asDictionary
-			asJsonOnStreamPretty: settings writeStream
-		"serializeToFileNamed"
-		"writeStreamDo: [ :stream | 
-					stream nextPutAll: (NeoJSONWriter toStringPretty:
-									 { (#cacheDirectory -> nil) } asDictionary) ] ]" ].
+		settings writeStreamDo: [ :stream | 
+			STON
+				put: { (#cacheDirectory -> nil) } asDictionary
+				asJsonOnStreamPretty: stream ] ].
 	((STON fromStream: settings readStream) at: 'cacheDirectory')
 		ifNil: [ 
 			| file |
+			Directory := settings parent.
 			file := settings parent / 'TimeTracker.fuel'.
 			file exists ifTrue: [ 
 				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ]
 		ifNotNil: [ :directory | 
 			| file |
+			Directory := directory asFileReference.
 			file := directory asFileReference / 'TimeTracker.fuel'.
 			file exists ifTrue: [ 
 				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ]
+]
+
+{ #category : #accessing }
+TtTime class >> saveToDisk [
+
+	Cache serializeToFileNamed: (Directory / 'test.fuel') pathString
 ]
 
 { #category : #accessing }
@@ -111,10 +127,14 @@ TtTime >> days [
 
 { #category : #import }
 TtTime >> import [
+
 	"This should eventually call a properly configured class that implements a trait that knows how to import data"
+
 	| data |
 	data := TtTrelloImporter fetch.
-	data
-		associationsDo:
-			[ :day | self days at: day key ifAbsentPut: (TtTrelloDayParser new import: day) ]
+	data associationsDo: [ :day | 
+		self days
+			at: day key
+			ifAbsentPut: (TtTrelloDayParser new import: day) ].
+	self class cache: self
 ]
