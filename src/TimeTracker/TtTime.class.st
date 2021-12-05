@@ -5,8 +5,47 @@ Class {
 		'days',
 		'categories'
 	],
+	#classVars : [
+		'Cache',
+		'Directory'
+	],
 	#category : #TimeTracker
 }
+
+{ #category : #accessing }
+TtTime class >> initialize [
+
+	| settings |
+	"maybe use `settingsLocation` but not sure if that will already be available on initialize"
+	settings := FileLocator preferences / #pharo / #TimeTracker
+	            / 'settings.json'.
+	settings exists ifFalse: [ 
+		settings ensureCreateFile.
+		STON
+			put: { (#cacheDirectory -> nil) } asDictionary
+			asJsonOnStreamPretty: settings writeStream
+		"serializeToFileNamed"
+		"writeStreamDo: [ :stream | 
+					stream nextPutAll: (NeoJSONWriter toStringPretty:
+									 { (#cacheDirectory -> nil) } asDictionary) ] ]" ].
+	((STON fromStream: settings readStream) at: 'cacheDirectory')
+		ifNil: [ 
+			| file |
+			file := settings parent / 'TimeTracker.fuel'.
+			file exists ifTrue: [ 
+				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ]
+		ifNotNil: [ :directory | 
+			| file |
+			file := directory asFileReference / 'TimeTracker.fuel'.
+			file exists ifTrue: [ 
+				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ]
+]
+
+{ #category : #accessing }
+TtTime class >> settingsLocation [
+
+	^ FileLocator preferences / #pharo / #TimeTracker
+]
 
 { #category : #view }
 TtTime >> TtCategoriesFor: aView [
@@ -72,6 +111,7 @@ TtTime >> days [
 
 { #category : #import }
 TtTime >> import [
+	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	| data |
 	data := TtTrelloImporter fetch.
 	data
