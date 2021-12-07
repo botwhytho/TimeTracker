@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'date',
 		'entries',
-		'comments'
+		'comments',
+		'rawImport'
 	],
 	#category : #TimeTracker
 }
@@ -187,6 +188,17 @@ TtDay >> entries [
 TtDay >> printOn: aStream [
 	super printOn: aStream.
 	aStream nextPutAll: ' (' , self date asString , ')'
+]
+
+{ #category : #accessing }
+TtDay >> rawData [
+
+	^ rawImport
+]
+
+{ #category : #accessing }
+TtDay >> rawData: rawExternalData [
+	rawImport := rawExternalData
 ]
 
 { #category : #'building ui' }

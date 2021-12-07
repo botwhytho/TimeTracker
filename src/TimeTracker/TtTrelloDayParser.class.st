@@ -11,22 +11,26 @@ TtTrelloDayParser >> entry [
 
 { #category : #import }
 TtTrelloDayParser >> import: anAssociation [
+
 	| metadata day entries |
-	day := TtDay new date: anAssociation key.
+	day := TtDay new
+		       date: anAssociation key;
+		       rawData: (anAssociation value at: 'raw').
 	metadata := OrderedCollection new.
-	entries := self lines parse: anAssociation value.
-	entries
-		do: [ :line | 
-			| parsed |
-			parsed := self entry parse: line.
-			parsed isArray
-				ifTrue: [ day entries
-						add:
-							(TtTimeEntry new
-								span: (self parseTimeSpan: parsed first date: anAssociation key);
-								activities: (($; split: parsed second) collect: [ :each | each trim -> nil ]);
-								yourself) ]
-				ifFalse: [ metadata add: parsed ] ].
+	entries := self lines parse: (anAssociation value at: 'description').
+	entries do: [ :line | 
+		| parsed |
+		parsed := self entry parse: line.
+		parsed isArray
+			ifTrue: [ 
+				day entries add: (TtTimeEntry new
+						 span:
+							 (self parseTimeSpan: parsed first date: anAssociation key);
+						 activities:
+							 (($; split: parsed second) collect: [ :each | 
+									  each trim -> nil ]);
+						 yourself) ]
+			ifFalse: [ metadata add: parsed ] ].
 	day comments: metadata.
 	^ day
 ]
@@ -75,9 +79,10 @@ TtTrelloDayParser >> timeEntry [
 
 { #category : #parsing }
 TtTrelloDayParser >> timeRange [
-	^ (('-' asPParser , #space asPParser plus) optional , self time
-		, '-' asPParser , self time)
-		==> [ :tr | 
-			{tr second.
-			tr fourth} ]
+
+	^ ('-' asPParser / '*' asPParser , #space asPParser plus) optional
+	  , self time , '-' asPParser , self time ==> [ :tr | 
+	  { 
+		  tr second.
+		  tr fourth } ]
 ]
