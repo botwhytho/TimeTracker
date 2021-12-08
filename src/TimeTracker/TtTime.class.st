@@ -12,15 +12,33 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #view }
+TtTime class >> TtTimeDashboardFor: aView [
+
+	<gtClassView>
+	^ aView forward
+		  title: 'Dashboard' translated;
+		  priority: 1;
+		  object: self cache;
+		  view: #TtTimeDashboardFor:
+]
+
 { #category : #accessing }
 TtTime class >> cache [
-	^ Cache
+
+	^ Cache ifNil: [ Cache := self new ]
 ]
 
 { #category : #accessing }
 TtTime class >> cache: anImport [
 
 	Cache := anImport
+]
+
+{ #category : #accessing }
+TtTime class >> import [
+
+	^ self cache import
 ]
 
 { #category : #accessing }
@@ -48,7 +66,8 @@ TtTime class >> initialize [
 			Directory := directory asFileReference.
 			file := directory asFileReference / 'TimeTracker.fuel'.
 			file exists ifTrue: [ 
-				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ]
+				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ].
+	self import
 ]
 
 { #category : #accessing }
@@ -131,11 +150,14 @@ TtTime >> import [
 
 	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 
-	| data |
+	| data latest |
 	data := TtTrelloImporter fetch.
+	"Not importing latest day under assumption it is today and data is not complete yet. Better logic needed later"
+	latest := data keys max.
 	data associationsDo: [ :day | 
-		self days
-			at: day key
-			ifAbsentPut: (TtTrelloDayParser new import: day) ].
-	self class cache: self
+		day key = latest ifFalse: [ 
+			self days
+				at: day key
+				ifAbsentPut: (TtTrelloDayParser new import: day) ] ].
+	^ self
 ]
