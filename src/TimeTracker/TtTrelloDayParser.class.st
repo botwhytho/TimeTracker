@@ -6,7 +6,8 @@ Class {
 
 { #category : #parsing }
 TtTrelloDayParser >> entry [
-	^ self timeEntry / self line
+
+	^ self timeEntry
 ]
 
 { #category : #import }
@@ -17,7 +18,7 @@ TtTrelloDayParser >> import: anAssociation [
 		       date: anAssociation key;
 		       rawData: (anAssociation value at: 'raw').
 	metadata := OrderedCollection new.
-	entries := self lines parse: (anAssociation value at: 'description').
+	entries := (anAssociation value at: 'description') lines.
 	entries do: [ :line | 
 		| parsed |
 		parsed := self entry parse: line.
@@ -30,19 +31,14 @@ TtTrelloDayParser >> import: anAssociation [
 							 (($; split: parsed second) collect: [ :each | 
 									  each trim -> nil ]);
 						 yourself) ]
-			ifFalse: [ metadata add: parsed ] ].
-	day comments: metadata.
+			ifFalse: [ metadata add: line ] ].
+	day comments: (Character lf join: metadata).
 	^ day
 ]
 
 { #category : #parsing }
 TtTrelloDayParser >> line [
 	^ #newline asPParser negate plus flatten
-]
-
-{ #category : #parsing }
-TtTrelloDayParser >> lines [
-	^ ((self line , #newline asPParser optional) ==> #first) plus
 ]
 
 { #category : #parsing }
