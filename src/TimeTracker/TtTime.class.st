@@ -45,9 +45,8 @@ TtTime class >> import [
 TtTime class >> initialize [
 
 	| settings |
-	"maybe use `settingsLocation` but not sure if that will already be available on initialize"
-	settings := FileLocator preferences / #pharo / #TimeTracker
-	            / 'settings.json'.
+	SessionManager default registerUserClassNamed: self name.
+	settings := self settingsLocation / 'settings.json'.
 	settings exists ifFalse: [ 
 		settings ensureCreateFile.
 		settings writeStreamDo: [ :stream | 
@@ -81,6 +80,12 @@ TtTime class >> saveToDisk [
 TtTime class >> settingsLocation [
 
 	^ FileLocator preferences / #pharo / #TimeTracker
+]
+
+{ #category : #accessing }
+TtTime class >> shutDown [
+
+	self saveToDisk
 ]
 
 { #category : #view }
