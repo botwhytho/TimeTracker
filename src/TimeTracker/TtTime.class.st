@@ -152,7 +152,8 @@ TtTime >> import [
 
 	| data latest |
 	data := TtTrelloImporter fetch.
-	"Not importing latest day under assumption it is today and data is not complete yet. Better logic needed later"
+	self flag:
+		'Not importing latest day under assumption it is today and data is not complete yet. Better logic needed later'.
 	latest := data keys max.
 	data associationsDo: [ :day | 
 		day key = latest ifFalse: [ 
