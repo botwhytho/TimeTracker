@@ -11,13 +11,14 @@ Class {
 }
 
 { #category : #view }
-TtDay >> TtDayDashboardFor: aView [
+TtDay >> TtDayCategorizeEntiresFor: aView [
 	<gtView>
 	| view |
 	view := aView columnedTree
 		expandAll;
-		title: 'Dashboard' translated;
-		priority: 1;
+		title: 'Categorize Entries' translated;
+		flag: 'Set a dynamic priority where it is 1 if things left to categorize, otherwise 2?' ; 
+		priority: 2 ;
 		items: [ self entries ];
 		children: [ :each | 
 			((each isKindOf: TtTimeEntry) and: [ each activities size > 1 ])
@@ -51,6 +52,62 @@ TtDay >> TtDayDashboardFor: aView [
 	^ view
 ]
 
+{ #category : #view }
+TtDay >> TtDayDashboardFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Dashboard' translated;
+		  priority: 1;
+		  stencil: [ 
+			  | data horizontalPane verticalPane |
+			  data := self calculateAnglesForDonut.
+			  horizontalPane := BrHorizontalPane new
+				                    hMatchParent;
+				                    alignCenter;
+				                    vFitContent.
+			  horizontalPane addChildren: { 
+					  (self buildDonut: data).
+					  (self buildBars: data) }.
+			  verticalPane := BrVerticalPane new
+				                  hMatchParent;
+				                  alignCenter;
+				                  vMatchParent.
+			  verticalPane addChildren: { 
+					  horizontalPane.
+					  (self TtDayCategorizeEntiresFor: GtPhlowView empty) asElement }.
+			  verticalPane ]
+]
+
+{ #category : #'building ui' }
+TtDay >> buildBars: data [
+
+	| theData aBarWidthScale barChart |
+	theData := GtPlotterDataGroup new values: data.
+	theData := theData labelled: [ :each | each first ].
+	theData := theData colored: [ :each | each fourth ].
+	aBarWidthScale := GtPlotterLinearScale new
+		                  domainFrom: 0
+		                  to: data first second asHours.
+
+	barChart := GtPlotterHorizontalBarChart new.
+	barChart barElement: [ :aGtPlotterContext | 
+		BlElement new aptitude:
+			((BrGlamorousWithTooltipAptitude content: [ 
+					  BrLabel new
+						  text: aGtPlotterContext originalValue second;
+						  aptitude:
+							  (BrGlamorousLabelAptitude new padding: (BlInsets all: 1)) ])
+				 hideDelay: 0;
+				 showDelay: 0) ].
+	barChart barLabelWidth: 160.
+	barChart barWidthScale: aBarWidthScale.
+	barChart barWidthData: [ :eachValue | eachValue second asHours ].
+	barChart amountOfTicks: 4.
+	barChart with: theData.
+	^ barChart asElement
+]
+
 { #category : #'building ui' }
 TtDay >> buildCategorizerButton: anActivity [
 	| button model |
@@ -70,6 +127,50 @@ TtDay >> buildCategorizerButton: anActivity [
 						handle: [ self editableLabel: button with: model ]
 						content: [ self dropdownList: button with:  model ]).
 	^ button
+]
+
+{ #category : #'building ui' }
+TtDay >> buildDonut: data [
+
+	^ BlElement new
+		  size: 400 @ 400;
+		  addChildren: (data collect: [ :each | 
+					   BlElement new
+						   when: BlClickEvent
+						   do: [ :e | e target phlow spawnObject: each last ];
+						   geometry: (BlAnnulusSector new
+								    startAngle: each third first;
+								    endAngle: each third last;
+								    innerRadius: 0.85);
+						   background: each fourth;
+						   constraintsDo: [ :c | 
+							   c horizontal matchParent.
+							   c vertical matchParent ] ])
+]
+
+{ #category : #'building ui' }
+TtDay >> calculateAnglesForDonut [
+
+	| categories totalTime |
+	categories := self sortedEntries.
+	totalTime := categories sum: [ :each | each second ].
+	categories inject: -90 into: [ :sum :each | 
+		| color temp |
+		temp := (each second / totalTime * 360 + sum) asInteger.
+		each
+			add: { 
+					sum.
+					temp }
+			afterIndex: 2.
+		color := Color random.
+		each first = 'Uncategorized' ifTrue: [ color := color alpha: 0.1 ].
+		each add: color afterIndex: 3.
+		temp ].
+	"Completing the circle, fixing any rounding differences by hard coding smallest entry's stop angle. Distorts it a bit but okay compromise for now"
+	categories last at: 3 put: { 
+			categories last third first.
+			270 }.
+	^ categories
 ]
 
 { #category : #'building ui' }
@@ -111,34 +212,37 @@ TtDay >> date: aDate [
 
 { #category : #'building ui' }
 TtDay >> dropdownList: aButton with: aModel [
+
 	| labelText simpleList |
 	simpleList := BrSimpleList new.
 	simpleList
 		vFitContentLimited;
 		hExact: 250;
-		itemStencil: [ BrButton new
+		itemStencil: [ 
+			BrButton new
 				beSmallSize;
 				hMatchParent;
 				alignCenterLeft;
-				aptitude: BrGlamorousButtonRectangularAptitude + BrGlamorousButtonLabelAptitude;
+				aptitude:
+					BrGlamorousButtonRectangularAptitude
+					+ BrGlamorousButtonLabelAptitude;
 				action: [ :aListItem :aButtonModel | 
 					aListItem fireEvent: BrDropdownHideWish new.
-					labelText := (aButtonModel widgetModels
-						detect: [ :inner | inner isKindOf: BrLabelModel ]) text asString.
-					aModel
-						value:
+					labelText := (aButtonModel widgetModels detect: [ :inner | 
+							              inner isKindOf: BrLabelModel ]) text asString.
+					aModel value:
 							(TtCategories testInstance sampleCategories categories
-								detect: [ :each | each name = labelText ]
-								ifNone: [ aModel value ]).
-					aButton
-						label:
-							(aModel value
-								ifNil: [ 'Please select an existing category' ]
-								ifNotNil: [ aModel value ]) ] ];
+								 detect: [ :each | each name = labelText ]
+								 ifNone: [ aModel value ]).
+					aButton label: (aModel value
+								 ifNil: [ 'Please select an existing category' ]
+								 ifNotNil: [ labelText ]) ] ];
 		itemDataBinder: [ :eachElement :eachCategory :eachIndex | 
 			eachElement viewModel model: eachCategory.
 			eachElement label: eachCategory name ];
-		items: TtCategories testInstance sampleCategories categories.
+		items:
+			(TtCategories testInstance sampleCategories categories sorted:
+				 #name ascending).
 	^ simpleList
 ]
 
@@ -199,6 +303,29 @@ TtDay >> rawData [
 { #category : #accessing }
 TtDay >> rawData: rawExternalData [
 	rawImport := rawExternalData
+]
+
+{ #category : #accessing }
+TtDay >> sortedEntries [
+
+	| categorizedActivities sumOfCategories |
+	categorizedActivities := (self entries collect: [ :entry | 
+		                          entry categories collect: [ :inner | 
+			                          inner -> entry ] ]) flatten
+		                         groupedBy: [ :each | 
+			                         each key
+				                         ifNil: [ 'Uncategorized' ]
+				                         ifNotNil: [ :key | key name ] ]
+		                         affect: [ :each | each collect: #value ].
+	sumOfCategories := categorizedActivities collect: [ :each | 
+		                   { 
+			                   (each sum: [ :entry | 
+				                    entry value span asDuration - 1 minutes
+				                    / entry value activities size ]).
+			                   each } ].
+	^ (sumOfCategories associations sorted: [ :a :b | 
+		   a value first > b value first ]) collect: [ :each | 
+		  OrderedCollection withAll: { each key } , each value ]
 ]
 
 { #category : #'building ui' }

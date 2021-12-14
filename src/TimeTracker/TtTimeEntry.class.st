@@ -32,6 +32,12 @@ TtTimeEntry >> activities: someActivities [
 ]
 
 { #category : #accessing }
+TtTimeEntry >> categories [
+
+	^ self activities collect: [ :each | each value ]
+]
+
+{ #category : #accessing }
 TtTimeEntry >> span [
 	^ span
 ]
