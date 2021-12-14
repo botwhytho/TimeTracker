@@ -10,15 +10,16 @@ Class {
 
 { #category : #view }
 TtTimeEntry >> TtTimeEntryDashboardFor: aView [
+
 	<gtView>
 	^ aView columnedList
-		title:
-			self span start asTime printMinutes , '-'
-				, self span end asTime printMinutes;
-		priority: 1;
-		items: [ self activities ];
-		column: 'Activities' text: [ :anEntry | anEntry key ];
-		column: 'Categories' text: [ :anEntry | anEntry value name ]
+		  title: self span start asTime printMinutes , '-'
+			  , self span end asTime printMinutes;
+		  priority: 1;
+		  items: [ self activities ];
+		  column: 'Activities' text: [ :anEntry | anEntry key ];
+		  column: 'Categories' text: [ :anEntry | 
+			  anEntry value ifNil: [ '' ] ifNotNil: [ :val | val name ] ]
 ]
 
 { #category : #accessing }
