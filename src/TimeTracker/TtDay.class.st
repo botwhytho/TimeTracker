@@ -46,6 +46,20 @@ TtDay >> TtDayCategorizeEntiresFor: aView [
 				                          vFitContent.
 
 			        self flag:
+				        'This is not working with BrFromFuture.'.
+			        #( #( #Left #previous ) #( #Right #next ) ) do: [ 
+				        :direction | 
+				        horizontalPane addShortcut: (BlShortcutWithAction new
+						         combination:
+							         (BlKeyCombination perform: #arrow , direction first);
+						         action: [ :anEvent | self halt.
+							         anEvent currentTarget deepestFocusedChild ifNotNil: [ 
+									         :aFocusedChild | 
+									         anEvent currentTarget
+										         perform: direction second , #SiblingDo:
+										         with: [ :sibling | sibling requestFocus ] ] ]) ].
+
+					 self flag:
 				        'Getting rather nested. Refactor out when move this code to other class.'.
 			        #( #( #Up #previous ) #( #Down #next ) ) do: [ :direction | 
 				        horizontalPane addShortcut: (BlShortcutWithAction new
@@ -355,23 +369,25 @@ TtDay >> sortedEntries [
 { #category : #'building ui' }
 TtDay >> suggestionsPlaceHolder [
 
-	^ { 
-		  (BrEditableLabel new
-			   aptitude:
-				   BrGlamorousEditableLabelAptitude new
-					   glamorousRegularFontAndSize;
-			   text: 'Suggestion 1';
-			   id: 'Suggestion 1').
-		  (BrEditableLabel new
-			   aptitude:
-				   BrGlamorousEditableLabelAptitude new
-					   glamorousRegularFontAndSize;
-			   text: 'Suggestion 2';
-			   id: 'Suggestion 2').
-		  (BrEditableLabel new
-			   aptitude:
-				   BrGlamorousEditableLabelAptitude new
-					   glamorousRegularFontAndSize;
-			   text: 'Suggestion 3';
-			   id: 'Suggestion 3') }
+	^ 3 timesCollect: [ :n | 
+		  BrFromFuture new
+			  fitContent;
+			  future: [ 
+				  (20 atRandom * 100) milliSeconds wait.
+				  (TtCategories testInstance sampleCategories categories collect:
+						   #name) atRandom ]
+			  initialValue: 'Calculating';
+			  stencil: [ 
+				  BrEditableLabel new
+					  aptitude:
+						  BrGlamorousEditableLabelAptitude new
+							  glamorousRegularFontAndSize;
+					  id: 'Suggestion ' , n asString ];
+			  dataBinder: [ :aLabel :aDataSnapshot | 
+				  aDataSnapshot
+					  ifSuccess: [ :aName | aLabel text: aName ]
+					  ifError: [ :anError | 
+						  aLabel text:
+							  (anError description asRopedText foreground: Color red) ]
+					  ifPending: [ :anInitialValue | aLabel text: anInitialValue ] ] ]
 ]
