@@ -12,41 +12,65 @@ Class {
 
 { #category : #view }
 TtDay >> TtDayCategorizeEntiresFor: aView [
+
 	<gtView>
 	| view |
 	view := aView columnedTree
-		expandAll;
-		title: 'Categorize Entries' translated;
-		flag: 'Set a dynamic priority where it is 1 if things left to categorize, otherwise 2?' ; 
-		priority: 2 ;
-		items: [ self entries ];
-		children: [ :each | 
-			((each isKindOf: TtTimeEntry) and: [ each activities size > 1 ])
-				ifTrue: [ each activities ]
-				ifFalse: [ #() ] ];
-		column: 'Time'
-			text: [ :anEntry | 
-			(anEntry isKindOf: Association)
-				ifTrue: [ '' ]
-				ifFalse: [ anEntry span start asTime printMinutes , '-'
-						, anEntry span end asTime printMinutes ] ];
-		column: 'Activities'
-			text: [ :anEntry | 
-			(anEntry isKindOf: TtTimeEntry)
-				ifTrue: [ anEntry activities size > 1
-						ifTrue: [ '' ]
-						ifFalse: [ anEntry activities first key ] ]
-				ifFalse: [ anEntry key ] ];
-		column: 'Categories'
-			icon: [ :anItem | 
-			| horizontalPane |
-			horizontalPane := BrHorizontalPane new
-				hMatchParent;
-				alignCenterLeft;
-				vFitContent.
-			((anItem isKindOf: TtTimeEntry) and: [ anItem activities size > 1 ])
-				ifFalse: [ horizontalPane addChildren: (self categoryButtons: anItem) ]
-				ifTrue: [ horizontalPane addChild: BlElement new ] ].
+		        expandAll;
+		        title: 'Categorize Entries' translated;
+		        priority: 2;
+		        items: [ self entries ];
+		        children: [ :each | 
+			        ((each isKindOf: TtTimeEntry) and: [ 
+					         each activities size > 1 ])
+				        ifTrue: [ each activities ]
+				        ifFalse: [ #(  ) ] ];
+		        column: 'Time' text: [ :anEntry | 
+			        (anEntry isKindOf: Association)
+				        ifTrue: [ '' ]
+				        ifFalse: [ 
+					        anEntry span start asTime printMinutes , '-'
+					        , anEntry span end asTime printMinutes ] ];
+		        column: 'Activities' text: [ :anEntry | 
+			        (anEntry isKindOf: TtTimeEntry)
+				        ifTrue: [ 
+					        anEntry activities size > 1
+						        ifTrue: [ '' ]
+						        ifFalse: [ anEntry activities first key ] ]
+				        ifFalse: [ anEntry key ] ];
+		        column: 'Categories' icon: [ :anItem | 
+			        | horizontalPane |
+			        horizontalPane := BrHorizontalPane new
+				                          hMatchParent;
+				                          alignCenterLeft;
+				                          vFitContent.
+
+			        self flag:
+				        'Getting rather nested. Refactor out when move this code to other class.'.
+			        #( #( #Up #previous ) #( #Down #next ) ) do: [ :direction | 
+				        horizontalPane addShortcut: (BlShortcutWithAction new
+						         combination:
+							         (BlKeyCombination perform: #arrow , direction first);
+						         action: [ :anEvent | 
+							         anEvent currentTarget deepestFocusedChild ifNotNil: [ 
+									         :aFocusedChild | 
+									         anEvent currentTarget parent parent parent
+										         perform: direction second , #SiblingDo:
+										         with: [ :sibling | 
+											         (sibling query // aFocusedChild id) anyOne
+												         ifNotNil: [ :element | element requestFocus ]
+												         ifNil: [ 
+													         sibling
+														         perform: direction second , #SiblingDo:
+														         with: [ :nextSibling | 
+															         (nextSibling query // aFocusedChild id) anyOne
+																         requestFocus ] ] ] ] ]) ].
+
+			        ((anItem isKindOf: TtTimeEntry) and: [ 
+				         anItem activities size > 1 ])
+				        ifFalse: [ 
+				        horizontalPane addChildren: (self categoryButtons: anItem) ]
+				        ifTrue: [ horizontalPane addChild: BlElement new ] ].
 	view columns first weight: 0.35.
 	view columns third weight: 1.2.
 	^ view
@@ -330,13 +354,24 @@ TtDay >> sortedEntries [
 
 { #category : #'building ui' }
 TtDay >> suggestionsPlaceHolder [
-	^ {(BrButton new
-		label: 'Suggestion 1';
-		aptitude: BrGlamorousButtonWithLabelAptitude).
-	(BrButton new
-		label: 'Suggestion 2';
-		aptitude: BrGlamorousButtonWithLabelAptitude).
-	(BrButton new
-		label: 'Suggestion 3';
-		aptitude: BrGlamorousButtonWithLabelAptitude)}
+
+	^ { 
+		  (BrEditableLabel new
+			   aptitude:
+				   BrGlamorousEditableLabelAptitude new
+					   glamorousRegularFontAndSize;
+			   text: 'Suggestion 1';
+			   id: 'Suggestion 1').
+		  (BrEditableLabel new
+			   aptitude:
+				   BrGlamorousEditableLabelAptitude new
+					   glamorousRegularFontAndSize;
+			   text: 'Suggestion 2';
+			   id: 'Suggestion 2').
+		  (BrEditableLabel new
+			   aptitude:
+				   BrGlamorousEditableLabelAptitude new
+					   glamorousRegularFontAndSize;
+			   text: 'Suggestion 3';
+			   id: 'Suggestion 3') }
 ]
