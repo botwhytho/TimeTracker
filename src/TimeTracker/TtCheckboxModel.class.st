@@ -44,6 +44,6 @@ TtCheckboxModel >> keyEvent: anEvent [
 		anElement
 			nextSiblingSuchThat: [ :sibling | sibling isFocusable ]
 			do: [ :sibling | sibling requestFocus ] ].
-	anEvent key = BlKeyboardKey return ifTrue: [ "self halt." 
-		anElement isChecked ifFalse: [ anEvent currentTarget check ] ]
+	anEvent key = BlKeyboardKey return ifTrue: [ 
+		anElement isChecked ifFalse: [ anElement check ] ]
 ]

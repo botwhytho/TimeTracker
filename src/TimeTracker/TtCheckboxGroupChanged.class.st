@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #accessing }
+TtCheckboxGroupChanged >> category [
+
+	^ category
+]
+
+{ #category : #accessing }
 TtCheckboxGroupChanged >> category: anObject [
 
 	category := anObject
