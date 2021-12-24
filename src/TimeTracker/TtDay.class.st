@@ -25,6 +25,7 @@ TtDay >> TtDayCategorizeEntiresFor: aView [
 					         each activities size > 1 ])
 				        ifTrue: [ each activities ]
 				        ifFalse: [ #(  ) ] ];
+				flag: 'Can use icon instead of text and use a button with `BrGlamorousLabelAptitude1` and custom action to inspect what I need independent of what collection is passed to view';
 		        column: 'Time' text: [ :anEntry | 
 			        (anEntry isKindOf: Association)
 				        ifTrue: [ '' ]
