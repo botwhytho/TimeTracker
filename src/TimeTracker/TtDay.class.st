@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : #view }
-TtDay >> TtDayCategorizeEntiresFor: aView [
+TtDay >> TtDayCategorizeEntreesFor: aView [
 
 	<gtView>
 	| view |
@@ -25,7 +25,8 @@ TtDay >> TtDayCategorizeEntiresFor: aView [
 					         each activities size > 1 ])
 				        ifTrue: [ each activities ]
 				        ifFalse: [ #(  ) ] ];
-				flag: 'Can use icon instead of text and use a button with `BrGlamorousLabelAptitude1` and custom action to inspect what I need independent of what collection is passed to view';
+		        flag:
+			        'Can use icon instead of text and use a button with `BrGlamorousLabelAptitude1` and custom action to inspect what I need independent of what collection is passed to view';
 		        column: 'Time' text: [ :anEntry | 
 			        (anEntry isKindOf: Association)
 				        ifTrue: [ '' ]
@@ -45,46 +46,21 @@ TtDay >> TtDayCategorizeEntiresFor: aView [
 				                          hMatchParent;
 				                          alignCenterLeft;
 				                          vFitContent.
-
-			        self flag:
-				        'This is not working with BrFromFuture.'.
-			        #( #( #Left #previous ) #( #Right #next ) ) do: [ 
-				        :direction | 
-				        horizontalPane addShortcut: (BlShortcutWithAction new
-						         combination:
-							         (BlKeyCombination perform: #arrow , direction first);
-						         action: [ :anEvent | self halt.
-							         anEvent currentTarget deepestFocusedChild ifNotNil: [ 
-									         :aFocusedChild | 
-									         anEvent currentTarget
-										         perform: direction second , #SiblingDo:
-										         with: [ :sibling | sibling requestFocus ] ] ]) ].
-
-					 self flag:
-				        'Getting rather nested. Refactor out when move this code to other class.'.
-			        #( #( #Up #previous ) #( #Down #next ) ) do: [ :direction | 
-				        horizontalPane addShortcut: (BlShortcutWithAction new
-						         combination:
-							         (BlKeyCombination perform: #arrow , direction first);
-						         action: [ :anEvent | 
-							         anEvent currentTarget deepestFocusedChild ifNotNil: [ 
-									         :aFocusedChild | 
-									         anEvent currentTarget parent parent parent
-										         perform: direction second , #SiblingDo:
-										         with: [ :sibling | 
-											         (sibling query // aFocusedChild id) anyOne
-												         ifNotNil: [ :element | element requestFocus ]
-												         ifNil: [ 
-													         sibling
-														         perform: direction second , #SiblingDo:
-														         with: [ :nextSibling | 
-															         (nextSibling query // aFocusedChild id) anyOne
-																         requestFocus ] ] ] ] ]) ].
-
 			        ((anItem isKindOf: TtTimeEntry) and: [ 
 				         anItem activities size > 1 ])
 				        ifFalse: [ 
-				        horizontalPane addChildren: (self categoryButtons: anItem) ]
+					        self addShortcuts: horizontalPane.
+					        horizontalPane addChildren:
+						        (self categoryButtons: anItem).
+					        horizontalPane asyncPromise promise: [ 
+						        (20 atRandom * 100) milliSeconds wait.
+						        3 timesCollect: [ :n | 
+							        (TtCategories testInstance sampleCategories categories 
+								         collect: #name) atRandom ] ] asAsyncPromise.
+					        horizontalPane withAsyncPromiseDo: [ :anElementPromise | 
+						        anElementPromise whenSuccess: [ :anElement :values | 
+							        self loadSuggestions: values for: anElement ] ].
+					        horizontalPane ]
 				        ifTrue: [ horizontalPane addChild: BlElement new ] ].
 	view columns first weight: 0.35.
 	view columns third weight: 1.2.
@@ -114,8 +90,39 @@ TtDay >> TtDayDashboardFor: aView [
 				                  vMatchParent.
 			  verticalPane addChildren: { 
 					  horizontalPane.
-					  (self TtDayCategorizeEntiresFor: GtPhlowView empty) asElement }.
+					  (self TtDayCategorizeEntreesFor: GtPhlowView empty) asElement }.
 			  verticalPane ]
+]
+
+{ #category : #view }
+TtDay >> addShortcuts: horizontalPane [
+
+	#( #( #Left #previous ) #( #Right #next ) ) do: [ :direction | 
+		horizontalPane addShortcut: (BlShortcutWithAction new
+				 combination: (BlKeyCombination perform: #arrow , direction first);
+				 action: [ :anEvent | "self halt."
+					 anEvent currentTarget deepestFocusedChild ifNotNil: [ 
+							 :aFocusedChild | 
+							 anEvent currentTarget
+								 perform: direction second , #SiblingDo:
+								 with: [ :sibling | sibling requestFocus ] ] ]) ].
+	#( #( #Up #previous ) #( #Down #next ) ) do: [ :direction | 
+		horizontalPane addShortcut: (BlShortcutWithAction new
+				 combination: (BlKeyCombination perform: #arrow , direction first);
+				 action: [ :anEvent | 
+					 anEvent currentTarget deepestFocusedChild ifNotNil: [ 
+							 :aFocusedChild | 
+							 anEvent currentTarget parent parent parent
+								 perform: direction second , #SiblingDo:
+								 with: [ :sibling | 
+									 (sibling query // aFocusedChild id) anyOne
+										 ifNotNil: [ :element | element requestFocus ]
+										 ifNil: [ 
+											 sibling
+												 perform: direction second , #SiblingDo:
+												 with: [ :nextSibling | 
+													 (nextSibling query // aFocusedChild id) anyOne
+														 requestFocus ] ] ] ] ]) ]
 ]
 
 { #category : #'building ui' }
@@ -327,6 +334,14 @@ TtDay >> entries [
 	^ entries ifNil: [ entries := SortedCollection sortUsing: [:a :b | a span start < b span start] ]
 ]
 
+{ #category : #view }
+TtDay >> loadSuggestions: suggestions for: horizontalPane [
+
+	horizontalPane children asArray allButLast doWithIndex: [ 
+		:element 
+		:index | element text: (suggestions at: index) ]
+]
+
 { #category : #printing }
 TtDay >> printOn: aStream [
 	super printOn: aStream.
@@ -371,24 +386,9 @@ TtDay >> sortedEntries [
 TtDay >> suggestionsPlaceHolder [
 
 	^ 3 timesCollect: [ :n | 
-		  BrFromFuture new
-			  fitContent;
-			  future: [ 
-				  (20 atRandom * 100) milliSeconds wait.
-				  (TtCategories testInstance sampleCategories categories collect:
-						   #name) atRandom ]
-			  initialValue: 'Calculating';
-			  stencil: [ 
-				  BrEditableLabel new
-					  aptitude:
-						  BrGlamorousEditableLabelAptitude new
-							  glamorousRegularFontAndSize;
-					  id: 'Suggestion ' , n asString ];
-			  dataBinder: [ :aLabel :aDataSnapshot | 
-				  aDataSnapshot
-					  ifSuccess: [ :aName | aLabel text: aName ]
-					  ifError: [ :anError | 
-						  aLabel text:
-							  (anError description asRopedText foreground: Color red) ]
-					  ifPending: [ :anInitialValue | aLabel text: anInitialValue ] ] ]
+		  BrEditableLabel new
+			  aptitude:
+				  BrGlamorousEditableLabelAptitude new glamorousRegularFontAndSize;
+			  id: 'Suggestion ' , n asString;
+			  text: 'Calculating' ]
 ]
