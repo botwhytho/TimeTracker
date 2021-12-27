@@ -45,21 +45,29 @@ TtDay >> TtDayCategorizeEntreesFor: aView [
 			        horizontalPane := BrHorizontalPane new
 				                          hMatchParent;
 				                          alignCenterLeft;
-				                          vFitContent.
+				                          vFitContent;
+				                          id: 'Categories'.
 			        ((anItem isKindOf: TtTimeEntry) and: [ 
 				         anItem activities size > 1 ])
 				        ifFalse: [ 
 					        self addShortcuts: horizontalPane.
 					        horizontalPane addChildren:
 						        (self categoryButtons: anItem).
-					        horizontalPane asyncPromise promise: [ 
-						        (20 atRandom * 100) milliSeconds wait.
-						        3 timesCollect: [ :n | 
-							        (TtCategories testInstance sampleCategories categories 
-								         collect: #name) atRandom ] ] asAsyncPromise.
+					        "horizontalPane asyncPromise promise:
+						        (self calculateCategorySuggestions: horizontalPane).
 					        horizontalPane withAsyncPromiseDo: [ :anElementPromise | 
 						        anElementPromise whenSuccess: [ :anElement :values | 
-							        self loadSuggestions: values for: anElement ] ].
+							        self loadSuggestions: values for: anElement ] ]."
+					        (self calculateCategorySuggestions: horizontalPane) 
+						        then: [ :succeededPromise | 
+							        self
+								        loadSuggestions: succeededPromise
+								        for: horizontalPane ].
+					        horizontalPane when: BrCheckboxChanged do: [ :anEvent | 
+						        horizontalPane children asArray allButLast
+							        reject: [ :anElement | anElement = anEvent source ]
+							        thenDo: [ :anElement | anElement uncheck ].
+						        anEvent consumed: true ].
 					        horizontalPane ]
 				        ifTrue: [ horizontalPane addChild: BlElement new ] ].
 	view columns first weight: 0.35.
@@ -156,22 +164,22 @@ TtDay >> buildBars: data [
 
 { #category : #'building ui' }
 TtDay >> buildCategorizerButton: anActivity [
+
 	| button model |
 	(anActivity isKindOf: TtTimeEntry)
 		ifTrue: [ model := anActivity activities first ]
 		ifFalse: [ model := anActivity ].
 	button := BrButton new.
 	button
-		label:
-			(model value
-				ifNil: [ 'Please Choose a Category' ]
-				ifNotNil: [ :c | c name ]);
+		label: (model value
+				 ifNil: [ 'Please Choose a Category' ]
+				 ifNotNil: [ :c | c name ]);
+		id: 'categoryDropdown';
 		aptitude:
 			BrGlamorousButtonWithLabelAptitude
-				+
-					(BrGlamorousWithDropdownAptitude
-						handle: [ self editableLabel: button with: model ]
-						content: [ self dropdownList: button with:  model ]).
+			+ (BrGlamorousWithDropdownAptitude
+					 handle: [ self editableLabel: button with: model ]
+					 content: [ self dropdownList: button with: model ]).
 	^ button
 ]
 
@@ -217,6 +225,26 @@ TtDay >> calculateAnglesForDonut [
 			categories last third first.
 			270 }.
 	^ categories
+]
+
+{ #category : #view }
+TtDay >> calculateCategorySuggestions: anElement [
+
+	| timeEntry |
+	self flag:
+		'Fetching time entry text from UI when should fetch from underlying model, plus below doesnt work anyways as this is being calculatend before the UI has been built'.
+	"timeEntry := anElement parent parent previousSiblingDo: [ :element | 
+		             (element query // BlAttributedTextElement) anyOne text
+			             asString ].
+	self haltOnce."
+
+	^ [ 
+	  (40 atRandom * 100) milliSeconds wait.
+	  self dummyCategoryConfidence collectWithIndex: [ :each :n | 
+		  { 
+			  each.
+			  (TtCategories testInstance sampleCategories categories collect:
+				   #name) atRandom } ] ] asAsyncPromise
 ]
 
 { #category : #'building ui' }
@@ -292,6 +320,21 @@ TtDay >> dropdownList: aButton with: aModel [
 	^ simpleList
 ]
 
+{ #category : #accessing }
+TtDay >> dummyCategoryConfidence [
+
+	| tmp |
+	^ (1 to: 3)
+		  inject: { (60 to: 90) atRandom }
+		  into: [ :accumulator :each | 
+			  each = 1 ifTrue: [ tmp := {  } ].
+			  each = 2 ifTrue: [ 
+				  tmp := { (100 - accumulator first / 2 to:
+				          100 - accumulator first - 5) atRandom asInteger } ].
+			  each = 3 ifTrue: [ tmp := { (100 - accumulator sum) asInteger } ].
+			  accumulator , tmp ]
+]
+
 { #category : #'building ui' }
 TtDay >> editableLabel: aButton with: aModel [
 	| anEditor |
@@ -339,7 +382,13 @@ TtDay >> loadSuggestions: suggestions for: horizontalPane [
 
 	horizontalPane children asArray allButLast doWithIndex: [ 
 		:element 
-		:index | element text: (suggestions at: index) ]
+		:index | 
+		element text: (suggestions at: index) second.
+		self flag:
+			'Should keep buton width constant, these are currently off as "Calculating" (orignal value) may be shorter/longer than category name'.
+		element children first size:
+			element extent x * ((suggestions at: index) first / 100)
+			@ element extent y ]
 ]
 
 { #category : #printing }
@@ -386,9 +435,30 @@ TtDay >> sortedEntries [
 TtDay >> suggestionsPlaceHolder [
 
 	^ 3 timesCollect: [ :n | 
-		  BrEditableLabel new
-			  aptitude:
-				  BrGlamorousEditableLabelAptitude new glamorousRegularFontAndSize;
-			  id: 'Suggestion ' , n asString;
-			  text: 'Calculating' ]
+		  | checkbox confidenceBar |
+		  checkbox := TtCheckbox new
+			              aptitude:
+				              BrGlamorousButtonWithIconAndLabelAptitude new;
+			              id: 'Suggestion ' , n asString;
+			              text: 'Calculating';
+			              icon:
+				              (BrGlamorousVectorIcons accept asElement 
+					               visibility: BlVisibility hidden);
+			              constraintsDo: [ :c | c horizontal fitContent ];
+			              whenCheckedDo: [ :anEvent | 
+				              anEvent currentTarget children second visibility:
+						              BlVisibility visible.
+				              anEvent currentTarget parent fireEvent: anEvent ];
+			              whenUncheckedDo: [ :anEvent | 
+				              anEvent currentTarget children second visibility:
+						              BlVisibility hidden ].
+		  confidenceBar := BlElement new
+			                   size: 0 @ 50;
+			                   background: (Color green alpha: 0.2);
+			                   constraintsDo: [ :c | 
+				                   c ignoreByLayout.
+				                   c ignored vertical alignCenter.
+				                   c ignored horizontal alignLeft ].
+		  checkbox addChild: confidenceBar at: 1.
+		  checkbox ]
 ]
