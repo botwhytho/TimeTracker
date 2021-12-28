@@ -156,7 +156,9 @@ TtTime >> import [
 	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 
 	| data latest |
-	data := TtTrelloImporter fetch.
+	[ data := TtTrelloImporter fetch ]
+		on: NameLookupFailure
+		do: [ ^ self ].
 	self flag:
 		'Not importing latest day under assumption it is today and data is not complete yet. Better logic needed later'.
 	latest := data keys max.
