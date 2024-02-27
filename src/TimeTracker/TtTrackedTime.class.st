@@ -21,7 +21,7 @@ TtTrackedTime >> asDictionary [
 ]
 
 { #category : #accessing }
-TtTrackedTime >> displayPomodoro [
+TtTrackedTime >> displayTrackedTime [
 	^ (BrVerticalPane new
 		exact: 600 @ 300;
 		aptitude: BrShadowAptitude;
@@ -86,42 +86,22 @@ TtTrackedTime >> displayPomodoro [
 ]
 
 { #category : #accessing }
-TtTrackedTime >> goals [
-	^ goals
-]
-
-{ #category : #accessing }
-TtTrackedTime >> goals: anObject [
-	goals := anObject
-]
-
-{ #category : #accessing }
-TtTrackedTime >> gtPomodoroFor: aView [
+TtTrackedTime >> gtTrackedTimeFor: aView [
 	<gtView>
 	^ aView explicit
 		title: 'Summary';
 		priority: 1;
-		stencil: self displayPomodoro
+		stencil: self displayTrackedTime
 ]
 
 { #category : #printing }
 TtTrackedTime >> printOn: aStream [
 	aStream
-		nextPutAll: 'a GtPomodoro (Starting at: ';
+		nextPutAll: 'a TtTrackedTime (Starting at: ';
 		nextPutAll: self start asTime printMinutes , ' for ' , self duration asMinutes rounded asString
 				, (' minute'
 						in: [ :aString | self duration minutes = 1 ifTrue: [ aString ] ifFalse: [ aString , 's' ] ]);
 		nextPut: $)
-]
-
-{ #category : #accessing }
-TtTrackedTime >> reflection [
-	^ reflection
-]
-
-{ #category : #accessing }
-TtTrackedTime >> reflection: anObject [
-	reflection := anObject
 ]
 
 { #category : #accessing }

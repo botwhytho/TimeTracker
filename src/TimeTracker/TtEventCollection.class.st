@@ -223,9 +223,9 @@ TtEventCollection >> initialize [
 		ifFalse: [ GtPomodoroSettings default serializeWithLepiter
 				ifTrue: [ | page |
 					page := LeDatabasesRegistry defaultLogicalDatabase
-							pageNamed: 'GtPomodoro Entries'
+							pageNamed: TtTrackedTime dataPageName
 							ifAbsent: [ | newPage |
-								newPage := LePage named: 'GtPomodoro Entries'.
+								newPage := LePage named: TtTrackedTime dataPageName.
 								LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
 								newPage addFirstSnippet: (LeTextSnippet string: '').
 								newPage ].
