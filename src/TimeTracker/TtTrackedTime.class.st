@@ -30,6 +30,7 @@ TtTrackedTime >> asDictionary [
 
 { #category : #accessing }
 TtTrackedTime >> displayTrackedTime [
+	self flag: 'DEPRECATE: should be able to modify as needed through simple columned list views.'.
 	^ (BrVerticalPane new
 		exact: 600 @ 300;
 		aptitude: BrShadowAptitude;
