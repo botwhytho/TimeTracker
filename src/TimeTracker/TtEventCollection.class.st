@@ -5,7 +5,8 @@ Class {
 	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
 		'valueHolder',
-		'counter'
+		'counter',
+		'groupedByDay'
 	],
 	#category : #TimeTracker
 }
@@ -139,8 +140,9 @@ TtEventCollection >> counter: anInteger [
 ]
 
 { #category : #views }
-TtEventCollection >> groupByDay [
-	^ self groupedBy: [ :each | each start asDate ]
+TtEventCollection >> groupedByDay [
+	^ groupedByDay
+		ifNil: [ groupedByDay := self groupedBy: [ :each | each start asDate ] ]
 ]
 
 { #category : #views }
@@ -148,7 +150,7 @@ TtEventCollection >> gtPomodorosFor: aView [
 	<gtView>
 	| pomodoros |
 	self ifEmpty: [ ^ aView empty ].
-	pomodoros := self groupByDay associations sorted: #key descending.
+	pomodoros := self groupedByDay associations sorted: #key descending.
 	^ aView columnedTree
 		title: 'Pomodoros By Day';
 		priority: 5;
@@ -176,7 +178,7 @@ TtEventCollection >> gtPomodorosFor: aView [
 TtEventCollection >> gtWeeklySummaryFor: aView [
 	<gtView>
 	| days weeks |
-	days := self groupByDay associations.
+	days := self groupedByDay associations.
 	weeks := (days collectAsSet: [ :each | each key asWeek ]) asArray sorted.
 	^ aView columnedList
 		title: 'Weekly Summary';
@@ -267,11 +269,17 @@ TtEventCollection >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		nextPut: $(;
-		nextPutAll: (self groupByDay keys
+		nextPutAll: (self groupedByDay keys
 				in: [ :someDates | someDates min asString , ' - ' , someDates max asString ]);
 		nextPutAll: ' [';
 		nextPutAll: self size asString , ' items';
 		nextPutAll: '])'
+]
+
+{ #category : #accessing }
+TtEventCollection >> recalculateGroupedByDay [
+	groupedByDay := nil.
+	^ self groupedByDay
 ]
 
 { #category : #accessing }
