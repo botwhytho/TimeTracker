@@ -20,7 +20,7 @@ TtCategories >> TtCategoriesFor: aView [
 	<gtView>
 	^ aView mondrian
 		title: 'Categories' translated;
-		priority: '10';
+		priority: 10;
 		painting: [ :view |
 			view nodes
 				shape: [ :aCategory |
