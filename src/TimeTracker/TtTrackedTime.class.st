@@ -2,9 +2,17 @@ Class {
 	#name : #TtTrackedTime,
 	#superclass : #Timespan,
 	#instVars : [
-		'goals',
-		'reflection',
-		'uid'
+		'description',
+		'details',
+		'uid',
+		'rawData',
+		'daySerializedFrom',
+		'category',
+		'labels',
+		'links',
+		'isPlanned',
+		'isRecurring',
+		'firstTimeScheduled'
 	],
 	#category : #TimeTracker
 }
@@ -81,8 +89,7 @@ TtTrackedTime >> displayTrackedTime [
 						do: [ :aWish | 
 							self reflection: aWish text asString.
 							self
-								serializeWithCounter: (GtPomodoroSettings default pomodoros
-										indexOf: (aWish target userData at: #model)) ]}) asStencil
+								serializeWithLepiter ]}) asStencil
 ]
 
 { #category : #accessing }
@@ -113,21 +120,6 @@ TtTrackedTime >> serializeSnippet: aTextSnippet [
 						serialize: aTextSnippet
 						on: s
 						prettyPrint: true ])
-]
-
-{ #category : #accessing }
-TtTrackedTime >> serializeToJSON: aCounter [
-	| folder |
-	folder := ('.' asFileReference / #pomodoro) ensureCreateDirectory.
-	folder / aCounter asString , 'json'
-		writeStreamDo: [ :aStream | STONJSON put: self asDictionary onStreamPretty: aStream ]
-]
-
-{ #category : #accessing }
-TtTrackedTime >> serializeWithCounter: aCounter [
-	GtPomodoroSettings default serializeWithLepiter
-		ifTrue: [ self serializeWithLepiter ]
-		ifFalse: [ self serializeToJSON: aCounter ]
 ]
 
 { #category : #accessing }

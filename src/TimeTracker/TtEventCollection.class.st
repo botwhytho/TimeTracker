@@ -289,8 +289,7 @@ TtEventCollection >> valueHolder [
 					sortUsing: [ :aPomodoro | aPomodoro start ] ascending) asValueHolder.
 			valueHolder
 				whenAddedDo: [ :newValue | 
-					newValue serializeWithCounter: self counter.
-					self counter: self counter + 1 ].
+					newValue serializeWithLepiter ].
 			valueHolder ]
 ]
 
