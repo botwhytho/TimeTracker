@@ -29,6 +29,46 @@ TtTrackedTime >> asDictionary [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> category [
+	^ category
+]
+
+{ #category : #accessing }
+TtTrackedTime >> category: anObject [
+	category := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> daySerializedFrom [
+	^ daySerializedFrom
+]
+
+{ #category : #accessing }
+TtTrackedTime >> daySerializedFrom: anObject [
+	daySerializedFrom := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> description [
+	^ description
+]
+
+{ #category : #accessing }
+TtTrackedTime >> description: anObject [
+	description := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> details [
+	^ details
+]
+
+{ #category : #accessing }
+TtTrackedTime >> details: anObject [
+	details := anObject
+]
+
+{ #category : #accessing }
 TtTrackedTime >> displayTrackedTime [
 	self flag: 'DEPRECATE: should be able to modify as needed through simple columned list views.'.
 	^ (BrVerticalPane new
@@ -94,12 +134,62 @@ TtTrackedTime >> displayTrackedTime [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> firstTimeScheduled [
+	^ firstTimeScheduled
+]
+
+{ #category : #accessing }
+TtTrackedTime >> firstTimeScheduled: anObject [
+	firstTimeScheduled := anObject
+]
+
+{ #category : #accessing }
 TtTrackedTime >> gtTrackedTimeFor: aView [
 	<gtView>
 	^ aView explicit
 		title: 'Summary';
 		priority: 1;
 		stencil: self displayTrackedTime
+]
+
+{ #category : #accessing }
+TtTrackedTime >> isPlanned [
+	^ isPlanned
+]
+
+{ #category : #accessing }
+TtTrackedTime >> isPlanned: anObject [
+	isPlanned := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> isRecurring [
+	^ isRecurring
+]
+
+{ #category : #accessing }
+TtTrackedTime >> isRecurring: anObject [
+	isRecurring := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> labels [
+	^ labels
+]
+
+{ #category : #accessing }
+TtTrackedTime >> labels: anObject [
+	labels := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> links [
+	^ links
+]
+
+{ #category : #accessing }
+TtTrackedTime >> links: anObject [
+	links := anObject
 ]
 
 { #category : #printing }
@@ -110,6 +200,16 @@ TtTrackedTime >> printOn: aStream [
 				, (' minute'
 						in: [ :aString | self duration minutes = 1 ifTrue: [ aString ] ifFalse: [ aString , 's' ] ]);
 		nextPut: $)
+]
+
+{ #category : #accessing }
+TtTrackedTime >> rawData [
+	^ rawData
+]
+
+{ #category : #accessing }
+TtTrackedTime >> rawData: anObject [
+	rawData := anObject
 ]
 
 { #category : #accessing }

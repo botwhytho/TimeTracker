@@ -5,7 +5,6 @@ Class {
 	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
 		'valueHolder',
-		'counter',
 		'groupedByDay'
 	],
 	#category : #TimeTracker
@@ -126,17 +125,6 @@ TtEventCollection >> add: anItem [
 { #category : #accessing }
 TtEventCollection >> addAll: aCollection [
 	self valueHolder addAll: aCollection
-]
-
-{ #category : #accessing }
-TtEventCollection >> counter [
-	^ counter
-		ifNil: [ self ifEmpty: [ counter := 1 ] ifNotEmpty: [ counter := self size + 1 ] ]
-]
-
-{ #category : #accessing }
-TtEventCollection >> counter: anInteger [
-	counter := anInteger
 ]
 
 { #category : #views }

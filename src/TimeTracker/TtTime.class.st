@@ -38,7 +38,7 @@ TtTime class >> cache: anImport [
 { #category : #accessing }
 TtTime class >> import [
 
-	^ self cache import
+	^ self cache importOLD
 ]
 
 { #category : #accessing }
@@ -141,17 +141,24 @@ TtTime >> categories: aCategoryHierarchy [
 ]
 
 { #category : #accessing }
-TtTime >> cetagories: aCategoryHierarchy [
-	categories := aCategoryHierarchy
-]
-
-{ #category : #accessing }
 TtTime >> days [
 	^ days ifNil: [ days := Dictionary new ]
 ]
 
 { #category : #import }
 TtTime >> import [
+	"This should eventually call a properly configured class that implements a trait that knows how to import data"
+
+	| collection data |
+	[ data := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
+	collection := TtEventCollection new.
+	data
+		associationsDo: [ :day | TtTrelloParser new add: day toCollection: collection ].
+	^ collection
+]
+
+{ #category : #import }
+TtTime >> importOLD [
 
 	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 
