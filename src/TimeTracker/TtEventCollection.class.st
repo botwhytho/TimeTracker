@@ -210,41 +210,27 @@ TtEventCollection >> initialize [
 	super initialize.
 	self flag: #TODO.	"Below is a code smell, should only load from disk by calling code as this collection just became more generic as can re-use for daily/weekly views"
 	thisContext sender sender selector = #withAll:
-		ifFalse: [ GtPomodoroSettings default serializeWithLepiter
-				ifTrue: [ | page |
-					page := LeDatabasesRegistry defaultLogicalDatabase
-							pageNamed: TtTrackedTime dataPageName
-							ifAbsent: [ | newPage |
-								newPage := LePage named: TtTrackedTime dataPageName.
-								LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
-								newPage addFirstSnippet: (LeTextSnippet string: '').
-								newPage ].
-					page children asArray
-						select: [ :each | each isKindOf: LeUnknownSnippet ]
-						thenDo: [ :each | 
-							| json |
-							json := (NeoJSONObject fromString: each jsonString) at: 'data'.
-							self items
-								add: (GtPomodoro new
-										start: json start asDateAndTime;
-										duration: json duration asDuration;
-										goals: json goals;
-										reflection: json reflection yourself) ] ]
-				ifFalse: [ | folder |
-					folder := '.' asFileReference / #pomodoro.
-					(folder exists
-						and: [ folder files anySatisfy: [ :aFile | aFile extension = 'json' ] ])
-						ifTrue: [ folder files
-								select: [ :aFile | aFile extension = 'json' ]
-								thenDo: [ :aFile | 
-									| json |
-									json := NeoJSONObject fromString: aFile contents.
-									self items
-										add: (GtPomodoro new
-												start: json start asDateAndTime;
-												duration: json duration asDuration;
-												goals: json goals;
-												reflection: json reflection yourself) ] ] ] ]
+		ifFalse: [ | page |
+			page := LeDatabasesRegistry defaultLogicalDatabase
+					pageNamed: TtTrackedTime dataPageName
+					ifAbsent: [ | newPage |
+						newPage := LePage named: TtTrackedTime dataPageName.
+						LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
+						newPage addFirstSnippet: (LeTextSnippet string: '').
+						newPage ].
+			page children asArray
+				select: [ :each | each isKindOf: LeUnknownSnippet ]
+				thenDo: [ :each | 
+					| json |
+					json := (NeoJSONObject fromString: each jsonString) at: 'data'.
+					self items
+						add: (TtTrackedTime new
+								start: json start asDateAndTime;
+								duration: json duration asDuration;
+								description: json description;
+								details: json details;
+								rawData: json rawData;
+								yourself) ] ]
 ]
 
 { #category : #accessing }
