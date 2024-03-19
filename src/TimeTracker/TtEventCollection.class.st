@@ -122,6 +122,13 @@ TtEventCollection class >> serializeCollection [
 	^ self new serializeCollection
 ]
 
+{ #category : #'instance - creation' }
+TtEventCollection class >> withAll: aCollection [
+	self flag: 'Explore why items is an OrderedCollection and how we can turn it into a SortedCollection'.
+	^ self new 
+		initializeWith: aCollection
+]
+
 { #category : #accessing }
 TtEventCollection >> add: anItem [
 	self collection add: anItem
