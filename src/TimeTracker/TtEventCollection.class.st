@@ -132,6 +132,50 @@ TtEventCollection >> addAll: aCollection [
 	self collection addAll: aCollection
 ]
 
+{ #category : #'building ui' }
+TtEventCollection >> buildDonut: data [
+
+	^ BlElement new
+		  size: 400 @ 400;
+		  addChildren: (data collect: [ :each | 
+					   BlElement new
+						   when: BlClickEvent
+						   do: [ :e | e target phlow spawnObject: each last ];
+						   geometry: (BlAnnulusSector new
+								    startAngle: each third first;
+								    endAngle: each third last;
+								    innerRadius: 0.85);
+						   background: each fourth;
+						   constraintsDo: [ :c | 
+							   c horizontal matchParent.
+							   c vertical matchParent ] ])
+]
+
+{ #category : #'building ui' }
+TtEventCollection >> calculateAnglesForDonut [
+	| categories totalTime |
+	categories := self sortedEntries.
+	totalTime := categories sum: [ :each | each second ].
+	categories
+		inject: -90
+		into: [ :sum :each | 
+			| color temp |
+			temp := (each second / totalTime * 360 + sum) asInteger.
+			each
+				add: {sum.
+						temp}
+				afterIndex: 2.
+			color := Color random.
+			each first = 'Uncategorized' ifTrue: [ color := color alpha: 0.1 ].
+			each add: color afterIndex: 3.
+			temp ].	"Completing the circle, fixing any rounding differences by hard coding smallest entry's stop angle. Distorts it a bit but okay compromise for now"
+	categories last
+		at: 3
+		put: {categories last third first.
+				270}.
+	^ categories
+]
+
 { #category : #accessing }
 TtEventCollection >> collection [
 	^ collection
@@ -143,6 +187,27 @@ TtEventCollection >> collection [
 TtEventCollection >> groupedByDay [
 	^ groupedByDay
 		ifNil: [ groupedByDay := self groupedBy: [ :each | each start asDate ] ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> gtDonutFor: aView [
+	<gtView>
+	^ aView explicit
+		title: 'Categories' translated;
+		priority: 1;
+		stencil: [ | data horizontalPane verticalPane |
+			data := self calculateAnglesForDonut.
+			horizontalPane := BrHorizontalPane new
+					hMatchParent;
+					alignCenter;
+					vFitContent.
+			horizontalPane addChildren: {self buildDonut: data}.	"(self buildBars: data) "
+			verticalPane := BrVerticalPane new
+					hMatchParent;
+					alignCenter;
+					vMatchParent.
+			verticalPane addChildren: {horizontalPane}.
+			verticalPane ]
 ]
 
 { #category : #views }
@@ -272,6 +337,22 @@ TtEventCollection >> recalculateGroupedByDay [
 TtEventCollection >> serializeCollection [
 	collection := collection asValueHolder.
 	collection whenAddedDo: [ :newValue | newValue serializeWithLepiter ]
+]
+
+{ #category : #'building ui' }
+TtEventCollection >> sortedEntries [
+	| categorizedActivities sumOfCategories |
+	categorizedActivities := (self items
+			collect: [ :entry | entry category -> entry ]) 
+			groupedBy: [ :each | each key ifNil: [ 'Uncategorized' ] ifNotNil: [ :key | key name ] ]
+			affect: [ :each | "TtEventCollection withAll:" (each collect: #value) ].
+	sumOfCategories := categorizedActivities
+			collect: [ :each | 
+				{each sum: [ :entry | entry value duration ].
+					TtEventCollection withAll:each} ].
+	^ (sumOfCategories associations
+		sorted: [ :a :b | a value first > b value first ])
+		collect: [ :each | OrderedCollection withAll: {each key} , each value ]
 ]
 
 { #category : #accessing }
