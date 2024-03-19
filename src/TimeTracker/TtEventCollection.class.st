@@ -4,8 +4,8 @@ Class {
 	#traits : 'TGtGroupWithItems',
 	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
-		'valueHolder',
-		'groupedByDay'
+		'groupedByDay',
+		'collection'
 	],
 	#category : #TimeTracker
 }
@@ -117,14 +117,26 @@ TtEventCollection class >> newFrom: aCollection [
 	^ self withAll: aCollection
 ]
 
+{ #category : #import }
+TtEventCollection class >> serializeCollection [
+	^ self new serializeCollection
+]
+
 { #category : #accessing }
 TtEventCollection >> add: anItem [
-	self valueHolder add: anItem
+	self collection add: anItem
 ]
 
 { #category : #accessing }
 TtEventCollection >> addAll: aCollection [
-	self valueHolder addAll: aCollection
+	self collection addAll: aCollection
+]
+
+{ #category : #accessing }
+TtEventCollection >> collection [
+	^ collection
+		ifNil: [ collection := SortedCollection
+					sortUsing: [ :aPomodoro | aPomodoro start ] ascending ]
 ]
 
 { #category : #views }
@@ -235,7 +247,7 @@ TtEventCollection >> initialize [
 
 { #category : #accessing }
 TtEventCollection >> items [
-	^ items ifNil: [ items := self valueHolder value ]
+	^ items ifNil: [ items := self collection value ]
 ]
 
 { #category : #printing }
@@ -256,18 +268,13 @@ TtEventCollection >> recalculateGroupedByDay [
 	^ self groupedByDay
 ]
 
-{ #category : #accessing }
-TtEventCollection >> valueHolder [
-	^ valueHolder
-		ifNil: [ valueHolder := (SortedCollection
-					sortUsing: [ :aPomodoro | aPomodoro start ] ascending) asValueHolder.
-			valueHolder
-				whenAddedDo: [ :newValue | 
-					newValue serializeWithLepiter ].
-			valueHolder ]
+{ #category : #import }
+TtEventCollection >> serializeCollection [
+	collection := collection asValueHolder.
+	collection whenAddedDo: [ :newValue | newValue serializeWithLepiter ]
 ]
 
 { #category : #accessing }
 TtEventCollection >> valueHolder: anObject [
-	valueHolder := anObject
+	collection := anObject
 ]

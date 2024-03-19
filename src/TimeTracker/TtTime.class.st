@@ -151,7 +151,7 @@ TtTime >> import [
 
 	| collection data |
 	[ data := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
-	collection := TtEventCollection new.
+	collection := TtEventCollection serializeCollection.
 	data
 		associationsDo: [ :day | TtTrelloParser new add: day toCollection: collection ].
 	^ collection
