@@ -229,19 +229,46 @@ TtEventCollection >> gtPomodorosFor: aView [
 		items: pomodoros;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
 		column: 'Pomodoros'
-			text: [ :each | each isAssociation ifTrue: [ each key asString ] ifFalse: [ each asString ] ];
-		column: 'Has Reflection'
+			text: [ :each | 
+				each isAssociation
+					ifTrue: [ each key asString ]
+					ifFalse: [ each printOnDetailed ] ];
+		column: 'Is Recurring'
 			stencil: [ :each | 
 				each isAssociation
 					ifTrue: [ BlElement new ]
 					ifFalse: [ BrCheckbox new
 							aptitude: BrGlamorousCheckboxAptitude;
 							in: [ :aCheckbox | 
-								(each reflection isNil or: [ each reflection = 'nil' ])
+								(each isRecurring isNil
+									or: [ each isRecurring = 'nil' or: [ each isRecurring = false ] ])
 									ifTrue: [ aCheckbox uncheck ]
 									ifFalse: [ aCheckbox check ].
-								aCheckbox ];
-							disable ] ];
+								aCheckbox ] ] ];
+		column: 'Is Planned'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new ]
+					ifFalse: [ BrCheckbox new
+							aptitude: BrGlamorousCheckboxAptitude;
+							in: [ :aCheckbox | 
+								(each isPlanned isNil
+									or: [ each isPlanned = 'nil' or: [ each isPlanned = false ] ])
+									ifTrue: [ aCheckbox uncheck ]
+									ifFalse: [ aCheckbox check ].
+								aCheckbox ] ] ];
+		column: 'First Time Scheduled'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new ]
+					ifFalse: [ BrCheckbox new
+							aptitude: BrGlamorousCheckboxAptitude;
+							in: [ :aCheckbox | 
+								(each firstTimeScheduled isNil
+									or: [ each firstTimeScheduled = 'nil' or: [ each firstTimeScheduled = false ] ])
+									ifTrue: [ aCheckbox uncheck ]
+									ifFalse: [ aCheckbox check ].
+								aCheckbox ] ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll
 ]

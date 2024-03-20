@@ -203,6 +203,22 @@ TtTrackedTime >> printOn: aStream [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> printOnDetailed [
+	^ String
+		streamContents: [ :aStream | 
+			aStream
+				nextPutAll: self start asTime hhmm24;
+				nextPut: $-;
+				nextPutAll: self end asTime hhmm24;
+				nextPut: Character space;
+				nextPutAll: self description.
+			self details
+				ifNotNil: [ aStream
+						nextPutAll: ': ';
+						nextPutAll: self details ] ]
+]
+
+{ #category : #accessing }
 TtTrackedTime >> rawData [
 	^ rawData
 ]
