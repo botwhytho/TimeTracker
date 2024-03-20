@@ -224,11 +224,11 @@ TtEventCollection >> gtPomodorosFor: aView [
 	self ifEmpty: [ ^ aView empty ].
 	pomodoros := self groupedByDay associations sorted: #key descending.
 	^ aView columnedTree
-		title: 'Pomodoros By Day';
+		title: 'Entries By Day';
 		priority: 5;
 		items: pomodoros;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
-		column: 'Pomodoros'
+		column: 'Tracked Time'
 			text: [ :each | 
 				each isAssociation
 					ifTrue: [ each key asString ]
@@ -237,38 +237,17 @@ TtEventCollection >> gtPomodorosFor: aView [
 			stencil: [ :each | 
 				each isAssociation
 					ifTrue: [ BlElement new ]
-					ifFalse: [ BrCheckbox new
-							aptitude: BrGlamorousCheckboxAptitude;
-							in: [ :aCheckbox | 
-								(each isRecurring isNil
-									or: [ each isRecurring = 'nil' or: [ each isRecurring = false ] ])
-									ifTrue: [ aCheckbox uncheck ]
-									ifFalse: [ aCheckbox check ].
-								aCheckbox ] ] ];
+					ifFalse: [ each generateCheckboxForBoolean: #isRecurring ] ];
 		column: 'Is Planned'
 			stencil: [ :each | 
 				each isAssociation
 					ifTrue: [ BlElement new ]
-					ifFalse: [ BrCheckbox new
-							aptitude: BrGlamorousCheckboxAptitude;
-							in: [ :aCheckbox | 
-								(each isPlanned isNil
-									or: [ each isPlanned = 'nil' or: [ each isPlanned = false ] ])
-									ifTrue: [ aCheckbox uncheck ]
-									ifFalse: [ aCheckbox check ].
-								aCheckbox ] ] ];
+					ifFalse: [ each generateCheckboxForBoolean: #isPlanned ] ];
 		column: 'First Time Scheduled'
 			stencil: [ :each | 
 				each isAssociation
 					ifTrue: [ BlElement new ]
-					ifFalse: [ BrCheckbox new
-							aptitude: BrGlamorousCheckboxAptitude;
-							in: [ :aCheckbox | 
-								(each firstTimeScheduled isNil
-									or: [ each firstTimeScheduled = 'nil' or: [ each firstTimeScheduled = false ] ])
-									ifTrue: [ aCheckbox uncheck ]
-									ifFalse: [ aCheckbox check ].
-								aCheckbox ] ] ];
+					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll
 ]

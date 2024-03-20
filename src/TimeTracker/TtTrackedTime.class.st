@@ -144,6 +144,24 @@ TtTrackedTime >> firstTimeScheduled: anObject [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> generateCheckboxForBoolean: aSelector [
+	^ BrCheckbox new
+		aptitude: BrGlamorousCheckboxAptitude;
+		in: [ :aCheckbox | 
+			((self perform: aSelector) isNil
+				or: [ (self perform: aSelector) = 'nil' or: [ (self perform: aSelector) = false ] ])
+				ifTrue: [ aCheckbox uncheck ]
+				ifFalse: [ aCheckbox check ].
+			aCheckbox ];
+		whenCheckedDo: [ :anEvent | 
+			self perform: aSelector , ':' withArguments: #(true).
+			self serializeWithLepiter ];
+		whenUncheckedDo: [ :anEvent | 
+			self perform: aSelector , ':' withArguments: #(false).
+			self serializeWithLepiter ]
+]
+
+{ #category : #accessing }
 TtTrackedTime >> gtTrackedTimeFor: aView [
 	<gtView>
 	^ aView explicit
