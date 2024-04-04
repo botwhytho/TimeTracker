@@ -106,7 +106,7 @@ TtTime >> TtCategoriesFor: aView [
 			view edges
 				fromRightCenter;
 				toLeftCenter;
-				connectFromAll: #parent.
+				connectFromAll: #parentCategory.
 			view layout horizontalTree ].
 ]
 

@@ -1,8 +1,10 @@
 Class {
 	#name : #TtCategories,
 	#superclass : #Object,
+	#traits : 'TGtGroupWithItems',
+	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
-		'categories'
+		'root'
 	],
 	#classInstVars : [
 		'testInstance'
@@ -25,12 +27,14 @@ TtCategories class >> fromJSON: aString [
 			for: #Children
 				customDo: [ :mapping | mapping listOfElementSchema: TtCategory ];
 			nextAs: TtCategory.
-	collection categories add: hierarchy.
+	hierarchy hierarchy: collection.
+	collection add: hierarchy.
+	collection root: hierarchy.
 	hierarchy
 		withDeep: #children
 		relationDo: [ :parent :child | 
-			child parent: child.
-			collection categories add: child ].
+			child parentCategory: parent.
+			collection add: child ].
 	^ collection
 ]
 
@@ -62,13 +66,13 @@ TtCategories >> TtCategoriesFor: aView [
 										aCategory children
 											add: (TtCategory new
 													name: 'Test';
-													parent: aCategory) ].
+													parentCategory: aCategory) ].
 								BrGlamorousVectorIcons close asElement
 									when: BlClickEvent
 									do: [ :anEvent | 
 										anEvent consumed: true.
 										anEvent target inform: 'TODO: sort out logic for category deletion' ]} ];
-				with: self categories.
+				with: self.
 			view edges
 				fromRightCenter;
 				toLeftCenter;
@@ -77,8 +81,13 @@ TtCategories >> TtCategoriesFor: aView [
 ]
 
 { #category : #accessing }
-TtCategories >> categories [
-	^ categories ifNil: [ categories := OrderedCollection new ]
+TtCategories >> root [
+	^ root
+]
+
+{ #category : #accessing }
+TtCategories >> root: anObject [
+	root := anObject
 ]
 
 { #category : #accessing }
@@ -86,69 +95,69 @@ TtCategories >> sampleCategories [
 	"Some nested categories"
 
 	<gtExample>
-	| categoryHierarchy root node1 node2 node3 leaf1_1 leaf2_1 leaf2_2 leaf2_3 leaf3_1 leaf3_2 leaf3_3 leaf1 leaf2 leaf3 |
-	categoryHierarchy := TtCategories new.
-	root := TtCategory new
+	| categoryHierarchy rootCategory node1 node2 node3 leaf1_1 leaf2_1 leaf2_2 leaf2_3 leaf3_1 leaf3_2 leaf3_3 leaf1 leaf2 leaf3 |
+	categoryHierarchy := self class new.
+	rootCategory := TtCategory new
 			name: 'Root';
 			hierarchy: categoryHierarchy.
 	node1 := TtCategory new
 			name: 'Errands';
-			parent: root.
+			parentCategory: rootCategory.
 	node2 := TtCategory new
 			name: 'Food';
-			parent: root.
+			parentCategory: rootCategory.
 	node3 := TtCategory new
 			name: 'Habits';
-			parent: root.
-	root children
+			parentCategory: rootCategory.
+	rootCategory children
 		addAll: {node1.
 				node2.
 				node3}.
 	leaf1_1 := TtCategory new
 			name: 'Groceries';
-			parent: node1.
+			parentCategory: node1.
 	node1 children addAll: {leaf1_1}.
 	leaf2_1 := TtCategory new
 			name: 'Cook';
-			parent: node2.
+			parentCategory: node2.
 	leaf2_2 := TtCategory new
 			name: 'Dishes';
-			parent: node2.
+			parentCategory: node2.
 	leaf2_3 := TtCategory new
 			name: 'Eat';
-			parent: node2.
+			parentCategory: node2.
 	node2 children
 		addAll: {leaf2_1.
 				leaf2_2.
 				leaf2_3}.
 	leaf3_1 := TtCategory new
 			name: 'Meditate';
-			parent: node3.
+			parentCategory: node3.
 	leaf3_2 := TtCategory new
 			name: 'Read';
-			parent: node3.
+			parentCategory: node3.
 	leaf3_3 := TtCategory new
 			name: 'Write';
-			parent: node3.
+			parentCategory: node3.
 	node3 children
 		addAll: {leaf3_1.
 				leaf3_2.
 				leaf3_3}.
 	leaf1 := TtCategory new
 			name: 'Leisure';
-			parent: root.
+			parentCategory: rootCategory.
 	leaf2 := TtCategory new
 			name: 'Sleep';
-			parent: root.
+			parentCategory: rootCategory.
 	leaf3 := TtCategory new
 			name: 'Work';
-			parent: root.
-	root children
+			parentCategory: rootCategory.
+	rootCategory children
 		addAll: {leaf1.
 				leaf2.
 				leaf3}.
-	categoryHierarchy categories
-		addAll: {root.
+	categoryHierarchy
+		addAll: {rootCategory.
 				node1.
 				node2.
 				node3.

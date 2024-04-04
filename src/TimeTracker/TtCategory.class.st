@@ -2,10 +2,10 @@ Class {
 	#name : #TtCategory,
 	#superclass : #Object,
 	#instVars : [
-		'parent',
 		'name',
 		'hierarchy',
-		'children'
+		'children',
+		'parentCategory'
 	],
 	#category : #TimeTracker
 }
@@ -19,7 +19,7 @@ TtCategory >> children [
 
 { #category : #accessing }
 TtCategory >> hierarchy [
-	^ hierarchy
+	^ hierarchy ifNil: [ self rootCategory hierarchy ]
 ]
 
 { #category : #accessing }
@@ -38,11 +38,28 @@ TtCategory >> name: aName [
 ]
 
 { #category : #accessing }
-TtCategory >> parent [
-	^ parent ifNil: [ ^ #() ] ifNotNil: [ ^ {parent} ]
+TtCategory >> parentCategory [
+	^ parentCategory
 ]
 
 { #category : #accessing }
-TtCategory >> parent: aTtCategory [
-	parent := aTtCategory
+TtCategory >> parentCategory: aTtCategory [
+	parentCategory := aTtCategory
+]
+
+{ #category : #printing }
+TtCategory >> printOn: aStream [
+	super printOn: aStream.
+	aStream
+		nextPut: $(;
+		nextPutAll: self name;
+		nextPut: $)
+]
+
+{ #category : #accessing }
+TtCategory >> rootCategory [
+	| category |
+	category := self.
+	[ category parentCategory ] whileNotNil: [ category := category parentCategory ].
+	^ category
 ]
