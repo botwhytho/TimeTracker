@@ -18,7 +18,7 @@ TtCategories class >> fromJSON: aString [
 	collection := self new.
 	reader := NeoJSONReader on: aString readStream.
 	reader
-		listClass: OrderedCollection;
+		listClass: SortedCollection;
 		for: TtCategory
 			do: [ :m | 
 				m mapInstVar: #name.

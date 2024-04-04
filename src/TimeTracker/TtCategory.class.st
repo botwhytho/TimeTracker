@@ -10,11 +10,14 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #comparing }
+TtCategory >> <= other [
+	^ self name <= other name
+]
+
 { #category : #accessing }
 TtCategory >> children [
-	^ children
-		ifNil: [ children := SortedCollection
-					sortUsing: [ :aCategory | aCategory name ] ascending ]
+	^ children ifNil: [ children := SortedCollection new ]
 ]
 
 { #category : #accessing }
