@@ -4,10 +4,18 @@ Class {
 	#instVars : [
 		'parent',
 		'name',
-		'hierarchy'
+		'hierarchy',
+		'children'
 	],
-	#category : #'TimeTracker-TimeTracker'
+	#category : #TimeTracker
 }
+
+{ #category : #accessing }
+TtCategory >> children [
+	^ children
+		ifNil: [ children := SortedCollection
+					sortUsing: [ :aCategory | aCategory name ] ascending ]
+]
 
 { #category : #accessing }
 TtCategory >> hierarchy [
