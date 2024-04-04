@@ -66,7 +66,7 @@ TtTime class >> initialize [
 			file := directory asFileReference / 'TimeTracker.fuel'.
 			file exists ifTrue: [ 
 				Cache := FLMaterializer materializeFromFileNamed: file pathString ] ].
-	self import
+	"self import"
 ]
 
 { #category : #accessing }
