@@ -120,6 +120,16 @@ TtCategories >> calculateHierarchy [
 			self add: child ]
 ]
 
+{ #category : #initialization }
+TtCategories >> initialize [
+	super initialize.
+	self
+		root: (TtCategory new
+				name: 'Root';
+				hierarchy: self).
+	self add: self root
+]
+
 { #category : #accessing }
 TtCategories >> root [
 	^ root
@@ -135,21 +145,17 @@ TtCategories >> sampleCategories [
 	"Some nested categories"
 
 	<gtExample>
-	| categoryHierarchy rootCategory node1 node2 node3 leaf1_1 leaf2_1 leaf2_2 leaf2_3 leaf3_1 leaf3_2 leaf3_3 leaf1 leaf2 leaf3 |
-	categoryHierarchy := self class new.
-	rootCategory := TtCategory new
-			name: 'Root';
-			hierarchy: categoryHierarchy.
+	| node1 node2 node3 leaf1_1 leaf2_1 leaf2_2 leaf2_3 leaf3_1 leaf3_2 leaf3_3 leaf1 leaf2 leaf3 |
 	node1 := TtCategory new
 			name: 'Errands';
-			parentCategory: rootCategory.
+			parentCategory: root.
 	node2 := TtCategory new
 			name: 'Food';
-			parentCategory: rootCategory.
+			parentCategory: root.
 	node3 := TtCategory new
 			name: 'Habits';
-			parentCategory: rootCategory.
-	rootCategory children
+			parentCategory: root.
+	root children
 		addAll: {node1.
 				node2.
 				node3}.
@@ -185,21 +191,19 @@ TtCategories >> sampleCategories [
 				leaf3_3}.
 	leaf1 := TtCategory new
 			name: 'Leisure';
-			parentCategory: rootCategory.
+			parentCategory: root.
 	leaf2 := TtCategory new
 			name: 'Sleep';
-			parentCategory: rootCategory.
+			parentCategory: root.
 	leaf3 := TtCategory new
 			name: 'Work';
-			parentCategory: rootCategory.
-	rootCategory children
+			parentCategory: root.
+	root children
 		addAll: {leaf1.
 				leaf2.
 				leaf3}.
-	categoryHierarchy root: rootCategory.
-	categoryHierarchy
-		addAll: {rootCategory.
-				node1.
+	self
+		addAll: {node1.
 				node2.
 				node3.
 				leaf1_1.
@@ -212,5 +216,5 @@ TtCategories >> sampleCategories [
 				leaf1.
 				leaf2.
 				leaf3}.
-	^ categoryHierarchy
+	^ self
 ]
