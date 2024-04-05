@@ -42,7 +42,9 @@ TtCategories class >> testInstance [
 { #category : #view }
 TtCategories >> TtCategoriesFor: aView [
 	<gtView>
-	^ aView mondrian
+	| viewObject |
+	viewObject := aView mondrian.
+	^ viewObject
 		title: 'Categories' translated;
 		priority: 10;
 		painting: [ :view | 
@@ -66,7 +68,8 @@ TtCategories >> TtCategoriesFor: aView [
 											add: (TtCategory new
 													name: 'Test';
 													parentCategory: aCategory).
-										self calculateHierarchy ].
+										self calculateHierarchy.
+										viewObject updateContent: aBrButton phlow firstParentWithView ].
 								BrButton new
 									beTinySize;
 									aptitude: BrGlamorousButtonWithIconAptitude;
@@ -74,7 +77,8 @@ TtCategories >> TtCategoriesFor: aView [
 									action: [ :aBrButton :aBrButtonModel :anEvent | 
 										anEvent consumed: true.
 										aCategory parentCategory children remove: aCategory.
-										self calculateHierarchy ]} ];
+										self calculateHierarchy.
+										viewObject updateContent: aBrButton phlow firstParentWithView ]} ];
 				with: self.
 			view edges
 				fromRightCenter;
