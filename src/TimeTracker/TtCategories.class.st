@@ -28,7 +28,6 @@ TtCategories class >> fromJSON: aString [
 				customDo: [ :mapping | mapping listOfElementSchema: TtCategory ];
 			nextAs: TtCategory.
 	hierarchy hierarchy: collection.
-	collection add: hierarchy.
 	collection root: hierarchy.
 	collection calculateHierarchy.
 	^ collection
