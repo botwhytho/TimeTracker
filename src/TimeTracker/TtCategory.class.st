@@ -40,6 +40,12 @@ TtCategory >> name: aName [
 	name := aName
 ]
 
+{ #category : #serialization }
+TtCategory >> neoJsonOn: aWriter [
+	{'name' -> name.
+		'children' -> (children ifNil: [ #() ])} asDictionary neoJsonOn: aWriter
+]
+
 { #category : #accessing }
 TtCategory >> parentCategory [
 	^ parentCategory
