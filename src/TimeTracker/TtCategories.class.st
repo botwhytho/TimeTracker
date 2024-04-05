@@ -42,9 +42,7 @@ TtCategories class >> testInstance [
 { #category : #view }
 TtCategories >> TtCategoriesFor: aView [
 	<gtView>
-	| viewObject |
-	viewObject := aView mondrian.
-	^ viewObject
+	^ aView mondrian
 		title: 'Categories' translated;
 		priority: 10;
 		painting: [ :view | 
@@ -87,8 +85,7 @@ TtCategories >> TtCategoriesFor: aView [
 																						name: aWish text asString;
 																						parentCategory: aCategory).
 																			self calculateHierarchy.
-																			viewObject
-																				updateContent: textElement phlow firstParentWithView ];
+																			textElement phlow firstParentWithView phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
 									icon: BrGlamorousVectorIcons add.
@@ -100,7 +97,10 @@ TtCategories >> TtCategoriesFor: aView [
 										anEvent consumed: true.
 										aCategory parentCategory children remove: aCategory.
 										self calculateHierarchy.
-										viewObject updateContent: aBrButton phlow firstParentWithView ]} ];
+										aBrButton phlow firstParentWithView phlow syncUpdate ];
+									in: [ :aDeleteButton | 
+										aCategory name = 'Root' ifTrue: [ aDeleteButton visibility: BlVisibility gone ].
+										aDeleteButton ]} ];
 				with: self.
 			view edges
 				fromRightCenter;
