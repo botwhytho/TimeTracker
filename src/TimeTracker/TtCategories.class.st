@@ -30,11 +30,7 @@ TtCategories class >> fromJSON: aString [
 	hierarchy hierarchy: collection.
 	collection add: hierarchy.
 	collection root: hierarchy.
-	hierarchy
-		withDeep: #children
-		relationDo: [ :parent :child | 
-			child parentCategory: parent.
-			collection add: child ].
+	collection calculateHierarchy.
 	^ collection
 ]
 
@@ -54,30 +50,48 @@ TtCategories >> TtCategoriesFor: aView [
 				shape: [ :aCategory | 
 					BrHorizontalPane new
 						border: (BlBorder paint: Color gray width: 1);
+						padding: (BlInsets all: 5);
 						fitContent;
 						alignCenter;
 						addChildren: {BlTextElement new
 									text: aCategory name asRopedText;
 									constraintsDo: [ :c | c padding: (BlInsets all: 10) ].
-								BrGlamorousVectorIcons add asElement
-									when: BlClickEvent
-									do: [ :anEvent | 
+								BrButton new
+									beTinySize;
+									aptitude: BrGlamorousButtonWithIconAptitude;
+									icon: BrGlamorousVectorIcons add;
+									action: [ :aBrButton :aBrButtonModel :anEvent | 
 										anEvent consumed: true.
 										aCategory children
 											add: (TtCategory new
 													name: 'Test';
-													parentCategory: aCategory) ].
-								BrGlamorousVectorIcons close asElement
-									when: BlClickEvent
-									do: [ :anEvent | 
+													parentCategory: aCategory).
+										self calculateHierarchy ].
+								BrButton new
+									beTinySize;
+									aptitude: BrGlamorousButtonWithIconAptitude;
+									icon: BrGlamorousVectorIcons close;
+									action: [ :aBrButton :aBrButtonModel :anEvent | 
 										anEvent consumed: true.
-										anEvent target inform: 'TODO: sort out logic for category deletion' ]} ];
+										aCategory parentCategory children remove: aCategory.
+										self calculateHierarchy ]} ];
 				with: self.
 			view edges
 				fromRightCenter;
 				toLeftCenter;
 				connectToAll: #children.
 			view layout horizontalTree ]
+]
+
+{ #category : #view }
+TtCategories >> calculateHierarchy [
+	self items removeAll.
+	self add: self root.
+	self root
+		withDeep: #children
+		relationDo: [ :parent :child | 
+			child parentCategory: parent.
+			self add: child ]
 ]
 
 { #category : #accessing }
@@ -156,6 +170,7 @@ TtCategories >> sampleCategories [
 		addAll: {leaf1.
 				leaf2.
 				leaf3}.
+	categoryHierarchy root: rootCategory.
 	categoryHierarchy
 		addAll: {rootCategory.
 				node1.
