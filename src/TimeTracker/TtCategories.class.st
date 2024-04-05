@@ -50,26 +50,48 @@ TtCategories >> TtCategoriesFor: aView [
 		painting: [ :view | 
 			view nodes
 				shape: [ :aCategory | 
+					| textElement |
+					textElement := BlTextElement new.
 					BrHorizontalPane new
 						border: (BlBorder paint: Color gray width: 1);
 						padding: (BlInsets all: 5);
 						fitContent;
 						alignCenter;
-						addChildren: {BlTextElement new
+						addChildren: {textElement
 									text: aCategory name asRopedText;
 									constraintsDo: [ :c | c padding: (BlInsets all: 10) ].
 								BrButton new
 									beTinySize;
-									aptitude: BrGlamorousButtonWithIconAptitude;
-									icon: BrGlamorousVectorIcons add;
-									action: [ :aBrButton :aBrButtonModel :anEvent | 
-										anEvent consumed: true.
-										aCategory children
-											add: (TtCategory new
-													name: 'Test';
-													parentCategory: aCategory).
-										self calculateHierarchy.
-										viewObject updateContent: aBrButton phlow firstParentWithView ].
+									aptitude: BrGlamorousButtonWithIconAptitude
+											+ (BrGlamorousWithDropdownAptitude
+													handle: [ BrButton new
+															beTinySize;
+															aptitude: BrGlamorousButtonWithIconAptitude;
+															icon: BrGlamorousVectorIcons add ]
+													content: [ BrHorizontalPane new
+															matchParent;
+															padding: (BlInsets all: 15);
+															addChild: (BrEditableLabel new
+																	text: 'Create a new Category';
+																	requestFocus;
+																	constraintsDo: [ :c | c minWidth: 100 ];
+																	aptitude: (BrGlamorousEditableLabelAptitude new
+																			glamorousCodeFont;
+																			defaultForeground: Color black;
+																			fontSize: 13);
+																	when: BrEditorAcceptWish
+																		do: [ :aWish | 
+																			aWish currentTarget fireEvent: BrDropdownHideWish new.
+																			aCategory children
+																				add: (TtCategory new
+																						name: aWish text asString;
+																						parentCategory: aCategory).
+																			self calculateHierarchy.
+																			viewObject
+																				updateContent: textElement phlow firstParentWithView ];
+																	when: BrEditorCancelWish
+																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
+									icon: BrGlamorousVectorIcons add.
 								BrButton new
 									beTinySize;
 									aptitude: BrGlamorousButtonWithIconAptitude;
