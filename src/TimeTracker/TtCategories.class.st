@@ -57,6 +57,7 @@ TtCategories >> TtCategoriesFor: aView [
 						addChildren: {textElement
 									text: aCategory name asRopedText;
 									constraintsDo: [ :c | c padding: (BlInsets all: 10) ].
+								BlElement new background: (self stringToColorHash: aCategory name).
 								BrButton new
 									beTinySize;
 									aptitude: BrGlamorousButtonWithIconAptitude
@@ -216,4 +217,16 @@ TtCategories >> sampleCategories [
 				leaf2.
 				leaf3}.
 	^ self
+]
+
+{ #category : #view }
+TtCategories >> stringToColorHash: aString [
+	| angle md5BitDepthMax stringHash |
+	md5BitDepthMax := 2 ** 128.
+	stringHash := (MD5 hashMessage: aString) asInteger.
+	angle := stringHash / md5BitDepthMax * 360.
+	^ Color
+		h: angle
+		s: 1
+		l: 0.5
 ]
