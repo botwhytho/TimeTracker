@@ -220,6 +220,23 @@ TtCategories >> sampleCategories [
 ]
 
 { #category : #view }
+TtCategories >> stringToColorHash2: aString [
+	| stringHash firstNum secondNum mappedNum hue variation saturation brightness |
+	stringHash := MD5 hashMessage: aString.
+	firstNum := stringHash first.
+	secondNum := stringHash second.
+	mappedNum := (firstNum / 256 * 360) asInteger.
+	hue := mappedNum % 360 / 360.
+	variation := secondNum / 256 / 2 - 0.25.
+	saturation := 0.8 + variation min: 1.0.
+	brightness := 0.7 + variation min: 1.0.
+	^ Color
+		h: hue
+		s: saturation
+		v: brightness
+]
+
+{ #category : #view }
 TtCategories >> stringToColorHash: aString [
 	| angle md5BitDepthMax stringHash |
 	md5BitDepthMax := 2 ** 128.
