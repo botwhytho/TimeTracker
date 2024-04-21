@@ -58,8 +58,8 @@ TtEventCollection class >> gtWeeklySummaryFor: aView [
 	<gtView>
 	<gtClassView>
 	^ aView forward
-		title: 'Pomodoros By Day';
-		priority: 1;
+		title: 'Pomodoros By Week';
+		priority: 6;
 		object: self new;
 		view: #gtWeeklySummaryFor:
 ]
