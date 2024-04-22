@@ -39,7 +39,7 @@ TtCategories class >> testInstance [
 ]
 
 { #category : #view }
-TtCategories >> TtCategoriesFor: aView [
+TtCategories >> TtCategoriesFor: aView context: aContext [
 	<gtView>
 	^ aView mondrian
 		title: 'Categories' translated;
@@ -47,9 +47,10 @@ TtCategories >> TtCategoriesFor: aView [
 		painting: [ :view | 
 			view nodes
 				shape: [ :aCategory | 
-					| textElement |
+					| pane textElement |
 					textElement := BlTextElement new.
-					BrHorizontalPane new
+					pane := BrHorizontalPane new.
+					pane
 						border: (BlBorder paint: Color gray width: 1);
 						padding: (BlInsets all: 5);
 						fitContent;
@@ -88,19 +89,34 @@ TtCategories >> TtCategoriesFor: aView [
 																			textElement phlow firstParentWithView phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
-									icon: BrGlamorousVectorIcons add.
-								BrButton new
-									beTinySize;
-									aptitude: BrGlamorousButtonWithIconAptitude;
-									icon: BrGlamorousVectorIcons close;
-									action: [ :aBrButton :aBrButtonModel :anEvent | 
-										anEvent consumed: true.
-										aCategory parentCategory children remove: aCategory.
-										self calculateHierarchy.
-										aBrButton phlow firstParentWithView phlow syncUpdate ];
-									in: [ :aDeleteButton | 
-										aCategory name = 'Root' ifTrue: [ aDeleteButton visibility: BlVisibility gone ].
-										aDeleteButton ]} ];
+									icon: BrGlamorousVectorIcons add}.
+					(aCategory isKindOf: TtRootCategory)
+						ifFalse: [ pane
+								addChild: (BrButton new
+										beTinySize;
+										aptitude: BrGlamorousButtonWithIconAptitude;
+										icon: BrGlamorousVectorIcons close;
+										action: [ :aBrButton :aBrButtonModel :anEvent | 
+											anEvent consumed: true.
+											aCategory parentCategory children remove: aCategory.
+											self calculateHierarchy.
+											aBrButton phlow firstParentWithView phlow syncUpdate ]) ].
+					aContext
+						at: #TtTrackedTime
+						ifPresent: [ :anAssociation | 
+							pane
+								addChild: (BrButton new
+										beTinySize;
+										aptitude: BrGlamorousButtonWithIconAptitude;
+										icon: BrGlamorousVectorIcons accept;
+										action: [ :aBrButton :aBrButtonModel :anEvent | 
+											anEvent consumed: true.
+											anAssociation key
+												category: aCategory;
+												serializeWithLepiter.
+											anAssociation value fireEvent: BrDropdownHideWish new ]) ]
+						ifAbsent: [  ].
+					pane ];
 				with: self.
 			view edges
 				fromRightCenter;
