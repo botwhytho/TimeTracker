@@ -248,6 +248,27 @@ TtEventCollection >> gtPomodorosFor: aView [
 				each isAssociation
 					ifTrue: [ BlElement new ]
 					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
+		column: 'Category'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new ]
+					ifFalse: [ | aButton |
+						aButton := BrButton new.
+						aButton
+							aptitude: BrGlamorousButtonWithLabelAptitude
+									+ (BrGlamorousWithDropdownAptitude
+											handle: [ BrButton new
+													aptitude: BrGlamorousButtonWithLabelAptitude;
+													label: 'Categorize' ]
+											content: [ BrHorizontalPane new
+													size: 800 @ 800;
+													padding: (BlInsets all: 15);
+													addChild: (TtCategories new sampleCategories
+															TtCategoriesFor: GtPhlowView empty
+															context: (GtPhlowContext new
+																	at: #TtTrackedTime put: each -> aButton;
+																	yourself)) asElement ]);
+							label: (each category ifNotNil: [ :notNil | notNil name ] ifNil: [ 'Categorize' ]) ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll
 ]

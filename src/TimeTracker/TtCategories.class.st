@@ -104,17 +104,19 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :anAssociation | 
-							pane
-								addChild: (BrButton new
-										beTinySize;
-										aptitude: BrGlamorousButtonWithIconAptitude;
-										icon: BrGlamorousVectorIcons accept;
-										action: [ :aBrButton :aBrButtonModel :anEvent | 
-											anEvent consumed: true.
-											anAssociation key
-												category: aCategory;
-												serializeWithLepiter.
-											anAssociation value fireEvent: BrDropdownHideWish new ]) ]
+							(aCategory isKindOf: TtRootCategory)
+								ifFalse: [ pane
+										addChild: (BrButton new
+												beTinySize;
+												aptitude: BrGlamorousButtonWithIconAptitude;
+												icon: BrGlamorousVectorIcons accept;
+												action: [ :aBrButton :aBrButtonModel :anEvent | 
+													anEvent consumed: true.
+													anAssociation key
+														category: aCategory;
+														serializeWithLepiter.
+													anAssociation value label: aCategory name.
+													anAssociation value fireEvent: BrDropdownHideWish new ]) ] ]
 						ifAbsent: [  ].
 					pane ];
 				with: self.
