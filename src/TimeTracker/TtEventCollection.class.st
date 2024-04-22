@@ -298,6 +298,7 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 { #category : #initialization }
 TtEventCollection >> initialize [
 	super initialize.
+	self flag: #TODO.	"Move out of initialize"
 	self flag: #TODO.	"Below is a code smell, should only load from disk by calling code as this collection just became more generic as can re-use for daily/weekly views"
 	thisContext sender sender selector = #withAll:
 		ifFalse: [ | page |
@@ -311,15 +312,18 @@ TtEventCollection >> initialize [
 			page children asArray
 				select: [ :each | each isKindOf: LeUnknownSnippet ]
 				thenDo: [ :each | 
-					| json |
-					json := (NeoJSONObject fromString: each jsonString) at: 'data'.
+					| data json |
+					self flag: #TODO.	"Use NeoJSONReader like in `TtCategories class>>#fromJSON:`"
+					json := NeoJSONObject fromString: each jsonString.
+					data := json at: 'data'.
 					self items
 						add: (TtTrackedTime new
-								start: json start asDateAndTime;
-								duration: json duration asDuration;
-								description: json description;
-								details: json details;
-								rawData: json rawData;
+								uid: (json at: 'uid' at: 'uidString');
+								start: data start asDateAndTime;
+								duration: data duration asDuration;
+								description: data description;
+								details: data details;
+								rawData: data rawData;
 								yourself) ] ]
 ]
 

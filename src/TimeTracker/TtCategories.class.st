@@ -140,8 +140,8 @@ TtCategories >> calculateHierarchy [
 TtCategories >> initialize [
 	super initialize.
 	self
-		root: (TtCategory new
-				name: 'Root';
+		root: (TtRootCategory new
+				name: 'Create Categories';
 				hierarchy: self).
 	self add: self root
 ]

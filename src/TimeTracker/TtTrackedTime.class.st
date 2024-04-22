@@ -233,7 +233,7 @@ TtTrackedTime >> printOnDetailed [
 			self details
 				ifNotNil: [ aStream
 						nextPutAll: ': ';
-						nextPutAll: self details ] ]
+						nextPutAll: (self details ifNil: [ '' ]) ] ]
 ]
 
 { #category : #accessing }
