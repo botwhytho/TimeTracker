@@ -1,8 +1,8 @@
 Class {
 	#name : #TtEventCollection,
 	#superclass : #Object,
-	#traits : 'TGtGroupWithItems',
-	#classTraits : 'TGtGroupWithItems classTrait',
+	#traits : 'TGtGroupWithItems + TGtUniqueInstance',
+	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'groupedByDay',
 		'collection'
@@ -49,7 +49,7 @@ TtEventCollection class >> gtPomodorosFor: aView [
 	^ aView forward
 		title: 'Pomodoros By Day';
 		priority: 5;
-		object: self new;
+		object: self loadFromLepiter;
 		view: #gtPomodorosFor:
 ]
 
@@ -110,6 +110,11 @@ TtEventCollection class >> hourlyTicksElement [
 							margin: (BlInsets top: 13);
 							constraintsDo: [ :c | c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength ] ]).
 	^ aContainer
+]
+
+{ #category : #initialization }
+TtEventCollection class >> loadFromLepiter [
+	^ self uniqueInstance loadFromLepiter
 ]
 
 { #category : #'instance creation' }
@@ -316,14 +321,16 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 									select: [ :aPomodoro | aPomodoro start asDate asWeek = anEvent date asWeek ]) ] ]
 ]
 
+{ #category : #accessing }
+TtEventCollection >> items [
+	^ items ifNil: [ items := self collection value ]
+]
+
 { #category : #initialization }
-TtEventCollection >> initialize [
-	super initialize.
-	self flag: #TODO.	"Move out of initialize"
-	self flag: #TODO.	"Below is a code smell, should only load from disk by calling code as this collection just became more generic as can re-use for daily/weekly views"
-	thisContext sender sender selector = #withAll:
-		ifFalse: [ | page |
-			page := LeDatabasesRegistry defaultLogicalDatabase
+TtEventCollection >> loadFromLepiter [
+	| page |
+	self size = 0
+		ifTrue: [ page := LeDatabasesRegistry defaultLogicalDatabase
 					pageNamed: TtTrackedTime dataPageName
 					ifAbsent: [ | newPage |
 						newPage := LePage named: TtTrackedTime dataPageName.
@@ -339,18 +346,17 @@ TtEventCollection >> initialize [
 					data := json at: 'data'.
 					self items
 						add: (TtTrackedTime new
-								uid: (json at: 'uid' at: 'uidString');
+								"uid: (json at: 'uid' at: 'uidString');"
+								uid: data uid;
 								start: data start asDateAndTime;
 								duration: data duration asDuration;
 								description: data description;
 								details: data details;
 								rawData: data rawData;
+								isPlanned: data isPlanned;
+								isRecurring: data isRecurring;
+								firstTimeScheduled: data firstTimeScheduled;
 								yourself) ] ]
-]
-
-{ #category : #accessing }
-TtEventCollection >> items [
-	^ items ifNil: [ items := self collection value ]
 ]
 
 { #category : #printing }

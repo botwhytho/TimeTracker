@@ -271,6 +271,7 @@ TtTrackedTime >> serializeWithLepiter [
 		detect: [ :aSnippet | aSnippet uidString = self uid ]
 		ifFound: [ :foundSnippet | 
 			snippetJSON := self serializeSnippet: foundSnippet.
+			snippetJSON data: self asDictionary.
 			serialized := NeoJSONWriter toStringPretty: snippetJSON.
 			foundSnippet jsonString: serialized source: lepiterPage ]
 		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
