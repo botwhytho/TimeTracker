@@ -44,7 +44,7 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 					categoryName := jsonReader next.
 					TtCategories new sampleCategories detect: [:each| each name = categoryName ] ifNone: [nil]
 					 ]; 
-				writer: [ :jsonWriter :aCategory | aCategory name ] ].
+				writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ].
 ]
 
 { #category : #accessing }
