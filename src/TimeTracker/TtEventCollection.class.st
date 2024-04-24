@@ -5,7 +5,8 @@ Class {
 	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'groupedByDay',
-		'collection'
+		'collection',
+		'categories'
 	],
 	#category : #TimeTracker
 }

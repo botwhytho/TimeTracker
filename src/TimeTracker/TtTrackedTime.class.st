@@ -64,6 +64,10 @@ TtTrackedTime >> category: anObject [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> createCategoriesSnippetInPage: newPage [ 
+]
+
+{ #category : #accessing }
 TtTrackedTime >> daySerializedFrom [
 	^ daySerializedFrom
 ]
@@ -291,22 +295,23 @@ TtTrackedTime >> serializeWithLepiter [
 				newPage := LePage named: self class dataPageName.
 				LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
 				newPage addFirstSnippet: (LeTextSnippet string: '').
+				self createCategoriesSnippetInPage: newPage.
 				newPage ].
 	lepiterPage children
 		detect: [ :aSnippet | aSnippet uidString = self uid ]
 		ifFound: [ :foundSnippet | 
 			snippetJSON := self serializeSnippet: foundSnippet.
-			snippetJSON data: self asDictionary.
+			snippetJSON data: self.
 			serialized := NeoJSONWriter toStringPretty: snippetJSON.
 			foundSnippet jsonString: serialized source: lepiterPage ]
 		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
 			lepiterPage addSnippet: aTextSnippet.
 			self uid: aTextSnippet uidString.
 			snippetJSON := self serializeSnippet: aTextSnippet.
-			snippetJSON __type: LeUnknownSnippet leJsonV4Name.
-			snippetJSON data: self asDictionary.
+			snippetJSON __type: TtTrackedTimeSnippet leJsonV4Name.
+			snippetJSON data: self.
 			serialized := NeoJSONWriter toStringPretty: snippetJSON.
-			anUnknownSnippet := LeUnknownSnippet new
+			anUnknownSnippet := TtTrackedTimeSnippet new
 					jsonString: serialized
 					source: lepiterPage.
 			aTextSnippet removeSelf.
