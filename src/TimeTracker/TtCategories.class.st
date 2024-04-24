@@ -14,19 +14,9 @@ Class {
 
 { #category : #accessing }
 TtCategories class >> fromJSON: aString [
-	| collection hierarchy reader |
+	| collection hierarchy |
 	collection := self new.
-	reader := NeoJSONReader on: aString readStream.
-	reader
-		listClass: SortedCollection;
-		for: TtCategory
-			do: [ :m | 
-				m mapInstVar: #name.
-				(m mapInstVar: #children) valueSchema: #Children ].
-	hierarchy := reader
-			for: #Children
-				customDo: [ :mapping | mapping listOfElementSchema: TtCategory ];
-			nextAs: TtCategory.
+	hierarchy := NeoJSONReader fromString: aString as: TtRootCategory.
 	hierarchy hierarchy: collection.
 	collection root: hierarchy.
 	collection calculateHierarchy.

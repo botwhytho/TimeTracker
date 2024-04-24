@@ -10,6 +10,19 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #serialization }
+TtCategory class >> neoJsonMapping: aNeoJSONMapper [
+	aNeoJSONMapper
+		for: self
+			do: [ :aMapping | 
+				aMapping mapInstVar: #name.
+				(aMapping mapInstVar: #children) valueSchema: #Children ];
+		for: #Children
+			customDo: [ :childrenMapping | childrenMapping listOfElementSchema: TtCategory ].
+	(aNeoJSONMapper isKindOf: NeoJSONReader)
+		ifTrue: [ aNeoJSONMapper listClass: SortedCollection ]
+]
+
 { #category : #comparing }
 TtCategory >> <= other [
 	^ self name <= other name
@@ -38,12 +51,6 @@ TtCategory >> name [
 { #category : #accessing }
 TtCategory >> name: aName [
 	name := aName
-]
-
-{ #category : #serialization }
-TtCategory >> neoJsonOn: aWriter [
-	{'name' -> name.
-		'children' -> (children ifNil: [ #() ])} asDictionary neoJsonOn: aWriter
 ]
 
 { #category : #accessing }
