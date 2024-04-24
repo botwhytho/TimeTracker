@@ -76,7 +76,7 @@ TtTrelloParser >> parseTimeSpan: anArray date: aDate [
 				+ (anArray first second asNumber * 60)
 		ending:
 			aDate + (anArray second first asNumber * 3600)
-				+ (anArray second second asNumber * 60) + 60
+				+ (anArray second second asNumber * 60)
 ]
 
 { #category : #parsing }

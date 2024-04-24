@@ -332,32 +332,13 @@ TtEventCollection >> loadFromLepiter [
 	| page |
 	self size = 0
 		ifTrue: [ page := LeDatabasesRegistry defaultLogicalDatabase
-					pageNamed: TtTrackedTime dataPageName
-					ifAbsent: [ | newPage |
-						newPage := LePage named: TtTrackedTime dataPageName.
-						LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
-						newPage addFirstSnippet: (LeTextSnippet string: '').
-						newPage ].
+					pageNamed: TtTrackedTime dataPageName.
 			page children asArray
-				select: [ :each | each isKindOf: LeUnknownSnippet ]
+				select: [ :each | each isKindOf: TtTrackedTimeSnippet ]
 				thenDo: [ :each | 
-					| data json |
-					self flag: #TODO.	"Use NeoJSONReader like in `TtCategories class>>#fromJSON:`"
-					json := NeoJSONObject fromString: each jsonString.
-					data := json at: 'data'.
 					self items
-						add: (TtTrackedTime new
-								"uid: (json at: 'uid' at: 'uidString');"
-								uid: data uid;
-								start: data start asDateAndTime;
-								duration: data duration asDuration;
-								description: data description;
-								details: data details;
-								rawData: data rawData;
-								isPlanned: data isPlanned;
-								isRecurring: data isRecurring;
-								firstTimeScheduled: data firstTimeScheduled;
-								yourself) ] ]
+						add: (NeoJSONReader fromString: each jsonString as: TrackedTimeSnippetDeserializer)
+								data ] ]
 ]
 
 { #category : #printing }
@@ -380,7 +361,7 @@ TtEventCollection >> recalculateGroupedByDay [
 
 { #category : #import }
 TtEventCollection >> serializeCollection [
-	collection := collection asValueHolder.
+	collection := self collection asValueHolder.
 	collection whenAddedDo: [ :newValue | newValue serializeWithLepiter ]
 ]
 
