@@ -28,24 +28,29 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
 			do: [ :aMapping | 
-				aMapping mapInstVars: #("category" "daySerializedFrom" description details "duration" firstTimeScheduled isPlanned isRecurring "labels" "links" rawData "start" "uid").
+				aMapping
+					mapInstVars: #(description details firstTimeScheduled isPlanned isRecurring rawData).	"category"	"daySerializedFrom"
 				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
 				(aMapping mapInstVar: #duration) valueSchema: Duration.
 				(aMapping mapInstVar: #category) valueSchema: #Category ];
-		for: DateAndTime customDo: [ :mapping |
-		mapping decoder: [ :string | DateAndTime fromString: string ].
-		mapping encoder: [ :dateAndTime | dateAndTime printString ] ];
-		for: Duration customDo: [ :mapping |
-		mapping decoder: [ :aString | aString asDuration ].
-		mapping encoder: [ :aDuration | aDuration asString ] ];
+		for: DateAndTime
+			customDo: [ :mapping | 
+				mapping decoder: [ :string | DateAndTime fromString: string ].
+				mapping encoder: [ :dateAndTime | dateAndTime printString ] ];
+		for: Duration
+			customDo: [ :mapping | 
+				mapping decoder: [ :aString | aString asDuration ].
+				mapping encoder: [ :aDuration | aDuration asString ] ];
 		for: #Category
-			customDo: [ :categoryMapping | categoryMapping
-				reader: [ :jsonReader | 
-					| categoryName |
-					categoryName := jsonReader next.
-					TtCategories new sampleCategories detect: [:each| each name = categoryName ] ifNone: [nil]
-					 ]; 
-				writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ].
+			customDo: [ :categoryMapping | 
+				categoryMapping
+					reader: [ :jsonReader | 
+						| categoryName |
+						categoryName := jsonReader next.
+						TtEventCollection default categories
+							detect: [ :each | each name = categoryName ]
+							ifNone: [ nil ] ];
+					writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ]
 ]
 
 { #category : #serialization }
