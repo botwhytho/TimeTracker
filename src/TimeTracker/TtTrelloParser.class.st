@@ -22,7 +22,9 @@ TtTrelloParser >> add: anAssociation toCollection: aCollection [
 											activity := ($: split: each) collect: #trim.
 											aTrackedTime description: activity first.
 											activity size > 1 ifTrue: [ aTrackedTime details: activity last ].
-											aTrackedTime rawData: line.
+											aTrackedTime
+												rawData: line;
+												collection: aCollection.
 											aTrackedTime ]) ] ] ]
 ]
 

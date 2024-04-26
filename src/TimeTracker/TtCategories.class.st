@@ -114,9 +114,9 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												icon: BrGlamorousVectorIcons accept;
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
 													anEvent consumed: true.
-													anAssociation key
-														category: aCategory;
-														serializeWithLepiter.
+													anAssociation key category: aCategory.
+													anAssociation key collection class
+														serializeWithLepiter: anAssociation key.
 													anAssociation value label: aCategory name.
 													anAssociation value fireEvent: BrDropdownHideWish new ]) ] ]
 						ifAbsent: [  ].
