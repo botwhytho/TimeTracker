@@ -118,6 +118,8 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													anAssociation key collection class
 														serializeWithLepiter: anAssociation key.
 													anAssociation value label: aCategory name.
+													anAssociation value icon
+														background: (self stringToColorHash: aCategory name).
 													anAssociation value fireEvent: BrDropdownHideWish new ]) ] ]
 						ifAbsent: [  ].
 					pane ];

@@ -59,12 +59,6 @@ TtTrackedTime class >> snippetClass [
 ]
 
 { #category : #accessing }
-TtTrackedTime >> asDictionary [
-	^ ((self class superclass slots , self class slots collect: #name) , {#end}
-		collect: [ :each | each -> (self perform: each) asString ]) asDictionary
-]
-
-{ #category : #accessing }
 TtTrackedTime >> category [
 	^ category
 ]

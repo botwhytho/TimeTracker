@@ -324,11 +324,15 @@ TtEventCollection >> gtPomodorosFor: aView [
 					ifFalse: [ | aButton |
 						aButton := BrButton new.
 						aButton
-							aptitude: BrGlamorousButtonWithLabelAptitude
+							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
 									+ (BrGlamorousWithDropdownAptitude
 											handle: [ BrButton new
-													aptitude: BrGlamorousButtonWithLabelAptitude;
-													label: 'Categorize' ]
+													aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
+													label: ('Categorize' asRopedText fontSize: 12);
+													icon: (BlElement new
+															size: 15 @ 15;
+															geometry: BlCircleGeometry new;
+															background: Color transparent) ]
 											content: [ BrHorizontalPane new
 													size: 800 @ 800;
 													padding: (BlInsets all: 15);
@@ -336,8 +340,21 @@ TtEventCollection >> gtPomodorosFor: aView [
 															TtCategoriesFor: GtPhlowView empty
 															context: (GtPhlowContext new
 																	at: #TtTrackedTime put: each -> aButton;
-																	yourself)) asElement ]);
-							label: (each category ifNotNil: [ :notNil | notNil name ] ifNil: [ 'Categorize' ]) ] ];
+																	yourself)) asElement ]).
+						each category
+							ifNotNil: [ :notNil | 
+								aButton
+									label: notNil name;
+									icon: (BlElement new
+											size: 15 @ 15;
+											geometry: BlCircleGeometry new;
+											background: (self categories stringToColorHash: notNil name)) ]
+							ifNil: [ aButton
+									label: ('Categorize' asRopedText fontSize: 12);
+									icon: (BlElement new
+											size: 15 @ 15;
+											geometry: BlCircleGeometry new;
+											background: Color transparent) ] ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll
 ]
