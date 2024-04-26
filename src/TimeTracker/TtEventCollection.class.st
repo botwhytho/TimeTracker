@@ -45,13 +45,6 @@ TtEventCollection class >> dailyTimePlot: somePomodoros [
 ]
 
 { #category : #accessing }
-TtEventCollection class >> default [
-	^ self uniqueInstance
-		page;
-		yourself
-]
-
-{ #category : #accessing }
 TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
@@ -421,11 +414,8 @@ TtEventCollection >> loadCategories [
 
 { #category : #initialization }
 TtEventCollection >> loadFromLepiter [
-	| page |
 	self size = 0
-		ifTrue: [ page := LeDatabasesRegistry defaultLogicalDatabase
-					pageNamed: TtTrackedTime dataPageName.
-			page children asArray
+		ifTrue: [ self page children asArray
 				select: [ :each | each isKindOf: TtTrackedTimeSnippet ]
 				thenDo: [ :each | 
 					self items
