@@ -256,7 +256,7 @@ TtTrackedTime >> printOnDetailed [
 			aStream
 				nextPutAll: self start asTime hhmm24;
 				nextPut: $-;
-				nextPutAll: self end asTime hhmm24;
+				nextPutAll: (self end asTime addSeconds: 1) hhmm24;
 				nextPut: Character space;
 				nextPutAll: self description.
 			self details
