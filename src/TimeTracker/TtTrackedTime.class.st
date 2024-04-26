@@ -306,7 +306,6 @@ TtTrackedTime >> serializeWithLepiter [
 			foundSnippet jsonString: serialized source: lepiterPage ]
 		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
 			lepiterPage addSnippet: aTextSnippet.
-			self uid: aTextSnippet uidString.
 			snippetJSON := self serializeSnippet: aTextSnippet.
 			snippetJSON __type: TtTrackedTimeSnippet leJsonV4Name.
 			snippetJSON data: self.
