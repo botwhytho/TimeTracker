@@ -27,7 +27,7 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
 			do: [ :aMapping | 
-				aMapping mapInstVars: #("category" "daySerializedFrom" description details "duration" firstTimeScheduled isPlanned isRecurring "labels" "links" rawData "start" uid).
+				aMapping mapInstVars: #("category" "daySerializedFrom" description details "duration" firstTimeScheduled isPlanned isRecurring "labels" "links" rawData "start" "uid").
 				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
 				(aMapping mapInstVar: #duration) valueSchema: Duration.
 				(aMapping mapInstVar: #category) valueSchema: #Category ];

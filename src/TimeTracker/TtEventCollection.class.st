@@ -115,7 +115,7 @@ TtEventCollection class >> hourlyTicksElement [
 
 { #category : #initialization }
 TtEventCollection class >> loadFromLepiter [
-	^ self uniqueInstance loadFromLepiter
+	^ self default loadFromLepiter
 ]
 
 { #category : #'instance creation' }
@@ -337,8 +337,12 @@ TtEventCollection >> loadFromLepiter [
 				select: [ :each | each isKindOf: TtTrackedTimeSnippet ]
 				thenDo: [ :each | 
 					self items
-						add: (NeoJSONReader fromString: each jsonString as: TrackedTimeSnippetDeserializer)
-								data ] ]
+						add: ((NeoJSONReader fromString: each jsonString as: TrackedTimeSnippetDeserializer)
+								data
+								in: [ :aTrackedTime | 
+									aTrackedTime
+										uid: each uidString;
+										yourself ]) ] ]
 ]
 
 { #category : #printing }
