@@ -6,7 +6,8 @@ Class {
 	#instVars : [
 		'groupedByDay',
 		'collection',
-		'categories'
+		'categories',
+		'page'
 	],
 	#category : #TimeTracker
 }
@@ -41,6 +42,18 @@ TtEventCollection class >> dailyTimePlot: somePomodoros [
 		values: somePomodoros;
 		when: BlDoubleClickEvent
 			do: [ :anEvent | anEvent target phlow spawnObject: somePomodoros ]
+]
+
+{ #category : #accessing }
+TtEventCollection class >> default [
+	^ self uniqueInstance
+		page;
+		yourself
+]
+
+{ #category : #accessing }
+TtEventCollection class >> defaultPageName [
+	^ 'Time Tracker Entries'
 ]
 
 { #category : #views }
@@ -128,6 +141,42 @@ TtEventCollection class >> serializeCollection [
 	^ self new serializeCollection
 ]
 
+{ #category : #serialization }
+TtEventCollection class >> serializeSnippet: aTextSnippet [
+	^ NeoJSONObject
+		fromString: (String
+				streamContents: [ :s | 
+					LeJsonV4 uniqueInstance
+						serialize: aTextSnippet
+						on: s
+						prettyPrint: true ])
+]
+
+{ #category : #serialization }
+TtEventCollection class >> serializeWithLepiter: anEntity [
+	| anUnknownSnippet aTextSnippet lepiterPage serialized snippetJSON |
+	lepiterPage := anEntity collection page.
+	lepiterPage children
+		detect: [ :aSnippet | aSnippet uidString = anEntity uid ]
+		ifFound: [ :foundSnippet | 
+			snippetJSON := self serializeSnippet: foundSnippet.
+			snippetJSON data: anEntity.
+			serialized := NeoJSONWriter toStringPretty: snippetJSON.
+			foundSnippet jsonString: serialized source: lepiterPage ]
+		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
+			lepiterPage addSnippet: aTextSnippet.
+			snippetJSON := self serializeSnippet: aTextSnippet.
+			snippetJSON __type: anEntity snippetClass leJsonV4Name.
+			snippetJSON data: anEntity.
+			serialized := NeoJSONWriter toStringPretty: snippetJSON.
+			anUnknownSnippet := anEntity snippetClass new
+					jsonString: serialized
+					source: lepiterPage.
+			aTextSnippet removeSelf.
+			lepiterPage addSnippet: anUnknownSnippet.
+			anEntity uid: anUnknownSnippet uidString ]
+]
+
 { #category : #'instance - creation' }
 TtEventCollection class >> withAll: aCollection [
 	self flag: 'Explore why items is an OrderedCollection and how we can turn it into a SortedCollection'.
@@ -190,10 +239,31 @@ TtEventCollection >> calculateAnglesForDonut [
 ]
 
 { #category : #accessing }
+TtEventCollection >> categories [
+	^ categories
+]
+
+{ #category : #accessing }
+TtEventCollection >> categories: aTtCategories [
+	categories := aTtCategories
+]
+
+{ #category : #accessing }
 TtEventCollection >> collection [
 	^ collection
 		ifNil: [ collection := SortedCollection
 					sortUsing: [ :aPomodoro | aPomodoro start ] ascending ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> defaultPage [
+	^ LeDatabasesRegistry defaultLogicalDatabase
+		pageNamed: self class defaultPageName
+		ifAbsent: [ | newPage |
+			newPage := LePage named: self class defaultPageName.
+			LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
+			newPage addFirstSnippet: (LeTextSnippet string: '').
+			newPage ]
 ]
 
 { #category : #views }
@@ -327,6 +397,28 @@ TtEventCollection >> items [
 	^ items ifNil: [ items := self collection value ]
 ]
 
+{ #category : #accessing }
+TtEventCollection >> loadCategories [
+	self page children
+		detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
+		ifFound: [ :aCategorySnippet | 
+			| someCategories |
+			someCategories := TtCategories
+					fromRoot: (NeoJSONReader
+							fromString: aCategorySnippet jsonString
+							as: CategorySnippetDeserializer) data.
+			someCategories root
+				collection: self;
+				uid: aCategorySnippet uidString.
+			self categories: someCategories ]
+		ifNone: [ self
+				categories: (TtCategories new
+						in: [ :someCategories | 
+							someCategories root collection: self.
+							someCategories ]).
+			self class serializeWithLepiter: self categories root ]
+]
+
 { #category : #initialization }
 TtEventCollection >> loadFromLepiter [
 	| page |
@@ -343,6 +435,21 @@ TtEventCollection >> loadFromLepiter [
 									aTrackedTime
 										uid: each uidString;
 										yourself ]) ] ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> page [
+	page
+		ifNil: [ [ page := self perform: #customPage ]
+				on: MessageNotUnderstood
+				do: [ page := self defaultPage ].
+				self loadCategories ].
+	^ page
+]
+
+{ #category : #accessing }
+TtEventCollection >> page: aLepiterPage [
+	page := aLepiterPage
 ]
 
 { #category : #printing }

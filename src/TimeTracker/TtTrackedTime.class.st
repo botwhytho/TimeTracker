@@ -47,6 +47,11 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 				writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ].
 ]
 
+{ #category : #serialization }
+TtTrackedTime class >> snippetClass [
+	^ TtTrackedTimeSnippet
+]
+
 { #category : #accessing }
 TtTrackedTime >> asDictionary [
 	^ ((self class superclass slots , self class slots collect: #name) , {#end}

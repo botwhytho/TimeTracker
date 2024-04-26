@@ -23,6 +23,11 @@ TtCategory class >> neoJsonMapping: aNeoJSONMapper [
 		ifTrue: [ aNeoJSONMapper listClass: SortedCollection ]
 ]
 
+{ #category : #serialization }
+TtCategory class >> snippetClass [
+	^ TtCategoriesSnippet
+]
+
 { #category : #comparing }
 TtCategory >> <= other [
 	^ self name <= other name
