@@ -12,7 +12,8 @@ Class {
 		'links',
 		'isPlanned',
 		'isRecurring',
-		'firstTimeScheduled'
+		'firstTimeScheduled',
+		'collection'
 	],
 	#category : #TimeTracker
 }
@@ -66,6 +67,16 @@ TtTrackedTime >> category [
 { #category : #accessing }
 TtTrackedTime >> category: anObject [
 	category := anObject
+]
+
+{ #category : #accessing }
+TtTrackedTime >> collection [
+	^ collection
+]
+
+{ #category : #accessing }
+TtTrackedTime >> collection: aTtEventCollection [
+	collection := aTtEventCollection
 ]
 
 { #category : #accessing }

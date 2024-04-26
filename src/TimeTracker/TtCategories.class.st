@@ -87,6 +87,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																						name: aWish text asString;
 																						parentCategory: aCategory).
 																			self calculateHierarchy.
+																			self root collection class serializeWithLepiter: self root.
 																			textElement phlow firstParentWithView phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);

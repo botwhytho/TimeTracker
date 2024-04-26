@@ -159,10 +159,10 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
 			lepiterPage addSnippet: aTextSnippet.
 			snippetJSON := self serializeSnippet: aTextSnippet.
-			snippetJSON __type: anEntity snippetClass leJsonV4Name.
+			snippetJSON __type: anEntity class snippetClass leJsonV4Name.
 			snippetJSON data: anEntity.
 			serialized := NeoJSONWriter toStringPretty: snippetJSON.
-			anUnknownSnippet := anEntity snippetClass new
+			anUnknownSnippet := anEntity class snippetClass new
 					jsonString: serialized
 					source: lepiterPage.
 			aTextSnippet removeSelf.
@@ -332,7 +332,7 @@ TtEventCollection >> gtPomodorosFor: aView [
 											content: [ BrHorizontalPane new
 													size: 800 @ 800;
 													padding: (BlInsets all: 15);
-													addChild: (TtCategories new sampleCategories
+													addChild: (self categories
 															TtCategoriesFor: GtPhlowView empty
 															context: (GtPhlowContext new
 																	at: #TtTrackedTime put: each -> aButton;
@@ -415,7 +415,9 @@ TtEventCollection >> loadCategories [
 { #category : #initialization }
 TtEventCollection >> loadFromLepiter [
 	self size = 0
-		ifTrue: [ self page children asArray
+		ifTrue: [ self loadPage.
+			self loadCategories.
+			self page children asArray
 				select: [ :each | each isKindOf: TtTrackedTimeSnippet ]
 				thenDo: [ :each | 
 					self items
@@ -424,16 +426,20 @@ TtEventCollection >> loadFromLepiter [
 								in: [ :aTrackedTime | 
 									aTrackedTime
 										uid: each uidString;
+										collection: self;
 										yourself ]) ] ]
 ]
 
 { #category : #accessing }
-TtEventCollection >> page [
+TtEventCollection >> loadPage [
 	page
 		ifNil: [ [ page := self perform: #customPage ]
 				on: MessageNotUnderstood
-				do: [ page := self defaultPage ].
-				self loadCategories ].
+				do: [ page := self defaultPage ] ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> page [
 	^ page
 ]
 
