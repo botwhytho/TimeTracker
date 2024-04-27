@@ -171,13 +171,6 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			anEntity uid: anUnknownSnippet uidString ]
 ]
 
-{ #category : #'instance - creation' }
-TtEventCollection class >> withAll: aCollection [
-	self flag: 'Explore why items is an OrderedCollection and how we can turn it into a SortedCollection'.
-	^ self new 
-		initializeWith: aCollection
-]
-
 { #category : #'building ui' }
 TtEventCollection >> buildDonut: data [
 	^ BlElement new
@@ -241,6 +234,31 @@ TtEventCollection >> defaultPage [
 			LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
 			newPage addFirstSnippet: (LeTextSnippet string: '').
 			newPage ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> groupedBy: aBlock [
+	"Override this method here and not reuse the one in collection
+	because we want the keys to be groups, not simple collections"
+
+	| result |
+	result := Dictionary new.
+	self
+		do: [ :each | 
+			| key collection |
+			key := aBlock value: each.
+			collection := result at: key ifAbsentPut: [ SortedCollection new ].
+			collection add: each ].
+
+	result
+		keysAndValuesDo: [ :key :value | 
+			result
+				at: key
+				put: ((self species withAll: value)
+						page: self page;
+						categories: self categories) ].
+
+	^ result
 ]
 
 { #category : #views }
@@ -481,6 +499,20 @@ TtEventCollection >> printOn: aStream [
 TtEventCollection >> recalculateGroupedByDay [
 	groupedByDay := nil.
 	^ self groupedByDay
+]
+
+{ #category : #enumerating }
+TtEventCollection >> reject: aBlock [
+	^ (self species withAll: (self items reject: aBlock))
+		page: self page;
+		categories: self categories
+]
+
+{ #category : #enumerating }
+TtEventCollection >> select: aBlock [
+	^ (self species withAll: (self items select: aBlock))
+		page: self page;
+		categories: self categories
 ]
 
 { #category : #import }
