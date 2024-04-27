@@ -62,6 +62,11 @@ TtTrackedTime class >> snippetClass [
 	^ TtTrackedTimeSnippet
 ]
 
+{ #category : #comparing }
+TtTrackedTime >> <= other [
+	^ self start <= other start
+]
+
 { #category : #accessing }
 TtTrackedTime >> category [
 	^ category
@@ -262,9 +267,9 @@ TtTrackedTime >> links: anObject [
 TtTrackedTime >> printOn: aStream [
 	aStream
 		nextPutAll: 'a TtTrackedTime (Starting at: ';
-		nextPutAll: self start asTime printMinutes , ' for ' , self duration asMinutes rounded asString
-				, (' minute'
-						in: [ :aString | self duration minutes = 1 ifTrue: [ aString ] ifFalse: [ aString , 's' ] ]);
+		nextPutAll: self start asTime printMinutes , ' for ' , self duration asHours asString
+				, (' hour'
+						in: [ :aString | self duration asHours = 1 ifTrue: [ aString ] ifFalse: [ aString , 's' ] ]);
 		nextPut: $)
 ]
 

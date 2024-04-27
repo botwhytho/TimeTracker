@@ -5,9 +5,11 @@ Class {
 	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'groupedByDay',
-		'collection',
 		'categories',
 		'page'
+	],
+	#classInstVars : [
+		'uniqueInstance'
 	],
 	#category : #TimeTracker
 }
@@ -176,16 +178,6 @@ TtEventCollection class >> withAll: aCollection [
 		initializeWith: aCollection
 ]
 
-{ #category : #accessing }
-TtEventCollection >> add: anItem [
-	self collection add: anItem
-]
-
-{ #category : #accessing }
-TtEventCollection >> addAll: aCollection [
-	self collection addAll: aCollection
-]
-
 { #category : #'building ui' }
 TtEventCollection >> buildDonut: data [
 	^ BlElement new
@@ -238,13 +230,6 @@ TtEventCollection >> categories [
 { #category : #accessing }
 TtEventCollection >> categories: aTtCategories [
 	categories := aTtCategories
-]
-
-{ #category : #accessing }
-TtEventCollection >> collection [
-	^ collection
-		ifNil: [ collection := SortedCollection
-					sortUsing: [ :aPomodoro | aPomodoro start ] ascending ]
 ]
 
 { #category : #accessing }
@@ -418,7 +403,8 @@ TtEventCollection >> importFromTrello [
 
 { #category : #accessing }
 TtEventCollection >> items [
-	^ items ifNil: [ items := self collection value ]
+	^ items ifNil: [
+		items := SortedCollection new ]
 ]
 
 { #category : #accessing }
@@ -499,9 +485,8 @@ TtEventCollection >> recalculateGroupedByDay [
 
 { #category : #import }
 TtEventCollection >> serializeCollection [
-	collection := self collection asValueHolder.
-	collection
-		whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ]
+	items := self items asValueHolder.
+	items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ]
 ]
 
 { #category : #'building ui' }
