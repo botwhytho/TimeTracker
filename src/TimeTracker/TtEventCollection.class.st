@@ -177,14 +177,25 @@ TtEventCollection >> buildDonut: data [
 		size: 400 @ 400;
 		addChildren: (data
 				collect: [ :each | 
+					| color |
+					color := each category = 'Uncategorized'
+							ifTrue: [ Color transparent ]
+							ifFalse: [ TtCategories stringToColorHash: each category name ].
 					BlElement new
-						when: BlClickEvent do: [ :e | e target phlow spawnObject: each last ];
+						when: BlClickEvent
+							do: [ :e | 
+								e consumed: true.
+								e target phlow spawnObject: each events ];
+						when: BlDoubleClickEvent
+							do: [ :e | 
+								e consumed: true.
+								e target phlow spawnObject: each ];
 						geometry: (BlAnnulusSector new
-								startAngle: each third first;
-								endAngle: each third last;
+								startAngle: each startAngle;
+								endAngle: each endAngle;
 								innerRadius: 0.85);
 						border: (BlBorder paint: Color lightGray width: 1);
-						background: each fourth;
+						background: color;
 						constraintsDo: [ :c | 
 							c horizontal matchParent.
 							c vertical matchParent ] ])
@@ -193,25 +204,20 @@ TtEventCollection >> buildDonut: data [
 { #category : #'building ui' }
 TtEventCollection >> calculateAnglesForDonut [
 	| sortedCategories totalTime |
-	sortedCategories := self sortedEntries.
-	totalTime := sortedCategories sum: [ :each | each second ].
+	sortedCategories := self categoriesSortedByDuration.
+	totalTime := sortedCategories sum: #sum.
 	sortedCategories
 		inject: -90
 		into: [ :sum :each | 
-			| color temp |
-			temp := (each second / totalTime * 360 + sum) asInteger.
+			| endAngle |
+			endAngle := (each sum / totalTime * 360 + sum) asInteger.
 			each
-				add: {sum.
-						temp}
-				afterIndex: 2.
-			color := TtCategories stringToColorHash: each first.
-			each first = 'Uncategorized' ifTrue: [ color := color alpha: 0.1 ].
-			each add: color afterIndex: 3.
-			temp ].	"Completing the circle, fixing any rounding differences by hard coding smallest entry's stop angle. Distorts it a bit but okay compromise for now"
-	sortedCategories last
-		at: 3
-		put: {sortedCategories last third first.
-				270}.
+				startAngle: sum;
+				endAngle: endAngle.
+			endAngle ].
+	self
+		flag: 'Completing the circle, fixing any rounding differences by hard coding smallest entry''s stop angle. Distorts it a bit but okay compromise for now'.
+	sortedCategories last endAngle: 270.
 	^ sortedCategories
 ]
 
@@ -223,6 +229,20 @@ TtEventCollection >> categories [
 { #category : #accessing }
 TtEventCollection >> categories: aTtCategories [
 	categories := aTtCategories
+]
+
+{ #category : #'building ui' }
+TtEventCollection >> categoriesSortedByDuration [
+	| categorizedActivities sumOfCategories |
+	categorizedActivities := self
+			groupedBy: [ :each | each category ifNil: [ 'Uncategorized' ] ].
+	sumOfCategories := categorizedActivities associations
+			collect: [ :anAssociation | 
+				TtCategorizedEventsHelper new
+					category: anAssociation key;
+					events: anAssociation value;
+					sum: (anAssociation value collect: #duration) sum ].
+	^ sumOfCategories sorted: #sum descending
 ]
 
 { #category : #accessing }
@@ -263,9 +283,7 @@ TtEventCollection >> groupedBy: aBlock [
 
 { #category : #views }
 TtEventCollection >> groupedByDay [
-	self flag: #TODO "Maybe remover caching? Might be premature optimization, if not, need to make sure to update cache.".
-	^ "groupedByDay
-		ifNil: [ groupedByDay :=" self groupedBy: [ :each | each start asDate ] "]"
+	^ self groupedBy: [ :each | each start asDate ]
 ]
 
 { #category : #accessing }
@@ -280,7 +298,7 @@ TtEventCollection >> gtDonutFor: aView [
 					hMatchParent;
 					alignCenter;
 					vFitContent.
-			horizontalPane addChildren: {self buildDonut: data}.	"(self buildBars: data) "
+			horizontalPane addChildren: {self buildDonut: data}.
 			verticalPane := BrVerticalPane new
 					hMatchParent;
 					alignCenter;
@@ -519,22 +537,6 @@ TtEventCollection >> select: aBlock [
 TtEventCollection >> serializeCollection [
 	items := self items asValueHolder.
 	items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ]
-]
-
-{ #category : #'building ui' }
-TtEventCollection >> sortedEntries [
-	| categorizedActivities sumOfCategories |
-	categorizedActivities := (self items
-			collect: [ :entry | entry category -> entry ]) 
-			groupedBy: [ :each | each key ifNil: [ 'Uncategorized' ] ifNotNil: [ :key | key name ] ]
-			affect: [ :each | "TtEventCollection withAll:" (each collect: #value) ].
-	sumOfCategories := categorizedActivities
-			collect: [ :each | 
-				{each sum: [ :entry | entry value duration ].
-					TtEventCollection withAll:each} ].
-	^ (sumOfCategories associations
-		sorted: [ :a :b | a value first > b value first ])
-		collect: [ :each | OrderedCollection withAll: {each key} , each value ]
 ]
 
 { #category : #accessing }
