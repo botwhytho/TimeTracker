@@ -203,10 +203,10 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			aCheckbox ];
 		whenCheckedDo: [ :anEvent | 
 			self perform: aSelector , ':' withArguments: #(true).
-			self serializeWithLepiter ];
+			self collection class serializeWithLepiter: self ];
 		whenUncheckedDo: [ :anEvent | 
 			self perform: aSelector , ':' withArguments: #(false).
-			self serializeWithLepiter ]
+			self collection class serializeWithLepiter: self ]
 ]
 
 { #category : #accessing }
