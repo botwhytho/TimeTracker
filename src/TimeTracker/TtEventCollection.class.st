@@ -50,14 +50,13 @@ TtEventCollection class >> defaultPageName [
 ]
 
 { #category : #views }
-TtEventCollection class >> gtPomodorosFor: aView [
-	<gtView>
+TtEventCollection class >> gtTrackedTimeFor: aView [
 	<gtClassView>
 	^ aView forward
-		title: 'Pomodoros By Day';
+		title: 'Entries By Day';
 		priority: 5;
 		object: self loadFromLepiter;
-		view: #gtPomodorosFor:
+		view: #gtTrackedTimeFor:
 ]
 
 { #category : #views }
@@ -287,16 +286,16 @@ TtEventCollection >> gtDonutFor: aView [
 ]
 
 { #category : #views }
-TtEventCollection >> gtPomodorosFor: aView [
+TtEventCollection >> gtTrackedTimeFor: aView [
 	<gtView>
 	| pomodoros |
-	self ifEmpty: [ ^ aView empty ].
 	pomodoros := self groupedByDay associations sorted: #key descending.
 	^ aView columnedTree
 		title: 'Entries By Day';
 		priority: 5;
 		items: pomodoros;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
+		actionUpdateButton;
 		column: 'Tracked Time'
 			text: [ :each | 
 				each isAssociation
