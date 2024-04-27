@@ -260,8 +260,9 @@ TtEventCollection >> defaultPage [
 
 { #category : #views }
 TtEventCollection >> groupedByDay [
-	^ groupedByDay
-		ifNil: [ groupedByDay := self groupedBy: [ :each | each start asDate ] ]
+	self flag: #TODO "Maybe remover caching? Might be premature optimization, if not, need to make sure to update cache.".
+	^ "groupedByDay
+		ifNil: [ groupedByDay :=" self groupedBy: [ :each | each start asDate ] "]"
 ]
 
 { #category : #accessing }
@@ -401,6 +402,20 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 									select: [ :aPomodoro | aPomodoro start asDate asWeek = anEvent date asWeek ]) ] ]
 ]
 
+{ #category : #import }
+TtEventCollection >> importFromTrello [
+	| response |
+	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
+	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
+	self
+		serializeCollection;
+		loadPage;
+		loadCategories.
+	self flag: #TODO.	"Add logic to take difference from days from Trello and ones in Lepiter and only import those"
+	response associations first in:
+		"associationsDo:" [ :day | TtTrelloParser new add: day toCollection: self ]
+]
+
 { #category : #accessing }
 TtEventCollection >> items [
 	^ items ifNil: [ items := self collection value ]
@@ -485,7 +500,8 @@ TtEventCollection >> recalculateGroupedByDay [
 { #category : #import }
 TtEventCollection >> serializeCollection [
 	collection := self collection asValueHolder.
-	collection whenAddedDo: [ :newValue | newValue serializeWithLepiter ]
+	collection
+		whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ]
 ]
 
 { #category : #'building ui' }
