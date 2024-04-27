@@ -188,29 +188,29 @@ TtEventCollection >> addAll: aCollection [
 
 { #category : #'building ui' }
 TtEventCollection >> buildDonut: data [
-
 	^ BlElement new
-		  size: 400 @ 400;
-		  addChildren: (data collect: [ :each | 
-					   BlElement new
-						   when: BlClickEvent
-						   do: [ :e | e target phlow spawnObject: each last ];
-						   geometry: (BlAnnulusSector new
-								    startAngle: each third first;
-								    endAngle: each third last;
-								    innerRadius: 0.85);
-						   background: each fourth;
-						   constraintsDo: [ :c | 
-							   c horizontal matchParent.
-							   c vertical matchParent ] ])
+		size: 400 @ 400;
+		addChildren: (data
+				collect: [ :each | 
+					BlElement new
+						when: BlClickEvent do: [ :e | e target phlow spawnObject: each last ];
+						geometry: (BlAnnulusSector new
+								startAngle: each third first;
+								endAngle: each third last;
+								innerRadius: 0.85);
+						border: (BlBorder paint: Color lightGray width: 1);
+						background: each fourth;
+						constraintsDo: [ :c | 
+							c horizontal matchParent.
+							c vertical matchParent ] ])
 ]
 
 { #category : #'building ui' }
 TtEventCollection >> calculateAnglesForDonut [
-	| categories totalTime |
-	categories := self sortedEntries.
-	totalTime := categories sum: [ :each | each second ].
-	categories
+	| sortedCategories totalTime |
+	sortedCategories := self sortedEntries.
+	totalTime := sortedCategories sum: [ :each | each second ].
+	sortedCategories
 		inject: -90
 		into: [ :sum :each | 
 			| color temp |
@@ -219,15 +219,15 @@ TtEventCollection >> calculateAnglesForDonut [
 				add: {sum.
 						temp}
 				afterIndex: 2.
-			color := Color random.
+			color := TtCategories stringToColorHash: each first.
 			each first = 'Uncategorized' ifTrue: [ color := color alpha: 0.1 ].
 			each add: color afterIndex: 3.
 			temp ].	"Completing the circle, fixing any rounding differences by hard coding smallest entry's stop angle. Distorts it a bit but okay compromise for now"
-	categories last
+	sortedCategories last
 		at: 3
-		put: {categories last third first.
+		put: {sortedCategories last third first.
 				270}.
-	^ categories
+	^ sortedCategories
 ]
 
 { #category : #accessing }
@@ -348,7 +348,7 @@ TtEventCollection >> gtTrackedTimeFor: aView [
 									icon: (BlElement new
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;
-											background: (self categories stringToColorHash: notNil name)) ]
+											background: (TtCategories stringToColorHash: notNil name)) ]
 							ifNil: [ aButton
 									label: ('Categorize' asRopedText fontSize: 12);
 									icon: (BlElement new
