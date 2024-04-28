@@ -200,12 +200,13 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 TtEventCollection >> buildBars: data [
 	| theData maxLines aBarWidthScale barChart totalTime |
 	theData := GtPlotterDataGroup new values: data.
-	totalTime := data sum: #sum.
+	totalTime := (data sum: #sum) asHours.
 	theData := theData
 			labelled: [ :each | 
-				each category = 'Uncategorized'
+				(each category = 'Uncategorized'
 					ifTrue: [ each category ]
-					ifFalse: [ each category name ] ].
+					ifFalse: [ each category name ]) , ' ('
+					, (each sum asHours / totalTime * 100 round: 1) asString , '%)' ].
 	theData := theData
 			colored: [ :each | 
 				each category = 'Uncategorized'
@@ -214,13 +215,14 @@ TtEventCollection >> buildBars: data [
 
 	maxLines := theData
 			inject: 0
-			intoValues: [ :anAmount :eachValue | anAmount max: eachValue sum asHours ].
+			intoValues: [ :anAmount :eachValue | anAmount max: eachValue sum asHours / totalTime ].
 	aBarWidthScale := GtPlotterLinearScale new domainFrom: 0 to: maxLines.
 
 	barChart := GtPlotterHorizontalBarChart new.
 	barChart
 		barElement: [ :aGtPlotterContext | 
 			BlElement new
+				border: (BlBorder paint: Color lightGray width: 1);
 				aptitude: ((BrGlamorousWithTooltipAptitude
 						content: [ BrLabel new
 								text: (aGtPlotterContext originalValue category = 'Uncategorized'
@@ -237,12 +239,13 @@ TtEventCollection >> buildBars: data [
 				when: BlDoubleClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
-						anEvent currentTarget phlow spawnObject: aGtPlotterContext originalValue ] ].
-	barChart barLabelWidth: 160.
-	barChart barWidthScale: aBarWidthScale.
-	barChart barWidthData: [ :eachValue | eachValue sum asHours ].
-	barChart amountOfTicks: 4.
-	barChart with: theData.
+						anEvent currentTarget phlow spawnObject: aGtPlotterContext originalValue ] ];
+		barLabelWidth: 160;
+		barWidthScale: aBarWidthScale;
+		barWidthData: [ :eachValue | eachValue sum asHours / totalTime ];
+		tickLabelFormat: [ :eachFloat | (eachFloat * 100 round: 1) asString , '%' ];
+		amountOfTicks: 4;
+		with: theData.
 
 	^ barChart asElement
 ]
@@ -376,7 +379,6 @@ TtEventCollection >> gtSummaryFor: aView [
 					matchParent;
 					alignCenter.
 			horizontalPane
-				flag: #TODO; "Use percentage on bars as hours past 1 day don't make sense"
 				flag: #TODO; "On hover 'select' both categories on bar graph and donut"
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.
