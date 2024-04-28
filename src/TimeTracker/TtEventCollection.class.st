@@ -55,6 +55,19 @@ TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
+{ #category : #views }
+TtEventCollection class >> eventCollectionCompositeTool [
+	^ GtPhlowCompositeTool new
+		addTool: (GtPhlowValuableTool new
+				name: 'Summary View';
+				valuable: (MessageSend
+						receiver: self
+						selector: #gtSummaryFor:
+						argument: GtPhlowView empty));
+		addTool: (GtClassCoderTool new observedClass: self);
+		yourself
+]
+
 { #category : #inspecting }
 TtEventCollection class >> gtInspectActionFor: anAction [
 	<gtAction>
@@ -64,6 +77,14 @@ TtEventCollection class >> gtInspectActionFor: anAction [
 		tooltip: 'Default Tracked Time Collection';
 		priority: 1;
 		action: [ :aButton | aButton phlow spawnObject: self default ]
+]
+
+{ #category : #views }
+TtEventCollection class >> gtSpotterActDefaultFrom: aSpotterElement [
+	^ (GtPager
+		openWrappedOn: self eventCollectionCompositeTool asElement
+		title: self printString
+		from: aSpotterElement) maximized
 ]
 
 { #category : #views }
@@ -332,7 +353,7 @@ TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
 ]
 
-{ #category : #accessing }
+{ #category : #views }
 TtEventCollection >> gtSummaryFor: aView [
 	<gtView>
 	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
@@ -433,7 +454,7 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 		expandAll
 ]
 
-{ #category : #accessing }
+{ #category : #views }
 TtEventCollection >> gtWeeklySummaryFor: aView [
 	<gtView>
 	| days weeks |
@@ -461,7 +482,7 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 					ifNotNil: [ self class dailyTimePlot: each value ] ]
 			weight: 0.9;
 		send: [  ];
-		flag: #TODO "Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency.";
+		flag: #TODO; "Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency."
 		actionDropdownButtonIcon: [ BrGlamorousVectorIcons calendar asElement asScalableElement size: 20 @ 20 ]
 					asStencil
 			content: [ :aButton :aBrTab | 
@@ -470,10 +491,15 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 				element
 					when: GtCalendarDateClickedEvent
 					do: [ :anEvent | 
+						| rootCollection |
+						rootCollection := self
+								detect: [ :each | each category isNotNil ]
+								ifFound: [ :found | found category rootCategory collection ]
+								ifNone: [ rootCollection := self ].
 						anEvent consumed: true.
 						aButton fireEvent: BrDropdownHideWish new.
 						aButton phlow
-							spawnObject: (self
+							spawnObject: (rootCollection
 									select: [ :aTrackedTime | aTrackedTime start asDate asWeek = anEvent date asWeek ]) ] ]
 ]
 
