@@ -511,12 +511,7 @@ TtEventCollection >> loadCategories [
 				collection: self;
 				uid: aCategorySnippet uidString.
 			self categories: someCategories ]
-		ifNone: [ self
-				categories: (TtCategories new
-						in: [ :someCategories | 
-							someCategories root collection: self.
-							someCategories ]).
-			self class serializeWithLepiter: self categories root ]
+		ifNone: [ self categories: (TtCategories basicNew collection: self) ]
 ]
 
 { #category : #initialization }

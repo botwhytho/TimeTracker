@@ -4,7 +4,8 @@ Class {
 	#traits : 'TGtGroupWithItems',
 	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
-		'root'
+		'root',
+		'collection'
 	],
 	#classInstVars : [
 		'testInstance'
@@ -60,6 +61,43 @@ TtCategories class >> testInstance [
 { #category : #view }
 TtCategories >> TtCategoriesFor: aView context: aContext [
 	<gtView>
+	self
+		ifEmpty: [ ^ aView explicit
+				title: 'Categories' translated;
+				priority: 10;
+				stencil: [ | buttonAction |
+					buttonAction := [ :aBrButton :aBrButtonModel :anEvent | 
+						| aChild aBRFrame |
+						aBRFrame := aBrButton phlow firstParentWithView phlow element.
+						aChild := aBRFrame childAt: 1.
+						anEvent consumed: true.
+						(aBrButton label asString includesSubstring: 'Template')
+							ifTrue: [ | aCollection |
+								aCollection := self collection.
+								self
+									becomeForward: (TtCategories new sampleCategories
+											in: [ :categories | 
+												categories collection: aCollection.
+												categories root collection: aCollection.
+												categories ]) ]
+							ifFalse: [ self initialize ].
+						self collection
+							ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+						aBRFrame
+							replaceChild: aChild
+							with: (self TtCategoriesFor: GtPhlowView empty context: aContext) asElement ].
+					BrFrame new
+						id: #categoriesFrame;
+						matchParent;
+						addChild: (BrHorizontalPane new matchParent
+								addChildren: {BrButton new
+											aptitude: BrGlamorousButtonWithLabelAptitude;
+											label: 'Create Empty Category Hierarchy';
+											action: buttonAction.
+										BrButton new
+											aptitude: BrGlamorousButtonWithLabelAptitude;
+											label: 'Create Category Hierarchy from Template';
+											action: buttonAction}) ] ].
 	^ aView mondrian
 		title: 'Categories' translated;
 		priority: 10;
@@ -105,7 +143,8 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																						name: aWish text asString;
 																						parentCategory: aCategory).
 																			self calculateHierarchy.
-																			self root collection class serializeWithLepiter: self root.
+																			self root collection
+																				ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
 																			textElement phlow firstParentWithView phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
@@ -117,10 +156,18 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 										aptitude: BrGlamorousButtonWithIconAptitude;
 										icon: BrGlamorousVectorIcons close;
 										action: [ :aBrButton :aBrButtonModel :anEvent | 
+											| isUsed |
 											anEvent consumed: true.
-											aCategory parentCategory children remove: aCategory.
-											self calculateHierarchy.
-											aBrButton phlow firstParentWithView phlow syncUpdate ]) ].
+											self flag: #TODO.	"Figure out logic for when categories are deleted"
+											self root collection
+												ifNil: [ isUsed := false ]
+												ifNotNil: [ :notNil | isUsed := notNil anySatisfy: [ :each | each category = aCategory ] ].
+											isUsed
+												ifTrue: [ self inform: 'This category is beind used and can''t be deleted'.
+													anEvent target fireEvent: BrDropdownHideWish new ]
+												ifFalse: [ aCategory parentCategory children remove: aCategory.
+													self calculateHierarchy.
+													aBrButton phlow firstParentWithView phlow syncUpdate ] ]) ].
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :anAssociation | 
@@ -160,13 +207,24 @@ TtCategories >> calculateHierarchy [
 			self add: child ]
 ]
 
+{ #category : #accessing }
+TtCategories >> collection [
+	^ collection
+]
+
+{ #category : #accessing }
+TtCategories >> collection: anObject [
+	collection := anObject
+]
+
 { #category : #initialization }
 TtCategories >> initialize [
 	super initialize.
 	self
 		root: (TtRootCategory new
 				name: 'Create Categories';
-				hierarchy: self).
+				hierarchy: self;
+				collection: self collection).
 	self add: self root
 ]
 
