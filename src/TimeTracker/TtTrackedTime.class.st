@@ -101,6 +101,12 @@ TtTrackedTime >> daySerializedFrom: anObject [
 	daySerializedFrom := anObject
 ]
 
+{ #category : #deleting }
+TtTrackedTime >> delete [
+	self collection page ifNotNil: [:aPage| (aPage children detect: [:aSnippet | aSnippet uidString = self uid ]) removeSelf ].
+	self collection items remove: self. 
+]
+
 { #category : #accessing }
 TtTrackedTime >> description [
 	^ description

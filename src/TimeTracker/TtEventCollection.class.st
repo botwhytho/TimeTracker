@@ -400,22 +400,22 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 		column: 'Is Recurring'
 			stencil: [ :each | 
 				each isAssociation
-					ifTrue: [ BlElement new ]
+					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #isRecurring ] ];
 		column: 'Is Planned'
 			stencil: [ :each | 
 				each isAssociation
-					ifTrue: [ BlElement new ]
+					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #isPlanned ] ];
 		column: 'First Time Scheduled'
 			stencil: [ :each | 
 				each isAssociation
-					ifTrue: [ BlElement new ]
+					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
 		column: 'Category'
 			stencil: [ :each | 
 				each isAssociation
-					ifTrue: [ BlElement new ]
+					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ | aButton |
 						aButton := BrButton new.
 						aButton
@@ -450,6 +450,18 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;
 											background: Color transparent) ] ] ];
+		column: 'Delete Day'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BrButton new
+							beTinySize;
+							aptitude: BrGlamorousButtonWithIconAptitude;
+							icon: BrGlamorousVectorIcons remove;
+							action: [ :aBrButton :aBrButtonModel :anEvent | 
+								anEvent consumed: true.
+								each value do: [ :aTrackedTime | aTrackedTime delete ].
+								aBrButton phlow firstParentWithView phlow syncUpdate ] ]
+					ifFalse: [ BlElement new size: 1 @ 1 ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll
 ]
@@ -505,15 +517,22 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 
 { #category : #import }
 TtEventCollection >> importFromTrello [
-	| response daysToImport |
+	| response daysToImport existingDays |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self
 		serializeCollection;
 		loadFromLepiter.
-	daysToImport := (response keys difference: (self collect: [:each| each start asDate] as: Set)) asArray sorted: #yourself ascending.
-	(daysToImport first: 1) do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self ].
-	"response associations first in:
+	existingDays := (self collect: [ :each | each start asDate ] as: Set) asArray
+			sorted: #yourself descending.
+	daysToImport := (response keys difference: existingDays) asArray
+			sorted: #yourself ascending.
+	daysToImport
+		select: [ :each | each < existingDays first ]
+		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ].
+	(daysToImport first: 1)
+		do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self ]
+		"response associations first in:
 		associationsDo: [ :day | TtTrelloParser new add: day toCollection: self ]"
 ]
 

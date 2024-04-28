@@ -154,7 +154,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 								addChild: (BrButton new
 										beTinySize;
 										aptitude: BrGlamorousButtonWithIconAptitude;
-										icon: BrGlamorousVectorIcons close;
+										icon: BrGlamorousVectorIcons remove;
 										action: [ :aBrButton :aBrButtonModel :anEvent | 
 											| isUsed |
 											anEvent consumed: true.
