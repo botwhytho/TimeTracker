@@ -13,18 +13,6 @@ Class {
 }
 
 { #category : #initialization }
-TtCategories class >> fromJSON: aString [
-	| collection hierarchy |
-	self flag: #TODO "May want to dreprecate this as `fromRoot:` should suffice. Deserializing logic now exists in more generic class to get to snippet data".
-	collection := self new.
-	hierarchy := NeoJSONReader fromString: aString as: TtRootCategory.
-	hierarchy hierarchy: collection.
-	collection root: hierarchy.
-	collection calculateHierarchy.
-	^ collection
-]
-
-{ #category : #initialization }
 TtCategories class >> fromRoot: aRootCategory [
 	| collection |
 	collection := self new.
