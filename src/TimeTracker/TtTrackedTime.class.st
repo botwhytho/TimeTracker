@@ -155,6 +155,18 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			self collection class serializeWithLepiter: self ]
 ]
 
+{ #category : #action }
+TtTrackedTime >> gtDeleteActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons remove;
+		tooltip: 'Delete the Tracked Time.';
+		priority: 1;
+		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
+			anEvent consumed: true.
+			self delete ]
+]
+
 { #category : #accessing }
 TtTrackedTime >> gtTrackedTimeFor: aView [
 	<gtView>
