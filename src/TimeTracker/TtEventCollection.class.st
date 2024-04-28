@@ -221,14 +221,23 @@ TtEventCollection >> buildBars: data [
 	barChart
 		barElement: [ :aGtPlotterContext | 
 			BlElement new
-				aptitude: ((BrGlamorousWithTooltipAptitude2
+				aptitude: ((BrGlamorousWithTooltipAptitude
 						content: [ BrLabel new
 								text: (aGtPlotterContext originalValue category = 'Uncategorized'
 										ifTrue: [ aGtPlotterContext originalValue category ]
 										ifFalse: [ aGtPlotterContext originalValue category name ]);
 								aptitude: (BrGlamorousLabelAptitude new padding: (BlInsets all: 1)) ])
 						hideDelay: 0;
-						showDelay: 0) ].
+						showDelay: 0);
+				when: BlClickEvent
+					do: [ :anEvent | 
+						anEvent consumed: true.
+						anEvent currentTarget phlow
+							spawnObject: aGtPlotterContext originalValue collection ];
+				when: BlDoubleClickEvent
+					do: [ :anEvent | 
+						anEvent consumed: true.
+						anEvent currentTarget phlow spawnObject: aGtPlotterContext originalValue ] ].
 	barChart barLabelWidth: 160.
 	barChart barWidthScale: aBarWidthScale.
 	barChart barWidthData: [ :eachValue | eachValue sum asHours ].
@@ -252,7 +261,7 @@ TtEventCollection >> buildDonut: data [
 						when: BlClickEvent
 							do: [ :e | 
 								e consumed: true.
-								e target phlow spawnObject: each events ];
+								e target phlow spawnObject: each collection ];
 						when: BlDoubleClickEvent
 							do: [ :e | 
 								e consumed: true.
@@ -307,7 +316,7 @@ TtEventCollection >> categoriesSortedByDuration [
 			collect: [ :anAssociation | 
 				TtCategorizedEventsHelper new
 					category: anAssociation key;
-					events: anAssociation value;
+					collection: anAssociation value;
 					sum: (anAssociation value collect: #duration) sum ].
 	^ sumOfCategories sorted: #sum descending
 ]
@@ -368,7 +377,6 @@ TtEventCollection >> gtSummaryFor: aView [
 					alignCenter.
 			horizontalPane
 				flag: #TODO; "Use percentage on bars as hours past 1 day don't make sense"
-				flag: #TODO; "Bars need to spawn collection correctly. Currently spawning helper object."
 				flag: #TODO; "On hover 'select' both categories on bar graph and donut"
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.

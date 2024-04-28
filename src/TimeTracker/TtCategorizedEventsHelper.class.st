@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'category',
-		'events',
+		'collection',
 		'sum',
 		'startAngle',
 		'endAngle'
@@ -22,6 +22,16 @@ TtCategorizedEventsHelper >> category: anObject [
 ]
 
 { #category : #accessing }
+TtCategorizedEventsHelper >> collection [
+	^ collection
+]
+
+{ #category : #accessing }
+TtCategorizedEventsHelper >> collection: aTtEventCollection [
+	collection := aTtEventCollection
+]
+
+{ #category : #accessing }
 TtCategorizedEventsHelper >> endAngle [
 	^ endAngle
 ]
@@ -31,22 +41,12 @@ TtCategorizedEventsHelper >> endAngle: anObject [
 	endAngle := anObject
 ]
 
-{ #category : #accessing }
-TtCategorizedEventsHelper >> events [
-	^ events
-]
-
-{ #category : #accessing }
-TtCategorizedEventsHelper >> events: anObject [
-	events := anObject
-]
-
 { #category : #printing }
 TtCategorizedEventsHelper >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		nextPut: $(;
-		nextPutAll: self events size asString , ' events categorized as '''
+		nextPutAll: self collection size asString , ' events categorized as '''
 				, (self category isString
 						ifTrue: [ 'Uncategorized' ]
 						ifFalse: [ self category name ]) , ''' lasting ' , self sum asHours asString
