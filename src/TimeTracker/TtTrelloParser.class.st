@@ -34,32 +34,6 @@ TtTrelloParser >> entry [
 	^ self timeEntry
 ]
 
-{ #category : #import }
-TtTrelloParser >> import: anAssociation [
-
-	| metadata day entries |
-	day := TtDay new
-		       date: anAssociation key;
-		       rawData: (anAssociation value at: 'raw').
-	metadata := OrderedCollection new.
-	entries := (anAssociation value at: 'description') lines.
-	entries do: [ :line | 
-		| parsed |
-		parsed := self entry parse: line.
-		parsed isArray
-			ifTrue: [ 
-				day entries add: (TtTimeEntry new
-						 span:
-							 (self parseTimeSpan: parsed first date: anAssociation key);
-						 activities:
-							 (($; split: parsed second) collect: [ :each | 
-									  each trim -> nil ]);
-						 yourself) ]
-			ifFalse: [ metadata add: line ] ].
-	day comments: (Character lf join: metadata).
-	^ day
-]
-
 { #category : #parsing }
 TtTrelloParser >> line [
 	^ #newline asPParser negate plus flatten
