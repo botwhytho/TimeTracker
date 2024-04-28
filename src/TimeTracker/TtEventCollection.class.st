@@ -197,6 +197,11 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 ]
 
 { #category : #accessing }
+TtEventCollection >> asAsyncStream [
+	^ self items asAsyncStream
+]
+
+{ #category : #accessing }
 TtEventCollection >> buildBars: data [
 	| theData maxLines aBarWidthScale barChart totalTime |
 	theData := GtPlotterDataGroup new values: data.
@@ -365,6 +370,35 @@ TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
 ]
 
+{ #category : #search }
+TtEventCollection >> gtSearchFor: aSearch [
+	<gtSearch>
+	^ aSearch list
+		priority: 1;
+		title: 'Search by Tracked Time entries';
+		items: [ self ];
+		itemName: [ :each | 
+			each start asDate yyyymmdd , ' | ' , each description
+				, (each details ifNotNil: [ :notNil | ': ' , notNil ] ifNil: [ '' ]) ];
+		send: [ :aRawObject :aStep :thisSearch | 
+			TtEventCollection new
+				categories: self categories;
+				page: self page;
+				add: aRawObject;
+				yourself ];
+		sendCategory: [ :aCategory :aStep :thisSearch | 
+			| context |
+			context := {aCategory.
+					aStep.
+					thisSearch}.
+			(TtEventCollection withAll: aCategory items contents)
+				categories: self categories;
+				page: self page ];
+		previewElement: [ :aTrackedTime | (aTrackedTime gtPreviewFor: GtPhlowEmptyView new) asElement ];
+		filterBySubstring;
+		wantsToDisplayOnEmptyQuery: true
+]
+
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView [
 	<gtView>
@@ -480,6 +514,7 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 TtEventCollection >> gtWeeklySummaryFor: aView [
 	<gtView>
 	| days weeks |
+	self flag: #TODO "Keep this but generalize to do all days and still keep weekly view with week button".
 	days := self groupedByDay associations.
 	weeks := (days collectAsSet: [ :each | each key asWeek ]) asArray sorted.
 	^ aView columnedList
