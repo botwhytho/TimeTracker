@@ -474,16 +474,16 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 
 { #category : #import }
 TtEventCollection >> importFromTrello [
-	| response |
+	| response daysToImport |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self
 		serializeCollection;
-		loadPage;
-		loadCategories.
-	self flag: #TODO.	"Add logic to take difference from days from Trello and ones in Lepiter and only import those"
-	response associations first in:
-		"associationsDo:" [ :day | TtTrelloParser new add: day toCollection: self ]
+		loadFromLepiter.
+	daysToImport := (response keys difference: (self collect: [:each| each start asDate] as: Set)) asArray sorted: #yourself ascending.
+	(daysToImport first: 1) do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self ].
+	"response associations first in:
+		associationsDo: [ :day | TtTrelloParser new add: day toCollection: self ]"
 ]
 
 { #category : #accessing }
@@ -584,8 +584,9 @@ TtEventCollection >> select: aBlock [
 
 { #category : #import }
 TtEventCollection >> serializeCollection [
-	items := self items asValueHolder.
-	items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ]
+	self items isValueHolder
+		ifFalse: [ items := self items asValueHolder.
+			items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ] ]
 ]
 
 { #category : #accessing }
