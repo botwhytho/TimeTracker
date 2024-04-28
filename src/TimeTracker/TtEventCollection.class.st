@@ -15,7 +15,7 @@ Class {
 }
 
 { #category : #accessing }
-TtEventCollection class >> dailyTimePlot: aTrackedTime [
+TtEventCollection class >> dailyTimePlot: aTTEventCollection [
 	^ GtPlotterHorizontalValueProjectionsElement new
 		padding: (BlInsets
 				top: 1
@@ -41,10 +41,13 @@ TtEventCollection class >> dailyTimePlot: aTrackedTime [
 						weight: aGtPlotterSingleScaleContext originalValue duration asMinutes rounded
 								/ (24 * 60) ];
 				when: BlClickEvent
-					do: [ :anEvent | anEvent target phlow spawnObject: aGtPlotterSingleScaleContext originalValue ] ];
-		values: aTrackedTime;
+					do: [ :anEvent | 
+						anEvent target phlow
+							spawnObject: (aTTEventCollection
+									select: [ :each | each = aGtPlotterSingleScaleContext originalValue ]) ] ];
+		values: aTTEventCollection;
 		when: BlDoubleClickEvent
-			do: [ :anEvent | anEvent target phlow spawnObject: aTrackedTime ]
+			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
 ]
 
 { #category : #accessing }
