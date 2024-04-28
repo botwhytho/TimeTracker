@@ -51,25 +51,25 @@ TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
-{ #category : #views }
-TtEventCollection class >> gtTrackedTimeFor: aView [
-	<gtClassView>
-	^ aView forward
-		title: 'Entries By Day';
-		priority: 5;
-		object: self loadFromLepiter;
-		view: #gtTrackedTimeFor:
+{ #category : #inspecting }
+TtEventCollection class >> gtInspectActionFor: anAction [
+	<gtAction>
+	<gtClassAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons inspect;
+		tooltip: 'Default Tracked Time Collection';
+		priority: 1;
+		action: [ :aButton | aButton phlow spawnObject: self default ]
 ]
 
 { #category : #views }
-TtEventCollection class >> gtWeeklySummaryFor: aView [
-	<gtView>
+TtEventCollection class >> gtSummaryFor: aView [
 	<gtClassView>
 	^ aView forward
-		title: 'Pomodoros By Week';
-		priority: 6;
-		object: self new;
-		view: #gtWeeklySummaryFor:
+		title: 'Summary';
+		priority: 1;
+		object: self loadFromLepiter;
+		view: #gtSummaryFor:
 ]
 
 { #category : #accessing }
@@ -169,6 +169,48 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			aTextSnippet removeSelf.
 			lepiterPage addSnippet: anUnknownSnippet.
 			anEntity uid: anUnknownSnippet uidString ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> buildBars: data [
+	| theData maxLines aBarWidthScale barChart totalTime |
+	theData := GtPlotterDataGroup new values: data.
+	totalTime := data sum: #sum.
+	theData := theData
+			labelled: [ :each | 
+				each category = 'Uncategorized'
+					ifTrue: [ each category ]
+					ifFalse: [ each category name ] ].
+	theData := theData
+			colored: [ :each | 
+				each category = 'Uncategorized'
+					ifTrue: [ Color transparent ]
+					ifFalse: [ TtCategories stringToColorHash: each category name ] ].
+
+	maxLines := theData
+			inject: 0
+			intoValues: [ :anAmount :eachValue | anAmount max: eachValue sum asHours ].
+	aBarWidthScale := GtPlotterLinearScale new domainFrom: 0 to: maxLines.
+
+	barChart := GtPlotterHorizontalBarChart new.
+	barChart
+		barElement: [ :aGtPlotterContext | 
+			BlElement new
+				aptitude: ((BrGlamorousWithTooltipAptitude2
+						content: [ BrLabel new
+								text: (aGtPlotterContext originalValue category = 'Uncategorized'
+										ifTrue: [ aGtPlotterContext originalValue category ]
+										ifFalse: [ aGtPlotterContext originalValue category name ]);
+								aptitude: (BrGlamorousLabelAptitude new padding: (BlInsets all: 1)) ])
+						hideDelay: 0;
+						showDelay: 0) ].
+	barChart barLabelWidth: 160.
+	barChart barWidthScale: aBarWidthScale.
+	barChart barWidthData: [ :eachValue | eachValue sum asHours ].
+	barChart amountOfTicks: 4.
+	barChart with: theData.
+
+	^ barChart asElement
 ]
 
 { #category : #'building ui' }
@@ -287,28 +329,35 @@ TtEventCollection >> groupedByDay [
 ]
 
 { #category : #accessing }
-TtEventCollection >> gtDonutFor: aView [
+TtEventCollection >> gtSummaryFor: aView [
 	<gtView>
+	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
 	^ aView explicit
-		title: 'Categories' translated;
-		priority: 1;
+		title: 'Summary' translated;
+		priority: 0;
+		actionUpdateButton;
 		stencil: [ | data horizontalPane verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
-					hMatchParent;
-					alignCenter;
-					vFitContent.
-			horizontalPane addChildren: {self buildDonut: data}.
+					matchParent;
+					alignCenter.
+			horizontalPane
+				flag: #TODO; "Use percentage on bars as hours past 1 day don't make sense"
+				flag: #TODO; "Bars need to spawn collection correctly. Currently spawning helper object."
+				flag: #TODO; "On hover 'select' both categories on bar graph and donut"
+				addChildren: {self buildDonut: data.
+						self buildBars: data}.
 			verticalPane := BrVerticalPane new
-					hMatchParent;
+					matchParent;
 					alignCenter;
-					vMatchParent.
-			verticalPane addChildren: {horizontalPane}.
+					addChildren: {horizontalPane.
+							(self gtWeeklySummaryFor: GtPhlowView empty) asElement.
+							(self gtTrackedTimeByDayFor: GtPhlowView empty) asElement}.
 			verticalPane ]
 ]
 
 { #category : #views }
-TtEventCollection >> gtTrackedTimeFor: aView [
+TtEventCollection >> gtTrackedTimeByDayFor: aView [
 	<gtView>
 	| pomodoros |
 	pomodoros := self groupedByDay associations sorted: #key descending.
@@ -388,7 +437,7 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 	weeks := (days collectAsSet: [ :each | each key asWeek ]) asArray sorted.
 	^ aView columnedList
 		title: 'Weekly Summary';
-		priority: 0;
+		priority: 6;
 		items: [ ((days select: [ :aDay | aDay key asWeek = weeks last ])
 				sorted: [ :each | Week indexOfDay: each key dayOfWeekName ] ascending)
 				, {nil -> nil} ];
