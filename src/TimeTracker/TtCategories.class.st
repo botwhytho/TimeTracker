@@ -42,6 +42,7 @@ TtCategories class >> stringToColorHash2: aString [
 { #category : #view }
 TtCategories class >> stringToColorHash: aString [
 	| angle md5BitDepthMax stringHash |
+	self flag: #TODO "Test other algorithms, colors look too alike".
 	md5BitDepthMax := 2 ** 128.
 	stringHash := (MD5 hashMessage: aString) asInteger.
 	angle := stringHash / md5BitDepthMax * 360.

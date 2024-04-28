@@ -15,7 +15,7 @@ Class {
 }
 
 { #category : #accessing }
-TtEventCollection class >> dailyTimePlot: somePomodoros [
+TtEventCollection class >> dailyTimePlot: aTrackedTime [
 	^ GtPlotterHorizontalValueProjectionsElement new
 		padding: (BlInsets
 				top: 1
@@ -25,25 +25,26 @@ TtEventCollection class >> dailyTimePlot: somePomodoros [
 		margin: (BlInsets all: 4);
 		aptitude: BrShadowAptitude;
 		background: Color white;
-		scale: (GtPlotterLinearScale new
-				domainFrom: 0
-				to: (24 * 60));
+		scale: (GtPlotterLinearScale new domainFrom: 0 to: 24 * 60);
 		scaleData: [ :each | (each start asDuration asMinutes + (each duration asMinutes / 2)) rounded ];
 		constraintsDo: [ :c | c vertical fitContent ];
 		valueElement: [ :aGtPlotterSingleScaleContext | BlElement new ];
 		valueStyle: [ :anElement :aGtPlotterSingleScaleContext | 
 			anElement
-				border: (BlBorder paint: Color black width: 1);
-				background: Color lightGray;
+				border: (BlBorder paint: Color darkGray width: 0.5);
+				background: (aGtPlotterSingleScaleContext originalValue category
+						ifNotNil: [ :notNil | TtCategories stringToColorHash: notNil name ]
+						ifNil: [ Color veryVeryLightGray ]);
 				constraintsDo: [ :c | 
 					c horizontal matchParent.
 					c frame horizontal
-						weight: aGtPlotterSingleScaleContext originalValue duration asMinutes rounded / (24 * 60) ];
+						weight: aGtPlotterSingleScaleContext originalValue duration asMinutes rounded
+								/ (24 * 60) ];
 				when: BlClickEvent
 					do: [ :anEvent | anEvent target phlow spawnObject: aGtPlotterSingleScaleContext originalValue ] ];
-		values: somePomodoros;
+		values: aTrackedTime;
 		when: BlDoubleClickEvent
-			do: [ :anEvent | anEvent target phlow spawnObject: somePomodoros ]
+			do: [ :anEvent | anEvent target phlow spawnObject: aTrackedTime ]
 ]
 
 { #category : #accessing }
@@ -457,6 +458,7 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 					ifNotNil: [ self class dailyTimePlot: each value ] ]
 			weight: 0.9;
 		send: [  ];
+		flag: #TODO "Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency.";
 		actionDropdownButtonIcon: [ BrGlamorousVectorIcons calendar asElement asScalableElement size: 20 @ 20 ]
 					asStencil
 			content: [ :aButton :aBrTab | 
@@ -469,7 +471,7 @@ TtEventCollection >> gtWeeklySummaryFor: aView [
 						aButton fireEvent: BrDropdownHideWish new.
 						aButton phlow
 							spawnObject: (self
-									select: [ :aPomodoro | aPomodoro start asDate asWeek = anEvent date asWeek ]) ] ]
+									select: [ :aTrackedTime | aTrackedTime start asDate asWeek = anEvent date asWeek ]) ] ]
 ]
 
 { #category : #import }
