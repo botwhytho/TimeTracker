@@ -14,7 +14,7 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #accessing }
+{ #category : #views }
 TtEventCollection class >> dailyTimePlot: aTTEventCollection [
 	^ GtPlotterHorizontalValueProjectionsElement new
 		padding: (BlInsets
@@ -26,26 +26,41 @@ TtEventCollection class >> dailyTimePlot: aTTEventCollection [
 		aptitude: BrShadowAptitude;
 		background: Color white;
 		scale: (GtPlotterLinearScale new domainFrom: 0 to: 24 * 60);
-		scaleData: [ :each | (each start asDuration asMinutes + (each duration asMinutes / 2)) rounded ];
+		scaleData: [ :each | 
+			(each key start asDuration asMinutes + (each key duration asMinutes / 2))
+				rounded ];
 		constraintsDo: [ :c | c vertical fitContent ];
 		valueElement: [ :aGtPlotterSingleScaleContext | BlElement new ];
 		valueStyle: [ :anElement :aGtPlotterSingleScaleContext | 
 			anElement
-				border: (BlBorder paint: Color darkGray width: 0.5);
-				background: (aGtPlotterSingleScaleContext originalValue category
-						ifNotNil: [ :notNil | TtCategories stringToColorHash: notNil name ]
-						ifNil: [ Color veryVeryLightGray ]);
 				constraintsDo: [ :c | 
 					c horizontal matchParent.
 					c frame horizontal
-						weight: aGtPlotterSingleScaleContext originalValue duration asMinutes rounded
-								/ (24 * 60) ];
+						weight: aGtPlotterSingleScaleContext originalValue key duration asMinutes rounded
+								/ (24 * 60) ].
+			anElement
+				addChild: (BrVerticalPane new
+						matchParent;
+						in: [ :aBrVerticalPane | 
+							aGtPlotterSingleScaleContext originalValue value
+								do: [ :aTtTrackedTime | 
+									| element |
+									element := BlElement new
+											constraintsDo: [ :c | 
+												c vertical matchParent.
+												c horizontal matchParent ];
+											border: (BlBorder paint: Color darkGray width: 0.5);
+											background: (aTtTrackedTime category
+													ifNotNil: [ :notNil | TtCategories stringToColorHash: notNil name ]
+													ifNil: [ Color veryVeryLightGray ]).
+									aBrVerticalPane addChild: element ].
+							aBrVerticalPane ]);
 				when: BlClickEvent
-					do: [ :anEvent | 
+					do: [ :anEvent |
+						anEvent consumed: true. 
 						anEvent target phlow
-							spawnObject: (aTTEventCollection
-									select: [ :each | each = aGtPlotterSingleScaleContext originalValue ]) ] ];
-		values: aTTEventCollection;
+							spawnObject: aGtPlotterSingleScaleContext originalValue value ] ];
+		values: aTTEventCollection groupedByTimespan associations;
 		when: BlDoubleClickEvent
 			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
 ]
@@ -406,6 +421,11 @@ TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
 ]
 
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByTimespan [
+	^ self groupedBy: [ :each | each as: each class superclass ]
+]
+
 { #category : #views }
 TtEventCollection >> gtDailySummaryFor: aView [
 	| days  |
@@ -466,6 +486,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 TtEventCollection >> gtSummaryFor: aView [
 	<gtView>
 	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
+	self flag: #TODO "Add un-tracked time to charts".
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
