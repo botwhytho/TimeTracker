@@ -70,36 +70,16 @@ TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
-{ #category : #views }
-TtEventCollection class >> eventCollectionCompositeTool [
-	^ GtPhlowCompositeTool new
-		addTool: (GtPhlowValuableTool new
-				name: 'Summary View';
-				valuable: (MessageSend
-						receiver: self
-						selector: #gtSummaryFor:
-						argument: GtPhlowView empty));
-		addTool: (GtClassCoderTool new observedClass: self);
-		yourself
-]
-
 { #category : #inspecting }
 TtEventCollection class >> gtInspectActionFor: anAction [
 	<gtAction>
 	<gtClassAction>
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
+		label: 'ALL TIME';
 		tooltip: 'Default Tracked Time Collection';
 		priority: 1;
 		action: [ :aButton | aButton phlow spawnObject: self default ]
-]
-
-{ #category : #views }
-TtEventCollection class >> gtSpotterActDefaultFrom: aSpotterElement [
-	^ (GtPager
-		openWrappedOn: self eventCollectionCompositeTool asElement
-		title: self printString
-		from: aSpotterElement) maximized
 ]
 
 { #category : #views }
@@ -107,7 +87,7 @@ TtEventCollection class >> gtSummaryFor: aView [
 	<gtClassView>
 	^ aView forward
 		title: 'Summary';
-		priority: 1;
+		priority: 10;
 		object: self loadFromLepiter;
 		view: #gtSummaryFor:
 ]
@@ -490,6 +470,7 @@ TtEventCollection >> gtSummaryFor: aView [
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
+		flag: #TODO "change to dropdown for different in place filters";
 		actionUpdateButton;
 		stencil: [ | data horizontalPane verticalPane |
 			data := self calculateAnglesForDonut.
