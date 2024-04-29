@@ -233,12 +233,6 @@ TtEventCollection >> buildBars: data [
 			BlElement new
 				id: categoryName;
 				border: (BlBorder paint: Color lightGray width: 1);
-				aptitude: ((BrGlamorousWithTooltipAptitude
-						content: [ BrLabel new
-								text: categoryName;
-								aptitude: (BrGlamorousLabelAptitude new padding: (BlInsets all: 1)) ])
-						hideDelay: 0;
-						showDelay: 0);
 				when: BlClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
@@ -412,6 +406,33 @@ TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
 ]
 
+{ #category : #views }
+TtEventCollection >> gtDailySummaryFor: aView [
+	| days  |
+	days := self groupedByDay associations sorted: #key ascending.
+	^ aView columnedList
+		title: 'Weekly Summary';
+		priority: 6;
+		items: [ days
+				, {nil -> nil} ];
+		column: 'Day'
+			stencil: [ :each | 
+				each key
+					ifNil: [ BlElement new ]
+					ifNotNil: [ BrButton new
+							aptitude: BrGlamorousButtonWithLabelAptitude;
+							label: (each key yyyymmdd , '-' , (each key weekday first: 3));
+							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
+			weight: 0.1;
+		column: 'Tracked Time'
+			stencil: [ :each | 
+				each key
+					ifNil: [ self class hourlyTicksElement ]
+					ifNotNil: [ self class dailyTimePlot: each value ] ]
+			weight: 0.9;
+		send: [  ]
+]
+
 { #category : #search }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
@@ -461,7 +482,7 @@ TtEventCollection >> gtSummaryFor: aView [
 					matchParent;
 					alignCenter;
 					addChildren: {horizontalPane.
-							(self gtWeeklySummaryFor: GtPhlowView empty) asElement.
+							(self gtDailySummaryFor: GtPhlowView empty) asElement.
 							(self gtTrackedTimeByDayFor: GtPhlowView empty) asElement}.
 			verticalPane ]
 ]
@@ -480,7 +501,7 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 		column: 'Tracked Time'
 			text: [ :each | 
 				each isAssociation
-					ifTrue: [ each key asString ]
+					ifTrue: [ each key yyyymmdd , '-' , (each key weekday first: 3) ]
 					ifFalse: [ each printOnDetailed ] ];
 		column: 'Is Recurring'
 			stencil: [ :each | 
@@ -539,7 +560,6 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 			stencil: [ :each | 
 				each isAssociation
 					ifTrue: [ BrButton new
-							beTinySize;
 							aptitude: BrGlamorousButtonWithIconAptitude;
 							icon: BrGlamorousVectorIcons remove;
 							action: [ :aBrButton :aBrButtonModel :anEvent | 
@@ -555,7 +575,6 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 TtEventCollection >> gtWeeklySummaryFor: aView [
 	<gtView>
 	| days weeks |
-	self flag: #TODO "Keep this but generalize to do all days and still keep weekly view with week button".
 	days := self groupedByDay associations.
 	weeks := (days collectAsSet: [ :each | each key asWeek ]) asArray sorted.
 	^ aView columnedList
@@ -687,7 +706,11 @@ TtEventCollection >> printOn: aStream [
 	aStream
 		nextPut: $(;
 		nextPutAll: (self groupedByDay keys
-				in: [ :someDates | someDates min asString , ' - ' , someDates max asString ]);
+				in: [ :someDates | 
+					someDates min yyyymmdd , '-' , (someDates min weekday first: 3)
+						, (someDates min = someDates max
+								ifTrue: [ '' ]
+								ifFalse: [ ' - ' , someDates max yyyymmdd , '-' , (someDates max weekday first: 3) ]) ]);
 		nextPutAll: ' [';
 		nextPutAll: self size asString , ' items';
 		nextPutAll: '])'
