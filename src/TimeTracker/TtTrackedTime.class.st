@@ -29,7 +29,7 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 		for: self
 			do: [ :aMapping | 
 				aMapping
-					mapInstVars: #(description details firstTimeScheduled isPlanned isRecurring rawData).	"category"	"daySerializedFrom"
+					mapInstVars: #(description details firstTimeScheduled isPlanned isRecurring rawData daySerializedFrom).
 				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
 				(aMapping mapInstVar: #duration) valueSchema: Duration.
 				(aMapping mapInstVar: #category) valueSchema: #Category ];
@@ -45,13 +45,13 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 			customDo: [ :categoryMapping | 
 				categoryMapping
 					reader: [ :jsonReader | 
-						| categoryName collection |
-						collection := thisContext stack
+						| categoryName aCollection |
+						aCollection := thisContext stack
 								detect: [ :each | each receiver class = TtEventCollection ]
 								ifFound: [ :found | found receiver ]
 								ifNone: [ TtEventCollection default ].
 						categoryName := jsonReader next.
-						collection categories
+						aCollection categories
 							detect: [ :each | each name = categoryName ]
 							ifNone: [ nil ] ];
 					writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ]
@@ -161,10 +161,22 @@ TtTrackedTime >> gtDeleteActionFor: anAction [
 	^ anAction button
 		icon: BrGlamorousVectorIcons remove;
 		tooltip: 'Delete the Tracked Time.';
-		priority: 1;
+		priority: 2;
 		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
 			anEvent consumed: true.
 			self delete ]
+]
+
+{ #category : #action }
+TtTrackedTime >> gtGoToTrelloFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons link;
+		tooltip: 'Open day in browser.';
+		priority: 1;
+		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
+			anEvent consumed: true.
+			WebBrowser openOn: 'https://trello.com/c/' , self daySerializedFrom ]
 ]
 
 { #category : #accessing }
