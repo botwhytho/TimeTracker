@@ -203,7 +203,7 @@ TtEventCollection >> asAsyncStream [
 
 { #category : #accessing }
 TtEventCollection >> buildBars: data [
-	| theData maxLines aBarWidthScale barChart totalTime |
+	| aBarWidthScale barChart container maxLines theData totalTime |
 	theData := GtPlotterDataGroup new values: data.
 	totalTime := (data sum: #sum) asHours.
 	theData := theData
@@ -226,13 +226,16 @@ TtEventCollection >> buildBars: data [
 	barChart := GtPlotterHorizontalBarChart new.
 	barChart
 		barElement: [ :aGtPlotterContext | 
+			| categoryName |
+			categoryName := [ aGtPlotterContext originalValue category name ]
+					on: MessageNotUnderstood
+					do: [ 'Uncategorized' ].
 			BlElement new
+				id: categoryName;
 				border: (BlBorder paint: Color lightGray width: 1);
 				aptitude: ((BrGlamorousWithTooltipAptitude
 						content: [ BrLabel new
-								text: (aGtPlotterContext originalValue category = 'Uncategorized'
-										ifTrue: [ aGtPlotterContext originalValue category ]
-										ifFalse: [ aGtPlotterContext originalValue category name ]);
+								text: categoryName;
 								aptitude: (BrGlamorousLabelAptitude new padding: (BlInsets all: 1)) ])
 						hideDelay: 0;
 						showDelay: 0);
@@ -244,7 +247,23 @@ TtEventCollection >> buildBars: data [
 				when: BlDoubleClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
-						anEvent currentTarget phlow spawnObject: aGtPlotterContext originalValue ] ];
+						anEvent currentTarget phlow spawnObject: aGtPlotterContext originalValue ];
+				when: BlMouseEnterEvent
+					do: [ :anEvent | 
+						anEvent consumed: true.
+						(BlBorder paint: Color black width: 2)
+							in: [ :aColor | 
+								anEvent currentTarget border: aColor.
+								container
+									previousSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ];
+				when: BlMouseLeaveEvent
+					do: [ :anEvent | 
+						anEvent consumed: true.
+						(BlBorder paint: Color lightGray width: 1)
+							in: [ :aColor | 
+								anEvent currentTarget border: aColor.
+								container
+									previousSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ] ];
 		barLabelWidth: 160;
 		barWidthScale: aBarWidthScale;
 		barWidthData: [ :eachValue | eachValue sum asHours / totalTime ];
@@ -252,20 +271,27 @@ TtEventCollection >> buildBars: data [
 		amountOfTicks: 4;
 		with: theData.
 
-	^ barChart asElement
+	container := barChart asElement.
+	^ container
 ]
 
 { #category : #'building ui' }
 TtEventCollection >> buildDonut: data [
-	^ BlElement new
+	| element |
+	element := BlElement new.
+	^ element
 		size: 400 @ 400;
 		addChildren: (data
 				collect: [ :each | 
-					| color |
+					| categoryName color |
+					categoryName := [ each category name ]
+							on: MessageNotUnderstood
+							do: [ 'Uncategorized' ].
 					color := each category = 'Uncategorized'
 							ifTrue: [ Color transparent ]
 							ifFalse: [ TtCategories stringToColorHash: each category name ].
 					BlElement new
+						id: categoryName;
 						when: BlClickEvent
 							do: [ :e | 
 								e consumed: true.
@@ -274,6 +300,22 @@ TtEventCollection >> buildDonut: data [
 							do: [ :e | 
 								e consumed: true.
 								e target phlow spawnObject: each ];
+						when: BlMouseEnterEvent
+							do: [ :anEvent | 
+								anEvent consumed: true.
+								(BlBorder paint: Color black width: 2)
+									in: [ :aColor | 
+										anEvent currentTarget border: aColor.
+										element
+											nextSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ];
+						when: BlMouseLeaveEvent
+							do: [ :anEvent | 
+								anEvent consumed: true.
+								(BlBorder paint: Color lightGray width: 1)
+									in: [ :aColor | 
+										anEvent currentTarget border: aColor.
+										element
+											nextSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ];
 						geometry: (BlAnnulusSector new
 								startAngle: each startAngle;
 								endAngle: each endAngle;
@@ -413,7 +455,6 @@ TtEventCollection >> gtSummaryFor: aView [
 					matchParent;
 					alignCenter.
 			horizontalPane
-				flag: #TODO; "On hover 'select' both categories on bar graph and donut"
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.
 			verticalPane := BrVerticalPane new
