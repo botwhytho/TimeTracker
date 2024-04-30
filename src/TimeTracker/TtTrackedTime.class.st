@@ -127,6 +127,13 @@ TtTrackedTime >> details: anObject [
 	details := anObject
 ]
 
+{ #category : #initialization }
+TtTrackedTime >> falseAllBooleans [
+	isPlanned := false.
+	isRecurring := false.
+	firstTimeScheduled := false
+]
+
 { #category : #accessing }
 TtTrackedTime >> firstTimeScheduled [
 	^ firstTimeScheduled
@@ -141,17 +148,12 @@ TtTrackedTime >> firstTimeScheduled: anObject [
 TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 	^ BrCheckbox new
 		aptitude: BrGlamorousCheckboxAptitude;
-		in: [ :aCheckbox | 
-			((self perform: aSelector) isNil
-				or: [ (self perform: aSelector) = 'nil' or: [ (self perform: aSelector) = false ] ])
-				ifTrue: [ aCheckbox uncheck ]
-				ifFalse: [ aCheckbox check ].
-			aCheckbox ];
+		checked: (self perform: aSelector);
 		whenCheckedDo: [ :anEvent | 
-			self perform: aSelector , ':' withArguments: #(true).
+			self perform: aSelector asMutator withArguments: #(true).
 			self collection class serializeWithLepiter: self ];
 		whenUncheckedDo: [ :anEvent | 
-			self perform: aSelector , ':' withArguments: #(false).
+			self perform: aSelector asMutator withArguments: #(false).
 			self collection class serializeWithLepiter: self ]
 ]
 

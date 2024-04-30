@@ -67,36 +67,6 @@ TtCategories class >> initialize [
 					colorOverride: BrGlamorousColors failureBackgroundColor)
 ]
 
-{ #category : #view }
-TtCategories class >> stringToColorHash2: aString [
-	| stringHash firstNum secondNum mappedNum hue variation saturation brightness |
-	stringHash := MD5 hashMessage: aString.
-	firstNum := stringHash first.
-	secondNum := stringHash second.
-	mappedNum := (firstNum / 256 * 360) asInteger.
-	hue := mappedNum % 360 / 360.
-	variation := secondNum / 256 / 2 - 0.25.
-	saturation := 0.8 + variation min: 1.0.
-	brightness := 0.7 + variation min: 1.0.
-	^ Color
-		h: hue
-		s: saturation
-		v: brightness
-]
-
-{ #category : #view }
-TtCategories class >> stringToColorHash: aString [
-	| angle md5BitDepthMax stringHash |
-	self flag: #TODO "Test other algorithms, colors look too alike".
-	md5BitDepthMax := 2 ** 128.
-	stringHash := (MD5 hashMessage: aString) asInteger.
-	angle := stringHash / md5BitDepthMax * 360.
-	^ Color
-		h: angle
-		s: 1
-		l: 0.5
-]
-
 { #category : #accessing }
 TtCategories class >> systemCategories [
 	^ SystemCategories
@@ -104,7 +74,13 @@ TtCategories class >> systemCategories [
 
 { #category : #'building ui' }
 TtCategories class >> testInstance [
-	^ testInstance ifNil: [ testInstance := self new ]
+	^ TestInstance ifNil: [ TestInstance := self new ]
+]
+
+{ #category : #accessing }
+TtCategories class >> uncategorized [
+
+	^ self systemCategories at: 'Uncategorized'
 ]
 
 { #category : #view }
@@ -164,7 +140,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 						addChildren: {textElement
 									text: aCategory name asRopedText;
 									constraintsDo: [ :c | c padding: (BlInsets all: 10) ].
-								BlElement new background: (self class stringToColorHash: aCategory name).
+								BlElement new background: aCategory color.
 								BrButton new
 									beTinySize;
 									aptitude: BrGlamorousButtonWithIconAptitude
@@ -233,7 +209,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														serializeWithLepiter: anAssociation key.
 													anAssociation value label: aCategory name.
 													anAssociation value icon
-														background: (self class stringToColorHash: aCategory name).
+														background: aCategory color.
 													anAssociation value fireEvent: BrDropdownHideWish new ]) ] ]
 						ifAbsent: [  ].
 					pane ];

@@ -23,6 +23,7 @@ TtTrelloParser >> add: anAssociation toCollection: aCollection [
 											aTrackedTime description: activity first.
 											activity size > 1 ifTrue: [ aTrackedTime details: activity last ].
 											aTrackedTime
+												falseAllBooleans;
 												rawData: line;
 												collection: aCollection;
 												daySerializedFrom: ($/ split: (anAssociation value at: 'trelloUrl')) last.

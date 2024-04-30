@@ -13,59 +13,6 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #views }
-TtEventCollection class >> dailyTimePlot: aTTEventCollection [
-	^ GtPlotterHorizontalValueProjectionsElement new
-		padding: (BlInsets
-				top: 1
-				left: 10
-				bottom: 1
-				right: 10);
-		margin: (BlInsets all: 4);
-		aptitude: BrShadowAptitude;
-		background: Color white;
-		scale: (GtPlotterLinearScale new domainFrom: 0 to: 24 * 60);
-		scaleData: [ :each | 
-			(each key start asDuration asMinutes + (each key duration asMinutes / 2))
-				rounded ];
-		constraintsDo: [ :c | c vertical fitContent ];
-		valueElement: [ :aGtPlotterSingleScaleContext | BlElement new ];
-		valueStyle: [ :anElement :aGtPlotterSingleScaleContext | 
-			anElement
-				constraintsDo: [ :c | 
-					c horizontal matchParent.
-					c frame horizontal
-						weight: aGtPlotterSingleScaleContext originalValue key duration asMinutes rounded
-								/ (24 * 60) ].
-			anElement
-				addChild: (BrVerticalPane new
-						matchParent;
-						in: [ :aBrVerticalPane | 
-							(aGtPlotterSingleScaleContext originalValue value
-								sorted: [ :each | each category ifNil: [ 'Uncategorized' ] ifNotNil: [ :notNil | notNil name ] ]
-										ascending)
-								do: [ :aTtTrackedTime | 
-									| element |
-									element := BlElement new
-											constraintsDo: [ :c | 
-												c vertical matchParent.
-												c horizontal matchParent ];
-											border: (BlBorder paint: Color darkGray width: 0.5);
-											background: (aTtTrackedTime category
-													ifNotNil: [ :notNil | TtCategories stringToColorHash: notNil name ]
-													ifNil: [ Color veryVeryLightGray ]).
-									aBrVerticalPane addChild: element ].
-							aBrVerticalPane ]);
-				when: BlClickEvent
-					do: [ :anEvent | 
-						anEvent consumed: true.
-						anEvent target phlow
-							spawnObject: aGtPlotterSingleScaleContext originalValue value ] ];
-		values: aTTEventCollection groupedByTimespan associations;
-		when: BlDoubleClickEvent
-			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
-]
-
 { #category : #accessing }
 TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
@@ -90,54 +37,6 @@ TtEventCollection class >> gtSummaryFor: aView [
 		priority: 10;
 		object: self loadFromLepiter latestWeek;
 		view: #gtSummaryFor:
-]
-
-{ #category : #accessing }
-TtEventCollection class >> hourlyTicksElement [
-	| aContainer ticksObject theTicks aLength |
-	ticksObject := GtPlotterNumberTicks
-			from: 0
-			to: 24
-			count: 24.
-	theTicks := ticksObject asArray.
-	aLength := (theTicks first - theTicks last) abs.
-	aLength isZero ifTrue: [ aLength := 1 ].
-
-	aContainer := BlElement new
-			layout: BlFrameLayout new;
-			padding: (BlInsets all: 10);
-			constraintsDo: [ :c | 
-				c horizontal matchParent.
-				c vertical matchParent ];
-			addChild: (BlElement new
-					background: Color gray;
-					constraintsDo: [ :c | 
-						c horizontal matchParent.
-						c vertical exact: 1 ]);
-			addChildren: ({theTicks first.
-					theTicks last}
-					collect: [ :eachTick | 
-						BlElement new
-							background: Color gray;
-							constraintsDo: [ :c | 
-								c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength.
-								c horizontal exact: 1.
-								c vertical exact: 10 ] ]);
-			addChildren: (theTicks
-					collect: [ :eachTick | 
-						BlElement new
-							background: Color gray;
-							constraintsDo: [ :c | 
-								c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength.
-								c horizontal exact: 1.
-								c vertical exact: 10 ] ]);
-			addChildren: (theTicks
-					collect: [ :eachTick | 
-						BlTextElement new
-							text: (eachTick printString asRopedText thin fontSize: 9);
-							margin: (BlInsets top: 13);
-							constraintsDo: [ :c | c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength ] ]).
-	^ aContainer
 ]
 
 { #category : #initialization }
@@ -214,15 +113,9 @@ TtEventCollection >> buildBars: data [
 	totalTime := (data sum: #sum) asHours.
 	theData := theData
 			labelled: [ :each | 
-				(each category = 'Uncategorized'
-					ifTrue: [ each category ]
-					ifFalse: [ each category name ]) , ' ('
+				each category name , ' ('
 					, (each sum asHours / totalTime * 100 round: 1) asString , '%)' ].
-	theData := theData
-			colored: [ :each | 
-				each category = 'Uncategorized'
-					ifTrue: [ Color transparent ]
-					ifFalse: [ TtCategories stringToColorHash: each category name ] ].
+	theData := theData colored: [ :each | each category color ].
 
 	maxLines := theData
 			inject: 0
@@ -233,9 +126,7 @@ TtEventCollection >> buildBars: data [
 	barChart
 		barElement: [ :aGtPlotterContext | 
 			| categoryName |
-			categoryName := [ aGtPlotterContext originalValue category name ]
-					on: MessageNotUnderstood
-					do: [ 'Uncategorized' ].
+			categoryName := aGtPlotterContext originalValue category name.
 			BlElement new
 				id: categoryName;
 				border: (BlBorder paint: Color lightGray width: 1);
@@ -284,12 +175,8 @@ TtEventCollection >> buildDonut: data [
 		addChildren: (data
 				collect: [ :each | 
 					| categoryName color |
-					categoryName := [ each category name ]
-							on: MessageNotUnderstood
-							do: [ 'Uncategorized' ].
-					color := each category = 'Uncategorized'
-							ifTrue: [ Color transparent ]
-							ifFalse: [ TtCategories stringToColorHash: each category name ].
+					categoryName := each category name.
+					color := each category color.
 					BlElement new
 						id: categoryName;
 						when: BlClickEvent
@@ -361,7 +248,7 @@ TtEventCollection >> categories: aTtCategories [
 TtEventCollection >> categoriesSortedByDuration [
 	| categorizedActivities sumOfCategories |
 	categorizedActivities := self
-			groupedBy: [ :each | each category ifNil: [ 'Uncategorized' ] ].
+			groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ].
 	sumOfCategories := categorizedActivities associations
 			collect: [ :anAssociation | 
 				TtCategorizedEventsHelper new
@@ -369,6 +256,63 @@ TtEventCollection >> categoriesSortedByDuration [
 					collection: anAssociation value;
 					sum: (anAssociation value collect: #duration) sum ].
 	^ sumOfCategories sorted: #sum descending
+]
+
+{ #category : #views }
+TtEventCollection >> dailyTimePlot: aTTEventCollection [
+	^ GtPlotterHorizontalValueProjectionsElement new
+		padding: (BlInsets
+				top: 1
+				left: 10
+				bottom: 1
+				right: 10);
+		margin: (BlInsets all: 4);
+		aptitude: BrShadowAptitude;
+		background: Color white;
+		scale: (GtPlotterLinearScale new domainFrom: 0 to: 24 * 60);
+		scaleData: [ :each | 
+			(each key start asDuration asMinutes + (each key duration asMinutes / 2))
+				rounded ];
+		constraintsDo: [ :c | c vertical fitContent ];
+		valueElement: [ :aGtPlotterSingleScaleContext | BlElement new ];
+		valueStyle: [ :anElement :aGtPlotterSingleScaleContext | 
+			anElement
+				constraintsDo: [ :c | 
+					c horizontal matchParent.
+					c frame horizontal
+						weight: aGtPlotterSingleScaleContext originalValue key duration asMinutes rounded
+								/ (24 * 60) ].
+			anElement
+				addChild: (BrVerticalPane new
+						matchParent;
+						in: [ :aBrVerticalPane | 
+							(aGtPlotterSingleScaleContext originalValue value
+								sorted: [ :each | each key name ] ascending)
+								do: [ :aTtTrackedTime | 
+									| element |
+									element := BlElement new
+											constraintsDo: [ :c | 
+												c vertical matchParent.
+												c horizontal matchParent ];
+											border: (BlBorder paint: Color darkGray width: 0.5);
+											background: aTtTrackedTime key color.
+									aBrVerticalPane addChild: element ].
+							aBrVerticalPane ]);
+				when: BlClickEvent
+					do: [ :anEvent | 
+						| newCollection someTrackedTimes |
+						someTrackedTimes := aGtPlotterSingleScaleContext originalValue value value.
+						newCollection := self class new
+								categories: someTrackedTimes first value collection categories;
+								page: someTrackedTimes first value collection page;
+								addAll: (someTrackedTimes collect: #value).
+						anEvent consumed: true.
+						anEvent target phlow spawnObject: newCollection ] ];
+		values: (aTTEventCollection
+				groupedBy: [ :each | each value as: each value class superclass ])
+				associations;
+		when: BlDoubleClickEvent
+			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
 ]
 
 { #category : #accessing }
@@ -418,29 +362,32 @@ TtEventCollection >> groupedByTimespan [
 ]
 
 { #category : #views }
-TtEventCollection >> gtDailySummaryFor: aView [
-	| days  |
-	self flag: #TODO "Re-use data used by charts to be able to color things consistently when looking at planned vs un-planned, etc.".
-	days := self groupedByDay associations sorted: #key ascending.
-	^ aView columnedList
+TtEventCollection >> gtDailySummaryFor: data [
+	| days flattenedData |
+	flattenedData := data
+			flatCollect: [ :aTtCategorizedEventsHelper | 
+				aTtCategorizedEventsHelper collection
+					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
+	days := (flattenedData groupedBy: [ :each | each value start asDate ])
+			associations sorted: #key ascending.
+	^ GtPhlowView new columnedList
 		title: 'Daily Summary';
 		priority: 6;
-		items: [ days
-				, {nil -> nil} ];
+		items: [ days , {nil -> nil} ];
 		column: 'Day'
 			stencil: [ :each | 
 				each key
 					ifNil: [ BlElement new ]
 					ifNotNil: [ BrButton new
 							aptitude: BrGlamorousButtonWithLabelAptitude;
-							label: (each key yyyymmdd , '-' , (each key weekday first: 3));
+							label: each key yyyymmdd , '-' , (each key weekday first: 3);
 							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
 			weight: 0.1;
 		column: 'Tracked Time'
 			stencil: [ :each | 
 				each key
-					ifNil: [ self class hourlyTicksElement ]
-					ifNotNil: [ self class dailyTimePlot: each value ] ]
+					ifNil: [ self hourlyTicksElement ]
+					ifNotNil: [ self dailyTimePlot: each value ] ]
 			weight: 0.9;
 		send: [  ]
 ]
@@ -495,7 +442,7 @@ TtEventCollection >> gtSummaryFor: aView [
 					matchParent;
 					alignCenter;
 					addChildren: {horizontalPane.
-							(self gtDailySummaryFor: GtPhlowView empty) asElement.
+							(self gtDailySummaryFor: data) asElement.
 							(self gtTrackedTimeByDayFor: GtPhlowView empty) asElement}.
 			verticalPane ]
 ]
@@ -548,7 +495,7 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 															geometry: BlCircleGeometry new;
 															background: Color transparent) ]
 											content: [ BrHorizontalPane new
-													size: 800 @ 800;
+													size: 1000 @ 1000;
 													padding: (BlInsets all: 15);
 													addChild: (self categories
 															TtCategoriesFor: GtPhlowView empty
@@ -562,7 +509,7 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 									icon: (BlElement new
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;
-											background: (TtCategories stringToColorHash: notNil name)) ]
+											background: each category color) ]
 							ifNil: [ aButton
 									label: ('Categorize' asRopedText fontSize: 12);
 									icon: (BlElement new
@@ -607,6 +554,54 @@ TtEventCollection >> gtWeekFor: anAction [
 					anEvent consumed: true.
 					aButton fireEvent: BrDropdownHideWish new.
 					aButton phlow spawnObject: (rootCollection weekFromDate: anEvent date) ] ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> hourlyTicksElement [
+	| aContainer ticksObject theTicks aLength |
+	ticksObject := GtPlotterNumberTicks
+			from: 0
+			to: 24
+			count: 24.
+	theTicks := ticksObject asArray.
+	aLength := (theTicks first - theTicks last) abs.
+	aLength isZero ifTrue: [ aLength := 1 ].
+
+	aContainer := BlElement new
+			layout: BlFrameLayout new;
+			padding: (BlInsets all: 10);
+			constraintsDo: [ :c | 
+				c horizontal matchParent.
+				c vertical matchParent ];
+			addChild: (BlElement new
+					background: Color gray;
+					constraintsDo: [ :c | 
+						c horizontal matchParent.
+						c vertical exact: 1 ]);
+			addChildren: ({theTicks first.
+					theTicks last}
+					collect: [ :eachTick | 
+						BlElement new
+							background: Color gray;
+							constraintsDo: [ :c | 
+								c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength.
+								c horizontal exact: 1.
+								c vertical exact: 10 ] ]);
+			addChildren: (theTicks
+					collect: [ :eachTick | 
+						BlElement new
+							background: Color gray;
+							constraintsDo: [ :c | 
+								c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength.
+								c horizontal exact: 1.
+								c vertical exact: 10 ] ]);
+			addChildren: (theTicks
+					collect: [ :eachTick | 
+						BlTextElement new
+							text: (eachTick printString asRopedText thin fontSize: 9);
+							margin: (BlInsets top: 13);
+							constraintsDo: [ :c | c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength ] ]).
+	^ aContainer
 ]
 
 { #category : #import }
