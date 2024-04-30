@@ -7,8 +7,9 @@ Class {
 		'root',
 		'collection'
 	],
-	#classInstVars : [
-		'testInstance'
+	#classVars : [
+		'SystemCategories',
+		'TestInstance'
 	],
 	#category : #TimeTracker
 }
@@ -21,6 +22,49 @@ TtCategories class >> fromRoot: aRootCategory [
 	collection root: aRootCategory.
 	collection calculateHierarchy.
 	^ collection
+]
+
+{ #category : #initialization }
+TtCategories class >> initialize [
+	super initialize.
+	SystemCategories := Dictionary new.
+	SystemCategories
+		at: 'Uncategorized'
+			put: (TtCategory new
+					name: 'Uncategorized';
+					colorOverride: Color veryVeryLightGray);
+		at: 'Untracked'
+			put: (TtCategory new
+					name: 'Untracked';
+					colorOverride: Color transparent);
+		at: 'Planned'
+			put: (TtCategory new
+					name: 'Planned';
+					colorOverride: BrGlamorousColors successBackgroundColor);
+		at: 'Unplanned'
+			put: (TtCategory new
+					name: 'Unplanned';
+					colorOverride: BrGlamorousColors failureBackgroundColor);
+		at: 'Recurring'
+			put: (TtCategory new
+					name: 'Recurring';
+					colorOverride: BrGlamorousColors successBackgroundColor);
+		at: 'One Time'
+			put: (TtCategory new
+					name: 'One Time';
+					colorOverride: BrGlamorousColors newsBackgroundColor);
+		at: 'Planned'
+			put: (TtCategory new
+					name: 'Planned';
+					colorOverride: BrGlamorousColors successBackgroundColor);
+		at: 'First Time Scheduled'
+			put: (TtCategory new
+					name: 'First Time Scheduled';
+					colorOverride: BrGlamorousColors successBackgroundColor);
+		at: 'Rescheduled'
+			put: (TtCategory new
+					name: 'Rescheduled';
+					colorOverride: BrGlamorousColors failureBackgroundColor)
 ]
 
 { #category : #view }
@@ -51,6 +95,11 @@ TtCategories class >> stringToColorHash: aString [
 		h: angle
 		s: 1
 		l: 0.5
+]
+
+{ #category : #accessing }
+TtCategories class >> systemCategories [
+	^ SystemCategories
 ]
 
 { #category : #'building ui' }

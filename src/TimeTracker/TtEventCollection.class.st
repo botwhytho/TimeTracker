@@ -420,9 +420,10 @@ TtEventCollection >> groupedByTimespan [
 { #category : #views }
 TtEventCollection >> gtDailySummaryFor: aView [
 	| days  |
+	self flag: #TODO "Re-use data used by charts to be able to color things consistently when looking at planned vs un-planned, etc.".
 	days := self groupedByDay associations sorted: #key ascending.
 	^ aView columnedList
-		title: 'Weekly Summary';
+		title: 'Daily Summary';
 		priority: 6;
 		items: [ days
 				, {nil -> nil} ];
