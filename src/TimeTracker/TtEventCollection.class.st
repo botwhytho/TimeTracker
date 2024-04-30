@@ -4,7 +4,6 @@ Class {
 	#traits : 'TGtGroupWithItems + TGtUniqueInstance',
 	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
-		'groupedByDay',
 		'categories',
 		'page'
 	],
@@ -72,7 +71,6 @@ TtEventCollection class >> defaultPageName [
 
 { #category : #inspecting }
 TtEventCollection class >> gtInspectActionFor: anAction [
-	<gtAction>
 	<gtClassAction>
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
@@ -88,7 +86,7 @@ TtEventCollection class >> gtSummaryFor: aView [
 	^ aView forward
 		title: 'Summary';
 		priority: 10;
-		object: self loadFromLepiter;
+		object: self loadFromLepiter latestWeek;
 		view: #gtSummaryFor:
 ]
 
@@ -573,53 +571,29 @@ TtEventCollection >> gtTrackedTimeByDayFor: aView [
 		expandAll
 ]
 
-{ #category : #views }
-TtEventCollection >> gtWeeklySummaryFor: aView [
-	<gtView>
-	| days weeks |
-	days := self groupedByDay associations.
-	weeks := (days collectAsSet: [ :each | each key asWeek ]) asArray sorted.
-	^ aView columnedList
-		title: 'Weekly Summary';
-		priority: 6;
-		items: [ ((days select: [ :aDay | aDay key asWeek = weeks last ])
-				sorted: [ :each | Week indexOfDay: each key dayOfWeekName ] ascending)
-				, {nil -> nil} ];
-		column: 'Day'
-			stencil: [ :each | 
-				each key
-					ifNil: [ BlElement new ]
-					ifNotNil: [ BrButton new
-							aptitude: BrGlamorousButtonWithLabelAptitude;
-							label: each key weekday;
-							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
-			weight: 0.1;
-		column: 'Tracked Time'
-			stencil: [ :each | 
-				each key
-					ifNil: [ self class hourlyTicksElement ]
-					ifNotNil: [ self class dailyTimePlot: each value ] ]
-			weight: 0.9;
-		send: [  ];
-		flag: #TODO; "Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency."
-		actionDropdownButtonIcon: [ BrGlamorousVectorIcons calendar asElement asScalableElement size: 20 @ 20 ]
-					asStencil
-			content: [ :aButton :aBrTab | 
-				| element |
-				element := GtCalendarElement forDate: Date today.
-				element
-					when: GtCalendarDateClickedEvent
-					do: [ :anEvent | 
-						| rootCollection |
-						rootCollection := self
-								detect: [ :each | each category isNotNil ]
-								ifFound: [ :found | found category rootCategory collection ]
-								ifNone: [ rootCollection := self ].
-						anEvent consumed: true.
-						aButton fireEvent: BrDropdownHideWish new.
-						aButton phlow
-							spawnObject: (rootCollection
-									select: [ :aTrackedTime | aTrackedTime start asDate asWeek = anEvent date asWeek ]) ] ]
+{ #category : #accessing }
+TtEventCollection >> gtWeekFor: anAction [
+	<gtAction>
+	self flag: #TODO.	"Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency."
+	^ anAction dropdown
+		icon: [ BrGlamorousVectorIcons calendar asElement asScalableElement size: 20 @ 20 ]
+				asStencil;
+		tooltip: 'Select a Week to Analyze';
+		priority: 1;
+		content: [ :aButton | 
+			| element |
+			element := GtCalendarElement forDate: Date today.
+			element
+				when: GtCalendarDateClickedEvent
+				do: [ :anEvent | 
+					| rootCollection |
+					rootCollection := self
+							detect: [ :each | each category isNotNil ]
+							ifFound: [ :found | found category rootCategory collection ]
+							ifNone: [ rootCollection := self ].
+					anEvent consumed: true.
+					aButton fireEvent: BrDropdownHideWish new.
+					aButton phlow spawnObject: (rootCollection weekFromDate: anEvent date) ] ]
 ]
 
 { #category : #import }
@@ -647,6 +621,11 @@ TtEventCollection >> importFromTrello [
 TtEventCollection >> items [
 	^ items ifNil: [
 		items := SortedCollection new ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> latestWeek [
+	^ self weekFromDate: self groupedByDay keys max
 ]
 
 { #category : #accessing }
@@ -746,6 +725,28 @@ TtEventCollection >> serializeCollection [
 ]
 
 { #category : #accessing }
+TtEventCollection >> thisWeek [
+	| lastSunday today |
+	today := Date today.
+	lastSunday := (today
+			- (today weekdayIndex - 1 = 0 ifTrue: [ 7 ] ifFalse: [ today weekdayIndex - 1 ])
+					days) asDate.
+	^ self select: [ :each | each start asDate > lastSunday ]
+]
+
+{ #category : #accessing }
 TtEventCollection >> valueHolder: anObject [
 	collection := anObject
+]
+
+{ #category : #accessing }
+TtEventCollection >> weekFromDate: aDate [
+	| lastSunday nextMonday today |
+	today := aDate.
+	lastSunday := (today
+			- (today weekdayIndex - 1 = 0 ifTrue: [ 7 ] ifFalse: [ today weekdayIndex - 1 ])
+					days) asDate.
+	nextMonday := (lastSunday + 8 days) asDate.
+	^ self
+		select: [ :each | each start asDate > lastSunday and: [ each start asDate < nextMonday ] ]
 ]
