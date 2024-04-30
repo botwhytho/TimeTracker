@@ -60,7 +60,7 @@ TtCategories class >> initialize [
 					colorOverride: BrGlamorousColors newsBackgroundColor);
 		at: 'First Time Scheduled'
 			put: (TtCategory new
-					name: 'First Time Scheduled';
+					name: 'When Planned';
 					colorOverride: BrGlamorousColors successBackgroundColor);
 		at: 'Rescheduled'
 			put: (TtCategory new

@@ -5,7 +5,8 @@ Class {
 	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'categories',
-		'page'
+		'page',
+		'viewFilterContext'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -217,7 +218,7 @@ TtEventCollection >> buildDonut: data [
 { #category : #'building ui' }
 TtEventCollection >> calculateAnglesForDonut [
 	| sortedCategories totalTime |
-	sortedCategories := self categoriesSortedByDuration.
+	sortedCategories := self groupedAndSortedByDuration.
 	totalTime := sortedCategories sum: #sum.
 	sortedCategories
 		inject: -90
@@ -242,20 +243,6 @@ TtEventCollection >> categories [
 { #category : #accessing }
 TtEventCollection >> categories: aTtCategories [
 	categories := aTtCategories
-]
-
-{ #category : #'building ui' }
-TtEventCollection >> categoriesSortedByDuration [
-	| categorizedActivities sumOfCategories |
-	categorizedActivities := self
-			groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ].
-	sumOfCategories := categorizedActivities associations
-			collect: [ :anAssociation | 
-				TtCategorizedEventsHelper new
-					category: anAssociation key;
-					collection: anAssociation value;
-					sum: (anAssociation value collect: #duration) sum ].
-	^ sumOfCategories sorted: #sum descending
 ]
 
 { #category : #views }
@@ -326,6 +313,24 @@ TtEventCollection >> defaultPage [
 			newPage ]
 ]
 
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupByFilter [
+	^ self perform: #groupedBy , self viewFilterContext
+]
+
+{ #category : #acccessing }
+TtEventCollection >> groupedAndSortedByDuration [
+	| groupedActivities summedGroupings |
+	groupedActivities := self groupByFilter.
+	summedGroupings := groupedActivities associations
+			collect: [ :anAssociation | 
+				TtCategorizedEventsHelper new
+					category: anAssociation key;
+					collection: anAssociation value;
+					sum: (anAssociation value collect: #duration) sum ].
+	^ summedGroupings sorted: #sum descending
+]
+
 { #category : #accessing }
 TtEventCollection >> groupedBy: aBlock [
 	"Override this method here and not reuse the one in collection
@@ -351,9 +356,42 @@ TtEventCollection >> groupedBy: aBlock [
 	^ result
 ]
 
-{ #category : #views }
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByCategory [
+	^ self
+		groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ]
+]
+
+{ #category : #'accessing - grouping' }
 TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
+]
+
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByFirstTimeScheduled [
+	^ self
+		groupedBy: [ :each | 
+			each firstTimeScheduled
+				ifTrue: [ TtCategories firstTimeScheduled ]
+				ifFalse: [ TtCategories rescheduled ] ]
+]
+
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByIsPlanned [
+	^ self
+		groupedBy: [ :each | 
+			each isPlanned
+				ifTrue: [ TtCategories planned ]
+				ifFalse: [ TtCategories unplanned ] ]
+]
+
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByIsRecurring [
+	^ self
+		groupedBy: [ :each | 
+			each isRecurring
+				ifTrue: [ TtCategories recurring ]
+				ifFalse: [ TtCategories oneTime ] ]
 ]
 
 { #category : #'accessing - grouping' }
@@ -745,6 +783,16 @@ TtEventCollection >> thisWeek [
 { #category : #accessing }
 TtEventCollection >> valueHolder: anObject [
 	collection := anObject
+]
+
+{ #category : #accessing }
+TtEventCollection >> viewFilterContext [
+	^ viewFilterContext ifNil: [ viewFilterContext := #Category ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> viewFilterContext: anObject [
+	viewFilterContext := anObject
 ]
 
 { #category : #accessing }
