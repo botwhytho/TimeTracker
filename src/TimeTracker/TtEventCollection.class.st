@@ -36,7 +36,7 @@ TtEventCollection class >> gtSummaryFor: aView [
 		title: 'Summary';
 		priority: 10;
 		object: self loadFromLepiter latestWeek;
-		view: #gtSummaryFor:
+		view: #gtSummaryFor:context:
 ]
 
 { #category : #initialization }
@@ -422,7 +422,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 ]
 
 { #category : #views }
-TtEventCollection >> gtSummaryFor: aView [
+TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
 	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
 	self flag: #TODO "Add un-tracked time to charts".
