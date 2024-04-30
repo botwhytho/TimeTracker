@@ -469,7 +469,6 @@ TtEventCollection >> gtSummaryFor: aView [
 		title: 'Summary' translated;
 		priority: 0;
 		flag: #TODO "change to dropdown for different in place filters";
-		actionUpdateButton;
 		stencil: [ | data horizontalPane verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
