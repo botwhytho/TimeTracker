@@ -14,6 +14,11 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #accessing }
+TtCategories class >> firstTimeScheduled [
+	^ self systemCategories at: 'First Time Scheduled'
+]
+
 { #category : #initialization }
 TtCategories class >> fromRoot: aRootCategory [
 	| collection |
@@ -53,10 +58,6 @@ TtCategories class >> initialize [
 			put: (TtCategory new
 					name: 'One Time';
 					colorOverride: BrGlamorousColors newsBackgroundColor);
-		at: 'Planned'
-			put: (TtCategory new
-					name: 'Planned';
-					colorOverride: BrGlamorousColors successBackgroundColor);
 		at: 'First Time Scheduled'
 			put: (TtCategory new
 					name: 'First Time Scheduled';
@@ -68,11 +69,31 @@ TtCategories class >> initialize [
 ]
 
 { #category : #accessing }
+TtCategories class >> oneTime [
+	^ self systemCategories at: 'One Time'
+]
+
+{ #category : #accessing }
+TtCategories class >> planned [
+	^ self systemCategories at: 'Planned'
+]
+
+{ #category : #accessing }
+TtCategories class >> recurring [
+	^ self systemCategories at: 'Recurring'
+]
+
+{ #category : #accessing }
+TtCategories class >> rescheduled [
+	^ self systemCategories at: 'Rescheduled'
+]
+
+{ #category : #accessing }
 TtCategories class >> systemCategories [
 	^ SystemCategories
 ]
 
-{ #category : #'building ui' }
+{ #category : #testing }
 TtCategories class >> testInstance [
 	^ TestInstance ifNil: [ TestInstance := self new ]
 ]
@@ -81,6 +102,16 @@ TtCategories class >> testInstance [
 TtCategories class >> uncategorized [
 
 	^ self systemCategories at: 'Uncategorized'
+]
+
+{ #category : #accessing }
+TtCategories class >> unplanned [
+	^ self systemCategories at: 'Unplanned'
+]
+
+{ #category : #accessing }
+TtCategories class >> untracked [
+	^ self systemCategories at: 'Untracked'
 ]
 
 { #category : #view }
