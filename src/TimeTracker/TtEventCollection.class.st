@@ -41,7 +41,9 @@ TtEventCollection class >> dailyTimePlot: aTTEventCollection [
 				addChild: (BrVerticalPane new
 						matchParent;
 						in: [ :aBrVerticalPane | 
-							aGtPlotterSingleScaleContext originalValue value
+							(aGtPlotterSingleScaleContext originalValue value
+								sorted: [ :each | each category ifNil: [ 'Uncategorized' ] ifNotNil: [ :notNil | notNil name ] ]
+										ascending)
 								do: [ :aTtTrackedTime | 
 									| element |
 									element := BlElement new
@@ -55,8 +57,8 @@ TtEventCollection class >> dailyTimePlot: aTTEventCollection [
 									aBrVerticalPane addChild: element ].
 							aBrVerticalPane ]);
 				when: BlClickEvent
-					do: [ :anEvent |
-						anEvent consumed: true. 
+					do: [ :anEvent | 
+						anEvent consumed: true.
 						anEvent target phlow
 							spawnObject: aGtPlotterSingleScaleContext originalValue value ] ];
 		values: aTTEventCollection groupedByTimespan associations;
@@ -187,6 +189,17 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			aTextSnippet removeSelf.
 			lepiterPage addSnippet: anUnknownSnippet.
 			anEntity uid: anUnknownSnippet uidString ]
+]
+
+{ #category : #views }
+TtEventCollection >> TtCategoriesFor: aView [
+	<gtView>
+	self categories ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Categories';
+		priority: 6;
+		object: self categories;
+		view: #TtCategoriesFor:context:
 ]
 
 { #category : #accessing }
