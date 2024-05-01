@@ -19,6 +19,18 @@ TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
+{ #category : #import }
+TtEventCollection class >> gtImportActionFor: anAction [
+	<gtClassAction>
+	self flag: #TODO "Generalize import through some type of interface".
+	^ anAction button
+		icon: BrGlamorousVectorIcons inspect;
+		label: 'Import';
+		tooltip: 'Default Tracked Time Collection';
+		priority: 0;
+		action: [ :aButton | aButton phlow spawnObject: self default importFromTrello ]
+]
+
 { #category : #inspecting }
 TtEventCollection class >> gtInspectActionFor: anAction [
 	<gtClassAction>
@@ -549,6 +561,30 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 				id: #gtEntriesByDayFor:context:;
 				matchParent;
 				addChild: self buildEntriesByDay ]
+]
+
+{ #category : #import }
+TtEventCollection >> gtImportActionFor: anAction [
+	<gtAction>
+	self flag: #TODO.	"Generalize import through some type of interface"
+	^ anAction button
+		icon: BrGlamorousVectorIcons inspect;
+		label: 'Import';
+		tooltip: 'Default Tracked Time Collection';
+		priority: 0;
+		action: [ :aButton :aBrTab | 
+			self importFromTrello.
+			self flag: #TODO "Other views and general UI things are not in sync. Can I be hacky and reload the WHOLE phlow tool, the Gt object inspector?".
+			aBrTab phlow firstParentWithView
+				allChildrenBreadthFirstDetect: [ :anElement | 
+					#(#gtSummaryFor:context: #gtEntriesByDayFor:context:)
+						includes: anElement id asSymbol ]
+				ifFound: [ :viewElement | 
+					(self
+						perform: viewElement id asSymbol
+						withArguments: {GtPhlowEmptyView new.
+								GtPhlowContext new}) updateContent: viewElement ]
+				ifNone: [ aBrTab phlow spawnObject: self ] ]
 ]
 
 { #category : #search }
