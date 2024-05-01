@@ -156,10 +156,28 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 		checked: (self perform: aSelector);
 		whenCheckedDo: [ :anEvent | 
 			self perform: aSelector asMutator withArguments: #(true).
-			self collection class serializeWithLepiter: self ];
+			self collection class serializeWithLepiter: self.
+			self collection viewFilterContext asLowercase = aSelector asLowercase
+				ifTrue: [ | viewElement |
+					viewElement := anEvent target phlow firstParentWithView phlow
+							firstParentWithView.
+					viewElement id asSymbol = #gtSummaryFor:context:
+						ifTrue: [ (self collection
+								perform: viewElement id asSymbol
+								withArguments: {GtPhlowEmptyView new.
+										GtPhlowContext new}) updateContent: viewElement ] ] ];
 		whenUncheckedDo: [ :anEvent | 
 			self perform: aSelector asMutator withArguments: #(false).
-			self collection class serializeWithLepiter: self ]
+			self collection class serializeWithLepiter: self.
+			self collection viewFilterContext asLowercase = aSelector asLowercase
+				ifTrue: [ | viewElement |
+					viewElement := anEvent target phlow firstParentWithView phlow
+							firstParentWithView.
+					viewElement id asSymbol = #gtSummaryFor:context:
+						ifTrue: [ (self collection
+								perform: viewElement id asSymbol
+								withArguments: {GtPhlowEmptyView new.
+										GtPhlowContext new}) updateContent: viewElement ] ] ]
 ]
 
 { #category : #action }
