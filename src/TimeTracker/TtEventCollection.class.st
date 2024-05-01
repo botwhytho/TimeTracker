@@ -163,8 +163,41 @@ TtEventCollection >> buildBars: data [
 		amountOfTicks: 4;
 		with: theData.
 
-	container := barChart asElement.
+	container := barChart asElement id: #buildBars:.
 	^ container
+]
+
+{ #category : #views }
+TtEventCollection >> buildDailySummary: data [
+	| days flattenedData |
+	flattenedData := (data
+			reject: [ :each | each category = TtCategories untracked ])
+			flatCollect: [ :aTtCategorizedEventsHelper | 
+				aTtCategorizedEventsHelper collection
+					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
+	days := (flattenedData groupedBy: [ :each | each value start asDate ])
+			associations sorted: #key ascending.
+	^ GtPhlowView new columnedList
+		title: 'Daily Summary';
+		priority: 6;
+		items: [ days , {nil -> nil} ];
+		column: 'Day'
+			stencil: [ :each | 
+				each key
+					ifNil: [ BlElement new ]
+					ifNotNil: [ BrButton new
+							aptitude: BrGlamorousButtonWithLabelAptitude;
+							label: each key yyyymmdd , '-' , (each key weekday first: 3);
+							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
+			weight: 0.1;
+		column: 'Tracked Time'
+			stencil: [ :each | 
+				each key
+					ifNil: [ self hourlyTicksElement ]
+					ifNotNil: [ self dailyTimePlot: each value ] ]
+			weight: 0.9;
+		send: [  ];
+		asElementDo: [ :anElement | anElement id: #buildDailySummary: ]
 ]
 
 { #category : #'building ui' }
@@ -172,6 +205,7 @@ TtEventCollection >> buildDonut: data [
 	| element |
 	element := BlElement new.
 	^ element
+		id: #buildDonut:;
 		size: 400 @ 400;
 		addChildren: (data
 				collect: [ :each | 
@@ -213,6 +247,92 @@ TtEventCollection >> buildDonut: data [
 						constraintsDo: [ :c | 
 							c horizontal matchParent.
 							c vertical matchParent ] ])
+]
+
+{ #category : #views }
+TtEventCollection >> buildEntriesByDay [
+	| entriesByDay |
+	entriesByDay := self groupedByDay associations sorted: #key descending.
+	^ GtPhlowView new columnedTree
+		items: entriesByDay;
+		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
+		column: 'Tracked Time'
+			text: [ :each | 
+				each isAssociation
+					ifTrue: [ each key yyyymmdd , '-' , (each key weekday first: 3) ]
+					ifFalse: [ each printOnDetailed ] ];
+		column: 'Is Recurring'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifFalse: [ each generateCheckboxForBoolean: #isRecurring ] ];
+		column: 'Is Planned'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifFalse: [ each generateCheckboxForBoolean: #isPlanned ] ];
+		column: 'First Time Scheduled'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
+		column: 'Category'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifFalse: [ | aButton |
+						aButton := BrButton new.
+						aButton
+							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
+									+ (BrGlamorousWithDropdownAptitude
+											handle: [ BrButton new
+													aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
+													label: ('Categorize' asRopedText fontSize: 12);
+													icon: (BlElement new
+															size: 15 @ 15;
+															geometry: BlCircleGeometry new;
+															background: Color transparent) ]
+											content: [ BrHorizontalPane new
+													size: 1000 @ 1000;
+													padding: (BlInsets all: 15);
+													addChild: (self categories
+															TtCategoriesFor: GtPhlowView empty
+															context: (GtPhlowContext new
+																	at: #TtTrackedTime put: each -> aButton;
+																	yourself)) asElement ]).
+						each category
+							ifNotNil: [ :notNil | 
+								aButton
+									label: notNil name;
+									icon: (BlElement new
+											size: 15 @ 15;
+											geometry: BlCircleGeometry new;
+											background: each category color) ]
+							ifNil: [ aButton
+									label: ('Categorize' asRopedText fontSize: 12);
+									icon: (BlElement new
+											size: 15 @ 15;
+											geometry: BlCircleGeometry new;
+											background: Color transparent) ] ] ];
+		column: 'Delete Day'
+			stencil: [ :each | 
+				each isAssociation
+					ifTrue: [ BrButton new
+							aptitude: BrGlamorousButtonWithIconAptitude;
+							icon: BrGlamorousVectorIcons remove;
+							action: [ :aBrButton :aBrButtonModel :anEvent | 
+								| viewElement |
+								anEvent consumed: true.
+								viewElement := aBrButton phlow firstParentWithView phlow
+										firstParentWithView.
+								each value do: [ :aTrackedTime | aTrackedTime delete ].
+								(self
+									perform: viewElement id asSymbol
+									withArguments: {GtPhlowEmptyView new. GtPhlowContext new}) updateContent: viewElement ] ]
+					ifFalse: [ BlElement new size: 1 @ 1 ] ];
+		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
+		expandAll;
+		asElementDo: [ :element | element id: #buildEntriesByDay ]
 ]
 
 { #category : #'building ui' }
@@ -418,35 +538,17 @@ TtEventCollection >> groupedByTimespan [
 ]
 
 { #category : #views }
-TtEventCollection >> gtDailySummaryFor: data [
-	| days flattenedData |
-	flattenedData := (data
-			reject: [ :each | each category = TtCategories untracked ])
-			flatCollect: [ :aTtCategorizedEventsHelper | 
-				aTtCategorizedEventsHelper collection
-					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
-	days := (flattenedData groupedBy: [ :each | each value start asDate ])
-			associations sorted: #key ascending.
-	^ GtPhlowView new columnedList
-		title: 'Daily Summary';
-		priority: 6;
-		items: [ days , {nil -> nil} ];
-		column: 'Day'
-			stencil: [ :each | 
-				each key
-					ifNil: [ BlElement new ]
-					ifNotNil: [ BrButton new
-							aptitude: BrGlamorousButtonWithLabelAptitude;
-							label: each key yyyymmdd , '-' , (each key weekday first: 3);
-							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
-			weight: 0.1;
-		column: 'Tracked Time'
-			stencil: [ :each | 
-				each key
-					ifNil: [ self hourlyTicksElement ]
-					ifNotNil: [ self dailyTimePlot: each value ] ]
-			weight: 0.9;
-		send: [  ]
+TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
+	<gtView>
+	| pomodoros |
+	pomodoros := self groupedByDay associations sorted: #key descending.
+	^ aView explicit
+		title: 'Entries By Day';
+		priority: 5;
+		stencil: [ BrFrame new
+				id: #gtEntriesByDayFor:context:;
+				matchParent;
+				addChild: self buildEntriesByDay ]
 ]
 
 { #category : #search }
@@ -481,7 +583,6 @@ TtEventCollection >> gtSearchFor: aSearch [
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
-	self flag: #TODO.	"Changes in categorizing should re-render graphs in realtime"
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
@@ -494,11 +595,12 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.
 			verticalPane := BrVerticalPane new
+					id: #gtSummaryFor:context:;
 					matchParent;
 					alignCenter;
 					addChildren: {horizontalPane.
-							(self gtDailySummaryFor: data) asElement.
-							(self gtTrackedTimeByDayFor: GtPhlowView empty) asElement}.
+							self buildDailySummary: data.
+							self buildEntriesByDay}.
 			verticalPane ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
@@ -522,90 +624,6 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 									(self gtSummaryFor: GtPhlowEmptyView new context: GtPhlowContext new)
 										updateContent: aBrTab viewContentElement.
 									aButton fireEvent: BrDropdownHideWish new ] ] ]
-]
-
-{ #category : #views }
-TtEventCollection >> gtTrackedTimeByDayFor: aView [
-	<gtView>
-	| pomodoros |
-	pomodoros := self groupedByDay associations sorted: #key descending.
-	^ aView columnedTree
-		title: 'Entries By Day';
-		priority: 5;
-		items: pomodoros;
-		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
-		actionUpdateButton;
-		column: 'Tracked Time'
-			text: [ :each | 
-				each isAssociation
-					ifTrue: [ each key yyyymmdd , '-' , (each key weekday first: 3) ]
-					ifFalse: [ each printOnDetailed ] ];
-		column: 'Is Recurring'
-			stencil: [ :each | 
-				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ each generateCheckboxForBoolean: #isRecurring ] ];
-		column: 'Is Planned'
-			stencil: [ :each | 
-				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ each generateCheckboxForBoolean: #isPlanned ] ];
-		column: 'First Time Scheduled'
-			stencil: [ :each | 
-				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
-		column: 'Category'
-			stencil: [ :each | 
-				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ | aButton |
-						aButton := BrButton new.
-						aButton
-							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
-									+ (BrGlamorousWithDropdownAptitude
-											handle: [ BrButton new
-													aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
-													label: ('Categorize' asRopedText fontSize: 12);
-													icon: (BlElement new
-															size: 15 @ 15;
-															geometry: BlCircleGeometry new;
-															background: Color transparent) ]
-											content: [ BrHorizontalPane new
-													size: 1000 @ 1000;
-													padding: (BlInsets all: 15);
-													addChild: (self categories
-															TtCategoriesFor: GtPhlowView empty
-															context: (GtPhlowContext new
-																	at: #TtTrackedTime put: each -> aButton;
-																	yourself)) asElement ]).
-						each category
-							ifNotNil: [ :notNil | 
-								aButton
-									label: notNil name;
-									icon: (BlElement new
-											size: 15 @ 15;
-											geometry: BlCircleGeometry new;
-											background: each category color) ]
-							ifNil: [ aButton
-									label: ('Categorize' asRopedText fontSize: 12);
-									icon: (BlElement new
-											size: 15 @ 15;
-											geometry: BlCircleGeometry new;
-											background: Color transparent) ] ] ];
-		column: 'Delete Day'
-			stencil: [ :each | 
-				each isAssociation
-					ifTrue: [ BrButton new
-							aptitude: BrGlamorousButtonWithIconAptitude;
-							icon: BrGlamorousVectorIcons remove;
-							action: [ :aBrButton :aBrButtonModel :anEvent | 
-								anEvent consumed: true.
-								each value do: [ :aTrackedTime | aTrackedTime delete ].
-								aBrButton phlow firstParentWithView phlow syncUpdate ] ]
-					ifFalse: [ BlElement new size: 1 @ 1 ] ];
-		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
-		expandAll
 ]
 
 { #category : #accessing }

@@ -234,14 +234,22 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												aptitude: BrGlamorousButtonWithIconAptitude;
 												icon: BrGlamorousVectorIcons accept;
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
+													| aTtTrackedTime categorizeButton viewElement |
+													aTtTrackedTime := anAssociation key.
+													categorizeButton := anAssociation value.
+													viewElement := categorizeButton phlow firstParentWithView phlow
+															firstParentWithView.
 													anEvent consumed: true.
-													anAssociation key category: aCategory.
-													anAssociation key collection class
-														serializeWithLepiter: anAssociation key.
-													anAssociation value label: aCategory name.
-													anAssociation value icon
-														background: aCategory color.
-													anAssociation value fireEvent: BrDropdownHideWish new ]) ] ]
+													aTtTrackedTime category: aCategory.
+													aTtTrackedTime collection class
+														serializeWithLepiter: aTtTrackedTime.
+													categorizeButton label: aCategory name.
+													categorizeButton icon background: aCategory color.
+													categorizeButton fireEvent: BrDropdownHideWish new.
+													(aTtTrackedTime collection
+														perform: viewElement id asSymbol
+														withArguments: {GtPhlowEmptyView new.
+																GtPhlowContext new}) updateContent: viewElement ]) ] ]
 						ifAbsent: [  ].
 					pane ];
 				with: self.
