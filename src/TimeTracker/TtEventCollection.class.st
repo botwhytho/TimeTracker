@@ -412,7 +412,7 @@ TtEventCollection >> groupedByIsRecurring [
 				ifFalse: [ TtCategories oneTime ] ]
 ]
 
-{ #category : #acccessing }
+{ #category : #'accessing - grouping' }
 TtEventCollection >> groupedByTimespan [
 	^ self groupedBy: #asTimespan
 ]
