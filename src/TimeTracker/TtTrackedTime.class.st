@@ -68,6 +68,11 @@ TtTrackedTime >> <= other [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> asTimespan [
+	^ self as: self value class superclass
+]
+
+{ #category : #accessing }
 TtTrackedTime >> category [
 	^ category
 ]

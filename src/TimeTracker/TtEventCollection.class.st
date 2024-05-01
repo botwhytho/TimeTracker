@@ -295,9 +295,7 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 								addAll: (someTrackedTimes collect: #value).
 						anEvent consumed: true.
 						anEvent target phlow spawnObject: newCollection ] ];
-		values: (aTTEventCollection
-				groupedBy: [ :each | each value as: each value class superclass ])
-				associations;
+		values: (aTTEventCollection groupedBy: [ :each | each value asTimespan ]) associations;
 		when: BlDoubleClickEvent
 			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
 ]
@@ -320,14 +318,21 @@ TtEventCollection >> groupByFilter [
 
 { #category : #acccessing }
 TtEventCollection >> groupedAndSortedByDuration [
-	| groupedActivities summedGroupings |
+	| groupedActivities groupedByTimespan summedGroupings |
+	groupedByTimespan := self groupedByTimespan.
 	groupedActivities := self groupByFilter.
 	summedGroupings := groupedActivities associations
 			collect: [ :anAssociation | 
 				TtCategorizedEventsHelper new
 					category: anAssociation key;
 					collection: anAssociation value;
-					sum: (anAssociation value collect: #duration) sum ].
+					sum: (anAssociation value
+							collect: [ :each | each duration / (groupedByTimespan at: each asTimespan) size ])
+							sum ].
+	summedGroupings
+		detect: [ :each | each category = TtCategories untracked ]
+		ifFound: [ :found | found sum: self groupedByDay keys size days - groupedByTimespan keys sum ]
+		ifNone: [  ].
 	^ summedGroupings sorted: #sum descending
 ]
 
@@ -351,15 +356,28 @@ TtEventCollection >> groupedBy: aBlock [
 				at: key
 				put: ((self species withAll: value)
 						page: self page;
-						categories: self categories) ].
+						categories: self categories;
+						viewFilterContext: self viewFilterContext) ].
 
 	^ result
 ]
 
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByCategory [
-	^ self
-		groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ]
+	| daysWithUntrackedTime grouped |
+	grouped := self
+			groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ].
+	daysWithUntrackedTime := self groupedByDay associations
+			select: [ :anAssociation | 
+				(anAssociation value
+					groupedBy: [ :each | each value as: each value class superclass ]) keys sum
+					< 1 day ]
+			thenCollect: #key.
+	daysWithUntrackedTime
+		ifNotEmpty: [ grouped
+				at: TtCategories untracked
+				put: (self select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ].
+	^ grouped
 ]
 
 { #category : #'accessing - grouping' }
@@ -394,15 +412,16 @@ TtEventCollection >> groupedByIsRecurring [
 				ifFalse: [ TtCategories oneTime ] ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : #acccessing }
 TtEventCollection >> groupedByTimespan [
-	^ self groupedBy: [ :each | each as: each class superclass ]
+	^ self groupedBy: #asTimespan
 ]
 
 { #category : #views }
 TtEventCollection >> gtDailySummaryFor: data [
 	| days flattenedData |
-	flattenedData := data
+	flattenedData := (data
+			reject: [ :each | each category = TtCategories untracked ])
 			flatCollect: [ :aTtCategorizedEventsHelper | 
 				aTtCategorizedEventsHelper collection
 					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
@@ -463,7 +482,6 @@ TtEventCollection >> gtSearchFor: aSearch [
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
 	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
-	self flag: #TODO "Add un-tracked time to charts".
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
@@ -760,7 +778,8 @@ TtEventCollection >> reject: aBlock [
 TtEventCollection >> select: aBlock [
 	^ (self species withAll: (self items select: aBlock))
 		page: self page;
-		categories: self categories
+		categories: self categories;
+		viewFilterContext: self viewFilterContext
 ]
 
 { #category : #import }
