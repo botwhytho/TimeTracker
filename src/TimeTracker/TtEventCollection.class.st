@@ -481,11 +481,10 @@ TtEventCollection >> gtSearchFor: aSearch [
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
-	self flag: #TODO "Changes in categorizing should re-render graphs in realtime".
+	self flag: #TODO.	"Changes in categorizing should re-render graphs in realtime"
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
-		flag: #TODO "change to dropdown for different in place filters";
 		stencil: [ | data horizontalPane verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
@@ -500,7 +499,29 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 					addChildren: {horizontalPane.
 							(self gtDailySummaryFor: data) asElement.
 							(self gtTrackedTimeByDayFor: GtPhlowView empty) asElement}.
-			verticalPane ]
+			verticalPane ];
+		actionDropdownButtonLabel: 'Group By'
+			content: [ :aButton :aBrTab | 
+				| labelMapping |
+				labelMapping := {'Group by Category' -> #Category.
+						'Group by Recurrence' -> #IsRecurring.
+						'Group by Planned' -> #IsPlanned.
+						'Group by Re-scheduled' -> #FirstTimeScheduled}.
+				BrSimpleList new
+					margin: (BlInsets all: 5);
+					items: labelMapping;
+					itemStencil: [ BrLabel new hMatchParent
+							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
+					itemDataBinder: [ :aLabel :aViewFilter | 
+						aLabel
+							text: aViewFilter key;
+							when: BlClickEvent
+								do: [ :_ | 
+									aButton fireEvent: BrDropdownHideWish new.
+									self viewFilterContext: aViewFilter value.
+									(self gtSummaryFor: GtPhlowEmptyView new context: GtPhlowContext new)
+										updateContent: aBrTab viewContentElement.
+									aButton fireEvent: BrDropdownHideWish new ] ] ]
 ]
 
 { #category : #views }
