@@ -438,16 +438,11 @@ TtEventCollection >> defaultPage [
 			newPage ]
 ]
 
-{ #category : #'accessing - grouping' }
-TtEventCollection >> groupByFilter [
-	^ self perform: #groupedBy , self viewFilterContext
-]
-
 { #category : #acccessing }
 TtEventCollection >> groupedAndSortedByDuration [
 	| groupedActivities groupedByTimespan summedGroupings |
 	groupedByTimespan := self groupedByTimespan.
-	groupedActivities := self groupByFilter.
+	groupedActivities := self groupedByFilter.
 	summedGroupings := groupedActivities associations
 			collect: [ :anAssociation | 
 				TtCategorizedEventsHelper new
@@ -510,6 +505,11 @@ TtEventCollection >> groupedByCategory [
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
+]
+
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByFilter [
+	^ self perform: #groupedBy , self viewFilterContext
 ]
 
 { #category : #'accessing - grouping' }
@@ -680,7 +680,8 @@ TtEventCollection >> gtWeekFor: anAction [
 		priority: 1;
 		content: [ :aButton | 
 			| element |
-			element := GtCalendarElement forDate: Date today.
+			element := GtCalendarElement
+					forDate: self rootCollection groupedByDay keys max.
 			element
 				when: GtCalendarDateClickedEvent
 				do: [ :anEvent | 
