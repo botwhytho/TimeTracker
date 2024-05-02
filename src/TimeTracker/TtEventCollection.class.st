@@ -573,18 +573,11 @@ TtEventCollection >> gtImportActionFor: anAction [
 		tooltip: 'Default Tracked Time Collection';
 		priority: 0;
 		action: [ :aButton :aBrTab | 
+			| aContainer |
 			self importFromTrello.
-			self flag: #TODO "Other views and general UI things are not in sync. Can I be hacky and reload the WHOLE phlow tool, the Gt object inspector?".
-			aBrTab phlow firstParentWithView
-				allChildrenBreadthFirstDetect: [ :anElement | 
-					#(#gtSummaryFor:context: #gtEntriesByDayFor:context:)
-						includes: anElement id asSymbol ]
-				ifFound: [ :viewElement | 
-					(self
-						perform: viewElement id asSymbol
-						withArguments: {GtPhlowEmptyView new.
-								GtPhlowContext new}) updateContent: viewElement ]
-				ifNone: [ aBrTab phlow spawnObject: self ] ]
+			self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
+			aContainer := aBrTab phlow firstParentWithView parent parent.
+			aContainer parent replaceChild: aContainer with: (GtInspector newOn: self) ]
 ]
 
 { #category : #search }
