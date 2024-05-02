@@ -321,6 +321,33 @@ TtEventCollection >> buildEntriesByDay [
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;
 											background: Color transparent) ] ] ];
+		column: 'Notes'
+			stencil: [ :each | 
+				| aButton |
+				aButton := [ BrButton new
+						aptitude: BrGlamorousButtonWithIconAptitude;
+						icon: BrGlamorousVectorIcons note;
+						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: each links asLepiterPagePhlowTool ] ].
+				each isAssociation
+					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifFalse: [ each links
+							ifNil: [ GtSpotterDropdownButtonStencil new
+									object: TtLepiterPageSearchStart new;
+									actOn: [ :anActOnEvent :anItem :aBrButton | 
+										| viewElement |
+										viewElement := aBrButton phlow firstParentWithView phlow
+												firstParentWithView.
+										anActOnEvent beActed.
+										each
+											links: ((anItem isKindOf: LePage)
+													ifTrue: [ anItem ]
+													ifFalse: [ anItem createWithoutPager ]).
+										aBrButton phlow spawnTool: each links asLepiterPagePhlowTool.
+										(self
+											perform: viewElement id asSymbol
+											withArguments: {GtPhlowEmptyView new.
+													GtPhlowContext new}) updateContent: viewElement ] ]
+							ifNotNil: aButton ] ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
@@ -335,7 +362,8 @@ TtEventCollection >> buildEntriesByDay [
 								each value do: [ :aTrackedTime | aTrackedTime delete ].
 								(self
 									perform: viewElement id asSymbol
-									withArguments: {GtPhlowEmptyView new. GtPhlowContext new}) updateContent: viewElement ] ]
+									withArguments: {GtPhlowEmptyView new.
+											GtPhlowContext new}) updateContent: viewElement ] ]
 					ifFalse: [ BlElement new size: 1 @ 1 ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll;

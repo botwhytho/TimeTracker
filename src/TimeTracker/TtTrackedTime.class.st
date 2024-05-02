@@ -205,15 +205,6 @@ TtTrackedTime >> gtGoToTrelloFor: anAction [
 ]
 
 { #category : #accessing }
-TtTrackedTime >> gtTrackedTimeFor: aView [
-	<gtView>
-	^ aView explicit
-		title: 'Summary';
-		priority: 1;
-		stencil: self displayTrackedTime
-]
-
-{ #category : #accessing }
 TtTrackedTime >> isPlanned [
 	^ isPlanned
 ]
