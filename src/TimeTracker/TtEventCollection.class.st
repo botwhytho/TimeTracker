@@ -589,6 +589,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 { #category : #search }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
+	self flag: #TODO "Need to fix nesting into categories, play with methods like GtSpotterSearch>>#categoryToActOn:from:".
 	^ aSearch list
 		priority: 1;
 		title: 'Search by Tracked Time entries';
