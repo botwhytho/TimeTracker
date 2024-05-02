@@ -621,11 +621,18 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 	^ aView explicit
 		title: 'Summary' translated;
 		priority: 0;
-		stencil: [ | data horizontalPane verticalPane |
+		stencil: [ | dailySummary data entriesByDay horizontalPane resizer verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
 					matchParent;
 					alignCenter.
+			dailySummary := self buildDailySummary: data.
+			resizer := BrResizer new
+					aptitude: BrGlamorousResizerAptitude;
+					elevation: (BlRelativeElevation elevation: 1000);
+					beBottom;
+					target: dailySummary.
+			entriesByDay := self buildEntriesByDay.
 			horizontalPane
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.
@@ -634,8 +641,9 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 					matchParent;
 					alignCenter;
 					addChildren: {horizontalPane.
-							self buildDailySummary: data.
-							self buildEntriesByDay}.
+							dailySummary.
+							resizer.
+							entriesByDay}.
 			verticalPane ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
