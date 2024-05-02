@@ -617,7 +617,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 { #category : #search }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
-	self flag: #TODO "Need to fix nesting into categories, play with methods like GtSpotterSearch>>#categoryToActOn:from:".
+	self flag: #TODO.	"Need to fix nesting into categories, play with methods like GtSpotterSearch>>#categoryToActOn:from:"
 	^ aSearch list
 		priority: 1;
 		title: 'Search by Tracked Time entries';
@@ -630,6 +630,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 				categories: self categories;
 				page: self page;
 				add: aRawObject;
+				viewFilterContext: self viewFilterContext;
 				yourself ];
 		sendCategory: [ :aCategory :aStep :thisSearch | 
 			| context |
@@ -638,7 +639,8 @@ TtEventCollection >> gtSearchFor: aSearch [
 					thisSearch}.
 			(TtEventCollection withAll: aCategory items contents)
 				categories: self categories;
-				page: self page ];
+				page: self page;
+				viewFilterContext: self viewFilterContext ];
 		previewElement: [ :aTrackedTime | (aTrackedTime gtPreviewFor: GtPhlowEmptyView new) asElement ];
 		filterBySubstring;
 		wantsToDisplayOnEmptyQuery: true
