@@ -565,14 +565,14 @@ TtEventCollection >> gtImportActionFor: anAction [
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
 		label: 'Import';
-		tooltip: 'Default Tracked Time Collection';
+		tooltip: 'Import new data';
 		priority: 0;
 		action: [ :aButton :aBrTab | 
 			| aContainer |
 			self importFromTrello.
 			self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
 			aContainer := aBrTab phlow firstParentWithView parent parent.
-			aContainer parent replaceChild: aContainer with: (GtInspector newOn: self) ]
+			aContainer parent replaceChild: aContainer with: (GtInspector newOn: self rootCollection latestWeek) ]
 ]
 
 { #category : #inspecting }
@@ -581,7 +581,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
 		label: 'ALL TIME';
-		tooltip: 'Default Tracked Time Collection';
+		tooltip: 'View ALL historical data';
 		priority: 1;
 		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
 ]
