@@ -182,8 +182,9 @@ TtEventCollection >> buildDailySummary: data [
 			flatCollect: [ :aTtCategorizedEventsHelper | 
 				aTtCategorizedEventsHelper collection
 					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
-	days := (flattenedData groupedBy: [ :each | each value start asDate ])
-			associations sorted: #key ascending.
+	days := (flattenedData groupedBy: [ :each | each value start asDate ]).
+	days := (flattenedData groupedBy: [ :each | each value start asWeek ]) size = 1 ifTrue: [
+			days associations sorted: #key ascending ] ifFalse: [ days associations sorted: #key descending] .
 	^ GtPhlowView new columnedList
 		title: 'Daily Summary';
 		priority: 6;
@@ -259,7 +260,9 @@ TtEventCollection >> buildDonut: data [
 { #category : #views }
 TtEventCollection >> buildEntriesByDay [
 	| entriesByDay |
-	entriesByDay := self groupedByDay associations sorted: #key descending.
+	entriesByDay := self groupedByWeek size = 1
+			ifTrue: [ self groupedByDay associations sorted: #key ascending ]
+			ifFalse: [ self groupedByDay associations sorted: #key descending ].
 	^ GtPhlowView new columnedTree
 		items: entriesByDay;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
@@ -305,7 +308,10 @@ TtEventCollection >> buildEntriesByDay [
 													addChild: (self categories
 															TtCategoriesFor: GtPhlowView empty
 															context: (GtPhlowContext new
-																	at: #TtTrackedTime put: each -> aButton;
+																	at: #TtTrackedTime
+																		put: {self.
+																				each.
+																				aButton};
 																	yourself)) asElement ]).
 						each category
 							ifNotNil: [ :notNil | 
@@ -343,6 +349,7 @@ TtEventCollection >> buildEntriesByDay [
 													ifTrue: [ anItem ]
 													ifFalse: [ anItem createWithoutPager ]).
 										aBrButton phlow spawnTool: each links asLepiterPagePhlowTool.
+										self flag: #TODO.	"Update only button as updating whole view will move scrollbar"
 										(self
 											perform: viewElement id asSymbol
 											withArguments: {GtPhlowEmptyView new.
@@ -570,6 +577,11 @@ TtEventCollection >> groupedByIsRecurring [
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByTimespan [
 	^ self groupedBy: #asTimespan
+]
+
+{ #category : #'accessing - grouping' }
+TtEventCollection >> groupedByWeek [
+	^ self groupedBy: [ :each | each start asWeek ]
 ]
 
 { #category : #views }
