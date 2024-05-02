@@ -9,7 +9,8 @@ Class {
 		'viewFilterContext'
 	],
 	#classInstVars : [
-		'uniqueInstance'
+		'uniqueInstance',
+		'pageRegistry'
 	],
 	#category : #TimeTracker
 }
@@ -19,37 +20,17 @@ TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
-{ #category : #import }
-TtEventCollection class >> gtImportActionFor: anAction [
-	<gtClassAction>
-	self flag: #TODO "Generalize import through some type of interface".
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		label: 'Import';
-		tooltip: 'Default Tracked Time Collection';
-		priority: 0;
-		action: [ :aButton | aButton phlow spawnObject: self default importFromTrello ]
-]
-
-{ #category : #inspecting }
-TtEventCollection class >> gtInspectActionFor: anAction [
-	<gtClassAction>
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		label: 'ALL TIME';
-		tooltip: 'Default Tracked Time Collection';
-		priority: 1;
-		action: [ :aButton | aButton phlow spawnObject: self default ]
-]
-
 { #category : #views }
-TtEventCollection class >> gtSummaryFor: aView [
+TtEventCollection class >> gtPageRegistryFor: aView [
 	<gtClassView>
-	^ aView forward
-		title: 'Summary';
-		priority: 10;
-		object: self loadFromLepiter latestWeek;
-		view: #gtSummaryFor:context:
+	self pageRegistry ifEmpty: [ ^ aView empty ].
+	^ aView columnedList
+		title: 'Page Registry';
+		priority: 1;
+		items: [ self pageRegistry associations ];
+		column: 'Database' text: [ :each | each key database databaseName ];
+		column: 'Page' text: [ :each | each key title ];
+		send: [ :each | each value latestWeek ]
 ]
 
 { #category : #initialization }
@@ -60,6 +41,20 @@ TtEventCollection class >> loadFromLepiter [
 { #category : #'instance creation' }
 TtEventCollection class >> newFrom: aCollection [
 	^ self withAll: aCollection
+]
+
+{ #category : #accessing }
+TtEventCollection class >> pageRegistry [
+	^ pageRegistry
+		ifNil: [ self loadFromLepiter.
+			pageRegistry := Dictionary new
+					at: self default page put: self default;
+					yourself ]
+]
+
+{ #category : #accessing }
+TtEventCollection class >> pageRegistry: aDictionary [
+	pageRegistry := aDictionary
 ]
 
 { #category : #import }
@@ -580,6 +575,17 @@ TtEventCollection >> gtImportActionFor: anAction [
 			aContainer parent replaceChild: aContainer with: (GtInspector newOn: self) ]
 ]
 
+{ #category : #inspecting }
+TtEventCollection >> gtInspectActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons inspect;
+		label: 'ALL TIME';
+		tooltip: 'Default Tracked Time Collection';
+		priority: 1;
+		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
+]
+
 { #category : #search }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
@@ -670,14 +676,9 @@ TtEventCollection >> gtWeekFor: anAction [
 			element
 				when: GtCalendarDateClickedEvent
 				do: [ :anEvent | 
-					| rootCollection |
-					rootCollection := self
-							detect: [ :each | each category isNotNil ]
-							ifFound: [ :found | found category rootCategory collection ]
-							ifNone: [ rootCollection := self ].
 					anEvent consumed: true.
 					aButton fireEvent: BrDropdownHideWish new.
-					aButton phlow spawnObject: (rootCollection weekFromDate: anEvent date) ] ]
+					aButton phlow spawnObject: (self rootCollection weekFromDate: anEvent date) ] ]
 ]
 
 { #category : #accessing }
@@ -733,10 +734,10 @@ TtEventCollection >> importFromTrello [
 	| response daysToImport existingDays |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
-	self
+	self rootCollection
 		serializeCollection;
 		loadFromLepiter.
-	existingDays := (self collect: [ :each | each start asDate ] as: Set) asArray
+	existingDays := (self rootCollection collect: [ :each | each start asDate ] as: Set) asArray
 			sorted: #yourself descending.
 	daysToImport := (response keys difference: existingDays) asArray
 			sorted: #yourself ascending.
@@ -744,7 +745,7 @@ TtEventCollection >> importFromTrello [
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
 		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ].
 	(daysToImport first: 1)
-		do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self ]
+		do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self rootCollection ]
 		 "response associations first in:
 		associationsDo: [ :day | TtTrelloParser new add: day toCollection: self ]"
 ]
@@ -757,7 +758,7 @@ TtEventCollection >> items [
 
 { #category : #accessing }
 TtEventCollection >> latestWeek [
-	^ self weekFromDate: self groupedByDay keys max
+	^ self rootCollection weekFromDate: self rootCollection groupedByDay keys max
 ]
 
 { #category : #accessing }
@@ -797,7 +798,7 @@ TtEventCollection >> loadFromLepiter [
 
 { #category : #accessing }
 TtEventCollection >> loadPage [
-	page
+	^ page
 		ifNil: [ [ page := self perform: #customPage ]
 				on: MessageNotUnderstood
 				do: [ page := self defaultPage ] ]
@@ -840,6 +841,11 @@ TtEventCollection >> reject: aBlock [
 	^ (self species withAll: (self items reject: aBlock))
 		page: self page;
 		categories: self categories
+]
+
+{ #category : #accessing }
+TtEventCollection >> rootCollection [
+	^ self class pageRegistry at: self page
 ]
 
 { #category : #enumerating }
