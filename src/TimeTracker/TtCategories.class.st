@@ -226,7 +226,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aBrButton phlow firstParentWithView phlow syncUpdate ] ]) ].
 					aContext
 						at: #TtTrackedTime
-						ifPresent: [ :anAssociation | 
+						ifPresent: [ :arguments | 
 							(aCategory isKindOf: TtRootCategory)
 								ifFalse: [ pane
 										addChild: (BrButton new
@@ -234,19 +234,20 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												aptitude: BrGlamorousButtonWithIconAptitude;
 												icon: BrGlamorousVectorIcons accept;
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
-													| aTtTrackedTime categorizeButton viewElement |
-													aTtTrackedTime := anAssociation key.
-													categorizeButton := anAssociation value.
+													| aCollection aTtTrackedTime categorizeButton viewElement |
+													aCollection := arguments first.
+													aTtTrackedTime := arguments second.
+													categorizeButton := arguments third.
 													viewElement := categorizeButton phlow firstParentWithView phlow
 															firstParentWithView.
 													anEvent consumed: true.
 													aTtTrackedTime category: aCategory.
-													aTtTrackedTime collection class
+													aCollection class
 														serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													categorizeButton fireEvent: BrDropdownHideWish new.
-													(aTtTrackedTime collection
+													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
 																GtPhlowContext new}) updateContent: viewElement ]) ] ]
