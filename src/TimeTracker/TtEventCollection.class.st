@@ -619,7 +619,9 @@ TtEventCollection >> gtSearchFor: aSearch [
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
 	^ aView explicit
-		title: 'Summary' translated;
+		title: ((self groupedBy: #asWeek) keys size = 1
+				ifTrue: [ 'Weekly Summary' ]
+				ifFalse: [ 'Summary' ]);
 		priority: 0;
 		stencil: [ | dailySummary data entriesByDay horizontalPane resizer verticalPane |
 			data := self calculateAnglesForDonut.
