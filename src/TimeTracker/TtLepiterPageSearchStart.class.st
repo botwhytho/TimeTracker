@@ -10,13 +10,14 @@ Class {
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 	<gtSearch>
+	self flag: #TODO "What to do when you enspect a category instead of item?".
 	^ aSearch list
 		priority: 1;
-		items: [ LeNotePlaygroundStencil new
-				knowledgeBase: self knowledgeBase;
-				asArray ];
+		items: [ {LeNotePlaygroundStencil new
+				knowledgeBase: self knowledgeBase".
+				GtPlaygroundStencil new knowledgeBase: self knowledgeBase"} ];
 		title: 'Create a New Page';
-		filterBySubstring;
+		filter: GtSpotterReturnAllItemsFilter new;
 		previewElement: [ :aStencil | aStencil asPreviewElement asElement ];
 		withoutItemAction;
 		wantsToDisplayOnEmptyQuery: true
@@ -25,9 +26,10 @@ TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 	<gtSearch>
+	self flag: #TODO "What to do when you enspect a category instead of item?".
 	^ aSearch explicit
 		title: 'Named pages';
-		priority: 22;
+		priority: 2;
 		search: [ :aContext | self knowledgeBase asyncPagesForWord: aContext searchQuery ];
 		itemName: #title;
 		withoutItemAction;
@@ -37,8 +39,9 @@ TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtSpotterContainingSubPartsFor: aSearch [
 	<gtSearch>
+	self flag: #TODO "What to do when you enspect a category instead of item?".
 	^ aSearch explicit
-		priority: 23;
+		priority: 3;
 		title: 'Page contents';
 		search: [ :aContext | 
 			[ | filter results |

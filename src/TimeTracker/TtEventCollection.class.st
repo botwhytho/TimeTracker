@@ -343,13 +343,16 @@ TtEventCollection >> buildEntriesByDay [
 										| viewElement |
 										viewElement := aBrButton phlow firstParentWithView phlow
 												firstParentWithView.
+										"self halt."
 										anActOnEvent beActed.
 										each
 											links: ((anItem isKindOf: LePage)
 													ifTrue: [ anItem ]
 													ifFalse: [ anItem createWithoutPager ]).
+										self flag: #TODO "Seems like I have two pages with same name in same DB below, test.".
+										"each links database pageNamed: [ anActOnEvent spotterStep searchQuery ] ifAbsent: [ self inform: 'Page not found'. each links updateTitle: anActOnEvent spotterStep searchQuery]."
 										aBrButton phlow spawnTool: each links asLepiterPagePhlowTool.
-										self flag: #TODO.	"Update only button as updating whole view will move scrollbar"
+										self flag: #TODO.	"Update only button as updating whole view will move scrollbar. Maybe update in an task?"
 										(self
 											perform: viewElement id asSymbol
 											withArguments: {GtPhlowEmptyView new.
