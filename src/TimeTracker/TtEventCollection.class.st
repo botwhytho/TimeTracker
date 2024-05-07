@@ -123,7 +123,7 @@ TtEventCollection >> buildBars: data [
 			labelled: [ :each | 
 				each category name , ' ('
 					, (each sum asHours / totalTime * 100 round: 1) asString , '%)' ].
-	theData := theData colored: [ :each | each category color ].
+	theData := theData background: [ :each | each category color ].
 
 	maxLines := theData
 			inject: 0
