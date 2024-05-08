@@ -2,10 +2,7 @@ Class {
 	#name : #LeJsonSnippetElement,
 	#superclass : #LeEvaluatedSnippetElement,
 	#instVars : [
-		'contentElement',
-		'bindingEditor',
-		'indicatorElement',
-		'indicatorStencil'
+		'contentElement'
 	],
 	#category : #TimeTracker
 }
@@ -15,19 +12,6 @@ LeJsonSnippetElement >> editorElement [
 	"Answer the BrEditor used by the receiver"
 
 	^ editorElement
-]
-
-{ #category : #initialization }
-LeJsonSnippetElement >> go [
-	| string bindingName sharedBindings binding |
-	string := editorElement text asString.
-	self snippetViewModel contentString: string.
-	bindingName := bindingEditor text asString.
-	self snippetViewModel bindingName: bindingName.
-	sharedBindings := self snippetViewModel snippetBindings.
-	binding := sharedBindings bindingOf: bindingName asSymbol.
-	binding value: string.
-	^ string
 ]
 
 { #category : #initialization }
@@ -50,10 +34,9 @@ LeJsonSnippetElement >> initializeEditorElement [
 					left: 7
 					bottom: 5
 					right: 0);
-			margin: BlInsets empty.
-	editorElement editor
-		addEventHandler: (LeEditorReachedBorderEventHandler new snippetElement: self);
-		ensureNoUndoRedoShortcuts.
+			margin: BlInsets empty;
+			beMode: BrTextEditorReadonlyWithSelectionMode new.
+	editorElement editor ensureNoUndoRedoShortcuts.
 
 	true
 		ifFalse: [ editorElement aptitudeDo: [ :aLook | aLook glamorousRegularDefaultFont ] ]
@@ -66,11 +49,8 @@ LeJsonSnippetElement >> onSnippetViewModelChanged [
 ]
 
 { #category : #'private - announcement handling' }
-LeJsonSnippetElement >> onStringFormatChanged: anAnnouncement [
-	BlTaskAction
-		enqueueElement: self
-		action: [ self updateIndicatorElement.
-			self updateEditorElement ]
+LeJsonSnippetElement >> onTextChanged: anAnnouncement [
+	BlTaskAction enqueueElement: self action: [ self updateElement ]
 ]
 
 { #category : #accessing }
@@ -83,8 +63,8 @@ LeJsonSnippetElement >> subscribeToSnippetViewModel [
 	super subscribeToSnippetViewModel.
 
 	self snippetViewModel announcer weak
-		when: LeStringFormatChanged
-		send: #onStringFormatChanged:
+		when: LeSnippetTextChanged
+		send: #onTextChanged:
 		to: self
 ]
 
@@ -96,9 +76,8 @@ LeJsonSnippetElement >> unsubscribeFromSnippetViewModel [
 ]
 
 { #category : #'private - updating' }
-LeJsonSnippetElement >> updateBindingElement [
-	bindingEditor
-		text: (self snippetViewModel bindingName ifNil: [ String new ]) asRopedText
+LeJsonSnippetElement >> updateCoderUIModel [
+	editorElement textualCoderViewModel: self snippetViewModel coderViewModel
 ]
 
 { #category : #'private - updating' }
@@ -114,21 +93,5 @@ LeJsonSnippetElement >> updateEditorElement [
 
 { #category : #'private - updating' }
 LeJsonSnippetElement >> updateElement [
-	self updateEditorElement.
-	self updateBindingElement.
-	self updateIndicatorElement.
-]
-
-{ #category : #'private - updating' }
-LeJsonSnippetElement >> updateIndicatorElement [
-	| aParserClass aParserName anIndicatorLabel |
-	aParserClass := self snippetViewModel parser.
-	aParserName := LeStringParserNameBuilder new
-			parserClass: aParserClass;
-			build.
-	anIndicatorLabel := aParserName
-			ifNil: [ 'String' ]
-			ifNotNil: [ 'String ({1})' format: {aParserName} ].
-	indicatorElement label: anIndicatorLabel.
-	indicatorStencil label: anIndicatorLabel
+	self updateEditorElement
 ]

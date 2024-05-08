@@ -11,6 +11,15 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #'api - accessing menu' }
+LeJsonSnippet class >> contextMenuItemSpecification [
+	<leSnippetSpecification>
+	self flag: #TODO "Remove this, only have this for testing but shouldn't be able to chose from meny as this snippet type is for programatic use".
+	^ LeContextMenuItemSpecification new
+		snippetClass: self;
+		title: 'JSON'
+]
+
 { #category : #accessing }
 LeJsonSnippet class >> empty [
 	^ self new
@@ -18,8 +27,9 @@ LeJsonSnippet class >> empty [
 
 { #category : #accessing }
 LeJsonSnippet class >> leJsonV4AttributeMapping [
-	^ super leJsonV4AttributeMapping
-		add: #contentString -> #contentString;
+	^ LeSnippet leJsonV4AttributeMapping
+		add: (#contentString -> #contentString);
+		add: (#schema -> #schema);
 		yourself
 ]
 
@@ -55,18 +65,8 @@ LeJsonSnippet >> announceTextChangedBy: anObject withTextEditCommand: aTextEditC
 ]
 
 { #category : #'api - editing' }
-LeJsonSnippet >> appendText: aText source: anObject [
-	"Text attributes aren't part of the model, so appending an empty text with attributes is meaningless and can be ignored"
-
-	aText ifEmpty: [ ^ self ].
-
-	self assertText: aText.
-
-	self contentString: self contentString , aText asString.
-
-	self updateEditTimeAndEmail.
-
-	self announceTextChangedBy: anObject
+LeJsonSnippet >> appendText: aText [
+	self shouldNotImplement
 ]
 
 { #category : #converting }
@@ -79,17 +79,7 @@ LeJsonSnippet >> asPhlowTool [
 { #category : #converting }
 LeJsonSnippet >> asSnippetViewModel [
 	<return: #LeSnippetViewModel>
-	^ LeStringSnippetViewModel new snippetModel: self
-]
-
-{ #category : #'private - asserting' }
-LeJsonSnippet >> assertText: aText [
-	self 
-		assert: [ aText isNotNil ] 
-		description: [ 'Text must be non-nil' ]. 
-	self 
-		assert: [ aText isKindOf: BlText ] 
-		description: [ 'Text must be a ', BlText name, ' instance' ]. 
+	^ LeJsonSnippetViewModel new snippetModel: self
 ]
 
 { #category : #accessing }
@@ -110,7 +100,8 @@ LeJsonSnippet >> contentString [
 
 { #category : #accessing }
 LeJsonSnippet >> contentString: aString [
-	contentString := aString
+	contentString := aString.
+	self announceTextChangedBy: self
 ]
 
 { #category : #initialization }
