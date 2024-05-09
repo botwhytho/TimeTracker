@@ -6,7 +6,7 @@ Class {
 
 { #category : #accessing }
 LeJsonSnippetViewModel >> contentString [
-	^ self snippetModel contentString
+	^ self snippetModel text
 ]
 
 { #category : #accessing }

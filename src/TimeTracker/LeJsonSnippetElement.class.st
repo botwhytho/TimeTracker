@@ -35,17 +35,14 @@ LeJsonSnippetElement >> initializeEditorElement [
 					bottom: 5
 					right: 0);
 			margin: BlInsets empty;
-			beMode: BrTextEditorReadonlyWithSelectionMode new.
+			beMode: BrTextEditorReadonlyWithoutSelectionMode new.
 	editorElement editor ensureNoUndoRedoShortcuts.
-
-	true
-		ifFalse: [ editorElement aptitudeDo: [ :aLook | aLook glamorousRegularDefaultFont ] ]
 ]
 
 { #category : #'api - snippet view model' }
 LeJsonSnippetElement >> onSnippetViewModelChanged [
 	super onSnippetViewModelChanged.
-	self updateElement
+	self onTextChanged: LeSnippetTextChanged new
 ]
 
 { #category : #'private - announcement handling' }
@@ -77,18 +74,14 @@ LeJsonSnippetElement >> unsubscribeFromSnippetViewModel [
 
 { #category : #'private - updating' }
 LeJsonSnippetElement >> updateCoderUIModel [
-	editorElement textualCoderViewModel: self snippetViewModel coderViewModel
+	self flag: #BUG	"Have issues if change the editor mode to allow selection.".
+	"editorElement textualCoderViewModel: self snippetViewModel coderViewModel."
+	"self onTextChanged: LeSnippetTextChanged new."
 ]
 
 { #category : #'private - updating' }
 LeJsonSnippetElement >> updateEditorElement [
-	| aParserClass |
-	editorElement
-		text: (self snippetViewModel contentString ifNil: [ String empty ]) asRopedText.
-
-	aParserClass := self snippetViewModel parser.
-	(aParserClass isNotNil and: [ aParserClass gtStyler isNotNil ])
-		ifTrue: [ editorElement styler: aParserClass gtStyler ]
+	editorElement text: self snippetViewModel contentString
 ]
 
 { #category : #'private - updating' }

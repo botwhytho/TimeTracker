@@ -55,16 +55,6 @@ LeJsonSnippet >> acceptVisitor: aVisitor [
 ]
 
 { #category : #'api - editing' }
-LeJsonSnippet >> announceTextChangedBy: anObject withTextEditCommand: aTextEditCommand [ 
-	"Notify all dependents that the receiver's text has changed"
-
-	self notifyAnnouncement: (LeSnippetTextChanged new
-		source: anObject;
-		snippet: self;
-		textEditCommand: aTextEditCommand)
-]
-
-{ #category : #'api - editing' }
 LeJsonSnippet >> appendText: aText [
 	self shouldNotImplement
 ]
@@ -90,7 +80,16 @@ LeJsonSnippet >> ast [
 
 { #category : #accessing }
 LeJsonSnippet >> contentAsString [
-	^ self contentString ifNil: [ String new ]
+	^ self contentString
+		ifNotNil: [ :notNil | 
+			notNil isString
+				ifTrue: [ '' ]
+				ifFalse: [ String
+						streamContents: [ :stream | 
+							(NeoJSONWriter on: stream)
+								prettyPrint: true;
+								nextPut: notNil ] ] ]
+		ifNil: [ String empty ]
 ]
 
 { #category : #accessing }
@@ -145,5 +144,5 @@ LeJsonSnippet >> schema: anObject [
 
 { #category : #accessing }
 LeJsonSnippet >> text [
-	^ self contentString asRopedText
+	^ self parser gtStyler style: self contentAsString asRopedText
 ]
