@@ -182,9 +182,10 @@ TtEventCollection >> buildDailySummary: data [
 			flatCollect: [ :aTtCategorizedEventsHelper | 
 				aTtCategorizedEventsHelper collection
 					collect: [ :aTtTrackedTime | aTtCategorizedEventsHelper category -> aTtTrackedTime ] ].
-	days := (flattenedData groupedBy: [ :each | each value start asDate ]).
-	days := (flattenedData groupedBy: [ :each | each value start asWeek ]) size = 1 ifTrue: [
-			days associations sorted: #key ascending ] ifFalse: [ days associations sorted: #key descending] .
+	days := flattenedData groupedBy: [ :each | each value start asDate ].
+	days := (flattenedData groupedBy: [ :each | each value start asWeek ]) size = 1
+			ifTrue: [ days associations sorted: #key ascending ]
+			ifFalse: [ days associations sorted: #key descending ].
 	^ GtPhlowView new columnedList
 		title: 'Daily Summary';
 		priority: 6;
@@ -196,7 +197,7 @@ TtEventCollection >> buildDailySummary: data [
 					ifNotNil: [ BrButton new
 							aptitude: BrGlamorousButtonWithLabelAptitude;
 							label: each key yyyymmdd , '-' , (each key weekday first: 3);
-							action: [ :anElement | anElement phlow spawnObject: each value ] ] ]
+							action: [ :anElement | anElement phlow spawnObject: (self withAll: (each value collect: #value)) ] ] ]
 			weight: 0.1;
 		column: 'Tracked Time'
 			stencil: [ :each | 
@@ -672,7 +673,8 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		stencil: [ | dailySummary data entriesByDay horizontalPane resizer verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
-					matchParent;
+					vFitContent;
+					hMatchParent;
 					alignCenter.
 			dailySummary := self buildDailySummary: data.
 			resizer := BrResizer new
@@ -955,4 +957,13 @@ TtEventCollection >> weekFromDate: aDate [
 	nextMonday := (lastSunday + 8 days) asDate.
 	^ self
 		select: [ :each | each start asDate > lastSunday and: [ each start asDate < nextMonday ] ]
+]
+
+{ #category : #'instance - creation' }
+TtEventCollection >> withAll: aCollection [
+	^ self class new
+		page: self page;
+		categories: self categories;
+		viewFilterContext: self viewFilterContext;
+		addAll: aCollection
 ]
