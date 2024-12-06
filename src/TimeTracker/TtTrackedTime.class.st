@@ -261,7 +261,9 @@ TtTrackedTime >> printOnDetailed [
 			aStream
 				nextPutAll: self start asTime hhmm24;
 				nextPut: $-;
-				nextPutAll: (self end asTime addSeconds: 1) hhmm24;
+				nextPutAll: (self end asTime
+						in: [ :aTime | aTime asSeconds < 86399 ifTrue: [ aTime addSeconds: 1 ] ifFalse: [ (self end + 1 day) asDate asTime ] ])
+						hhmm24;
 				nextPut: Character space;
 				nextPutAll: self description.
 			self details
