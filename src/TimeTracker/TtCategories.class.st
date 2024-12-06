@@ -201,7 +201,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																			self calculateHierarchy.
 																			self root collection
 																				ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-																			textElement phlow firstParentWithView phlow syncUpdate ];
+																			textElement phlow firstParentWithViewContent phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
 									icon: BrGlamorousVectorIcons add}.
@@ -238,12 +238,11 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection := arguments first.
 													aTtTrackedTime := arguments second.
 													categorizeButton := arguments third.
-													viewElement := categorizeButton phlow firstParentWithView phlow
-															firstParentWithView.
+													viewElement := categorizeButton phlow firstParentWithViewContent
+															phlow firstParentWithViewContent.
 													anEvent consumed: true.
 													aTtTrackedTime category: aCategory.
-													aCollection class
-														serializeWithLepiter: aTtTrackedTime.
+													aCollection class serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													categorizeButton fireEvent: BrDropdownHideWish new.
