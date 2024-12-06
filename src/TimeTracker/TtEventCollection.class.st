@@ -163,7 +163,7 @@ TtEventCollection >> buildBars: data [
 								anEvent currentTarget border: aColor.
 								container
 									previousSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ] ];
-		barLabelWidth: 160;
+		barLabelSpacing: 160;
 		barWidthScale: aBarWidthScale;
 		barWidthData: [ :eachValue | eachValue sum asHours / totalTime ];
 		tickLabelFormat: [ :eachFloat | (eachFloat * 100 round: 1) asString , '%' ];
@@ -615,8 +615,10 @@ TtEventCollection >> gtImportActionFor: anAction [
 			| aContainer |
 			self importFromTrello.
 			self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
-			aContainer := aBrTab phlow firstParentWithView parent parent.
-			aContainer parent replaceChild: aContainer with: (GtInspector newOn: self rootCollection latestWeek) ]
+			aContainer := aBrTab phlow firstParentWithViewContent parent parent.
+			aContainer parent
+				replaceChild: aContainer
+				with: (GtInspector newOn: self rootCollection latestWeek) ]
 ]
 
 { #category : #inspecting }
