@@ -295,7 +295,7 @@ TtEventCollection >> buildEntriesByDay [
 						aButton := BrButton new.
 						aButton
 							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
-									+ (BrGlamorousWithDropdownAptitude
+									+ ((BrGlamorousWithDropdownAptitude
 											handle: [ BrButton new
 													aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 													label: ('Categorize' asRopedText fontSize: 12);
@@ -313,7 +313,8 @@ TtEventCollection >> buildEntriesByDay [
 																		put: {self.
 																				each.
 																				aButton};
-																	yourself)) asElement ]).
+																	yourself)) asElement ])
+													preferredExtent: 1000 @ 1000).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton
