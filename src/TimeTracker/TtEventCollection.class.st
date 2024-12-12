@@ -732,15 +732,32 @@ TtEventCollection >> gtWeekFor: anAction [
 		tooltip: 'Select a Week to Analyze';
 		priority: 1;
 		content: [ :aButton | 
-			| element |
-			element := GtCalendarElement
+			| firstDate element |
+			firstDate := nil.
+			element := TtCalendarElement
 					forDate: self rootCollection groupedByDay keys max.
 			element
-				when: GtCalendarDateClickedEvent
+				when: TtCalendarDateClickedEvent
 				do: [ :anEvent | 
-					anEvent consumed: true.
-					aButton fireEvent: BrDropdownHideWish new.
-					aButton phlow spawnObject: (self rootCollection weekFromDate: anEvent date) ] ]
+					anEvent clickEvent modifiers = BlKeyModifiers shift
+						ifTrue: [ firstDate
+								ifNil: [ anEvent consumed: true.
+									firstDate := anEvent date ]
+								ifNotNil: [ | sortedDates |
+									anEvent consumed: true.
+									sortedDates := {firstDate.
+											anEvent date} sorted: #yourself ascending.
+									aButton fireEvent: BrDropdownHideWish new.
+									aButton phlow
+										spawnObject: (self rootCollection
+												select: [ :each | 
+													each start asDate >= sortedDates first
+														and: [ each start asDate <= sortedDates second ] ]).
+									firstDate := nil ] ]
+						ifFalse: [ anEvent consumed: true.
+							aButton fireEvent: BrDropdownHideWish new.
+							aButton phlow
+								spawnObject: (self rootCollection weekFromDate: anEvent date) ] ] ]
 ]
 
 { #category : #accessing }
