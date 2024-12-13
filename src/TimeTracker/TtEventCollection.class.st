@@ -819,10 +819,10 @@ TtEventCollection >> importFromTrello [
 	existingDays := (self rootCollection collect: [ :each | each start asDate ] as: Set) asArray
 			sorted: #yourself descending.
 	daysToImport := (response keys difference: existingDays) asArray
-			sorted: #yourself ascending.
-	daysToImport
+			sorted: #yourself descending.
+	"daysToImport
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
-		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ].
+		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
 	(daysToImport first: 1)
 		do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self rootCollection ]
 		 "response associations first in:
