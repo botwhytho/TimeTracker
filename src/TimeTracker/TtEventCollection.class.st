@@ -129,6 +129,17 @@ TtEventCollection >> allEqualTo: aTtTrackedTime [
 	^ before , after
 ]
 
+{ #category : #filtering }
+TtEventCollection >> allOverlappingWith: aTtTrackedTime [
+	"Returns all entries overlapping with the entry at some point (both shorter and longer timespans)."
+
+	self flag: #EXPENSIVE.	"What would we use this for that can't be achieve more cheaply. This iterates whole collection and does (potentially) expensive comparisons"
+	^ self items value asArray
+		select: [ :each | 
+			(each == aTtTrackedTime) not
+				and: [ (aTtTrackedTime includes: each) or: [ each includes: aTtTrackedTime ] ] ]
+]
+
 { #category : #accessing }
 TtEventCollection >> asAsyncStream [
 	^ self items asAsyncStream
