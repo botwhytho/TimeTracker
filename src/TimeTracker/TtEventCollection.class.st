@@ -109,6 +109,26 @@ TtEventCollection >> TtCategoriesFor: aView [
 		view: #TtCategoriesFor:context:
 ]
 
+{ #category : #filtering }
+TtEventCollection >> allEqualTo: aTtTrackedTime [
+	"Returns all entries happening at the same time. Had to define identityBefore/identityAfter (that use `identityIndexOf:`) for this to work properly as `indexOf:` just compares by `=`"
+
+	| before after previous next sortedCollection |
+	sortedCollection := self items value.
+	before := OrderedCollection new.
+	after := OrderedCollection new.
+	previous := sortedCollection identityBefore: aTtTrackedTime ifAbsent: [ nil ].
+	next := sortedCollection identityAfter: aTtTrackedTime ifAbsent: [ nil ].
+
+	[ previous isNotNil and: [ aTtTrackedTime = previous ] ]
+		whileTrue: [ before add: previous.
+			previous := sortedCollection identityBefore: previous ifAbsent: [ nil ] ].
+	[ next isNotNil and: [ aTtTrackedTime = next ] ]
+		whileTrue: [ after add: next.
+			next := sortedCollection identityAfter: next ifAbsent: [ nil ] ].
+	^ before , after
+]
+
 { #category : #accessing }
 TtEventCollection >> asAsyncStream [
 	^ self items asAsyncStream
