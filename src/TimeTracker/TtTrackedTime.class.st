@@ -64,6 +64,7 @@ TtTrackedTime class >> snippetClass [
 
 { #category : #comparing }
 TtTrackedTime >> <= other [
+	self flag: #DEPRECATE "This looks redundant with superclass chain definitions. Test and remove".
 	^ self start <= other start
 ]
 
