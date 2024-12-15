@@ -949,6 +949,12 @@ TtEventCollection >> page: aLepiterPage [
 	page := aLepiterPage
 ]
 
+{ #category : #accessing }
+TtEventCollection >> pomodoros [
+	self flag: #TODO.	"Placeholder for when I integrate pomodoros into this package"
+	^ #()
+]
+
 { #category : #printing }
 TtEventCollection >> printOn: aStream [
 	super printOn: aStream.
