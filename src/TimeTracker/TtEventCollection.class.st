@@ -935,6 +935,11 @@ TtEventCollection >> loadPage [
 ]
 
 { #category : #accessing }
+TtEventCollection >> notes [
+	^ self select: [ :each | each isKindOf: TtNote ]
+]
+
+{ #category : #accessing }
 TtEventCollection >> page [
 	^ page
 ]
@@ -1002,6 +1007,11 @@ TtEventCollection >> thisWeek [
 			- (today weekdayIndex - 1 = 0 ifTrue: [ 7 ] ifFalse: [ today weekdayIndex - 1 ])
 					days) asDate.
 	^ self select: [ :each | each start asDate > lastSunday ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> timeEntries [
+	^ self select: [ :each | each isKindOf: TtTrackedTime ]
 ]
 
 { #category : #accessing }
