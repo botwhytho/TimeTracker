@@ -53,6 +53,11 @@ TtNote class >> snippetClass [
 ]
 
 { #category : #accessing }
+TtNote >> asTimespan [
+	^ self as: self value class superclass
+]
+
+{ #category : #accessing }
 TtNote >> collection [
 	^ collection
 ]
