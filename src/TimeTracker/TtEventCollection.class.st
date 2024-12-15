@@ -98,6 +98,12 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			anEntity uid: anUnknownSnippet uidString ]
 ]
 
+{ #category : #serialization }
+TtEventCollection class >> supportedSnippetTypes [
+	^ {TtTrackedTimeSnippet.
+		TtNoteSnippet}
+]
+
 { #category : #views }
 TtEventCollection >> TtCategoriesFor: aView [
 	<gtView>
@@ -908,10 +914,10 @@ TtEventCollection >> loadFromLepiter [
 		ifTrue: [ self loadPage.
 			self loadCategories.
 			self page children asArray
-				select: [ :each | each isKindOf: TtTrackedTimeSnippet ]
+				select: [ :each | self class supportedSnippetTypes includes: each class ]
 				thenDo: [ :each | 
 					self items
-						add: ((NeoJSONReader fromString: each jsonString as: TrackedTimeSnippetDeserializer)
+						add: ((NeoJSONReader fromString: each jsonString as: each class deserializerClass)
 								data
 								in: [ :aTrackedTime | 
 									aTrackedTime
@@ -969,6 +975,7 @@ TtEventCollection >> reject: aBlock [
 
 { #category : #accessing }
 TtEventCollection >> rootCollection [
+	self flag: #TODO.	"Need to change definition of this. Propagate in `withAll:`, `select:`, `reject:`, etc. Once we have custom page types, should remove the assumption that there will be a 'default' page. Just add slot and point to self on initialization and forward as mentioned above."
 	^ self class pageRegistry at: self page
 ]
 

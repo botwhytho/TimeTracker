@@ -4,6 +4,11 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #serialization }
+TtTrackedTimeSnippet class >> deserializerClass [
+	^ TrackedTimeSnippetDeserializer
+]
+
 { #category : #initialization }
 TtTrackedTimeSnippet class >> initialize [
 	super initialize.

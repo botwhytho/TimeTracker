@@ -4,6 +4,11 @@ Class {
 	#category : #TimeTracker
 }
 
+{ #category : #serialization }
+TtNoteSnippet class >> deserializerClass [
+	^ NoteSnippetDeserializer
+]
+
 { #category : #initialization }
 TtNoteSnippet class >> initialize [
 	super initialize.
