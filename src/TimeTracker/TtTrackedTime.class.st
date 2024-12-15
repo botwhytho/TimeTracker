@@ -9,7 +9,6 @@ Class {
 		'daySerializedFrom',
 		'category',
 		'labels',
-		'links',
 		'isPlanned',
 		'isRecurring',
 		'firstTimeScheduled',
@@ -239,16 +238,6 @@ TtTrackedTime >> labels [
 { #category : #accessing }
 TtTrackedTime >> labels: anObject [
 	labels := anObject
-]
-
-{ #category : #accessing }
-TtTrackedTime >> links [
-	^ links
-]
-
-{ #category : #accessing }
-TtTrackedTime >> links: anObject [
-	links := anObject
 ]
 
 { #category : #printing }
