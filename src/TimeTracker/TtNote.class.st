@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'collection',
 		'page',
-		'database'
+		'database',
+		'uid'
 	],
 	#category : #TimeTracker
 }
@@ -60,4 +61,14 @@ TtNote >> page [
 { #category : #accessing }
 TtNote >> page: aLePage [
 	page := aLePage
+]
+
+{ #category : #accessing }
+TtNote >> uid [
+	^ uid
+]
+
+{ #category : #accessing }
+TtNote >> uid: anObject [
+	uid := anObject
 ]
