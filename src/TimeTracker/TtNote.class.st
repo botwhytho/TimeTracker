@@ -12,12 +12,14 @@ Class {
 
 { #category : #serialization }
 TtNote class >> neoJsonMapping: aNeoJSONMapper [
+	| database |
 	aNeoJSONMapper
 		for: self
 			do: [ :aMapping | 
-				aMapping mapInstVars: #(database page).
 				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
-				(aMapping mapInstVar: #duration) valueSchema: Duration ];
+				(aMapping mapInstVar: #duration) valueSchema: Duration.
+				(aMapping mapInstVar: #database) valueSchema: LeDatabase.
+				(aMapping mapInstVar: #page) valueSchema: LePage ];
 		for: DateAndTime
 			customDo: [ :mapping | 
 				mapping decoder: [ :string | DateAndTime fromString: string ].
@@ -25,7 +27,24 @@ TtNote class >> neoJsonMapping: aNeoJSONMapper [
 		for: Duration
 			customDo: [ :mapping | 
 				mapping decoder: [ :aString | aString asDuration ].
-				mapping encoder: [ :aDuration | aDuration asString ] ]
+				mapping encoder: [ :aDuration | aDuration asString ] ];
+		for: LeDatabase
+			customDo: [ :mapping | 
+				mapping
+					decoder: [ :aString | 
+						database := (LeLogicalDatabase allSubInstances
+								collect: [ :each | each databaseWithID: aString ifNone: [ nil ] ])
+								detect: #isNotNil
+								ifNone: [ nil ] ].
+				mapping
+					encoder: [ :aLeDatabase | [ aLeDatabase uuidString ] on: MessageNotUnderstood do: [ nil ] ] ];
+		for: LePage
+			customDo: [ :mapping | 
+				mapping decoder: [ :aString | 
+				self flag: #TODO. "Do better error handling. Create custom (or re-use) error for db/page not found and wrap IDs"
+				database pageWithID: aString ifAbsent: [ nil ] ].
+				mapping
+					encoder: [ :aLePage | [ aLePage uidString ] on: MessageNotUnderstood do: [ nil ] ] ]
 ]
 
 { #category : #serialization }
