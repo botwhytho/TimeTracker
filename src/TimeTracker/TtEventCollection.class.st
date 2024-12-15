@@ -509,6 +509,20 @@ TtEventCollection >> defaultPage [
 			newPage ]
 ]
 
+{ #category : #accessing }
+TtEventCollection >> groupIntoContiguous [
+	| contiguousCollections |
+	contiguousCollections := self items value allButFirst
+			inject: (OrderedCollection with: (OrderedCollection with: self first))
+			into: [ :collection :each | 
+				(each isContiguous: collection last last)
+					ifFalse: [ collection add: OrderedCollection new ].
+				collection last add: each.
+				collection ].
+	^ contiguousCollections
+		collect: [ :each | (Timespan starting: each first start ending: each last end) -> each ]
+]
+
 { #category : #acccessing }
 TtEventCollection >> groupedAndSortedByDuration [
 	| groupedActivities groupedByTimespan summedGroupings |
