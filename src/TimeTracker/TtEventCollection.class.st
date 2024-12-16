@@ -301,7 +301,7 @@ TtEventCollection >> buildEntriesByDay [
 	entriesByDay := self timeEntries groupedByWeek size = 1
 			ifTrue: [ self timeEntries groupedByDay associations sorted: #key ascending ]
 			ifFalse: [ self timeEntries groupedByDay associations sorted: #key descending ].
-	notes := self select: [ :each | each isKindOf: TtNote ].
+	notes := self notes.
 	^ GtPhlowView new columnedTree
 		items: entriesByDay;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
@@ -531,8 +531,8 @@ TtEventCollection >> groupIntoContiguous [
 { #category : #acccessing }
 TtEventCollection >> groupedAndSortedByDuration [
 	| groupedActivities groupedByTimespan summedGroupings |
-	groupedByTimespan := self groupedByTimespan.
-	groupedActivities := self groupedByFilter.
+	groupedByTimespan := self timeEntries groupedByTimespan.
+	groupedActivities := self timeEntries groupedByFilter.
 	summedGroupings := groupedActivities associations
 			collect: [ :anAssociation | 
 				TtCategorizedEventsHelper new
@@ -543,7 +543,7 @@ TtEventCollection >> groupedAndSortedByDuration [
 							sum ].
 	summedGroupings
 		detect: [ :each | each category = TtCategories untracked ]
-		ifFound: [ :found | found sum: self groupedByDay keys size days - groupedByTimespan keys sum ]
+		ifFound: [ :found | found sum: self timeEntries groupedByDay keys size days - groupedByTimespan keys sum ]
 		ifNone: [  ].
 	^ summedGroupings sorted: #sum descending
 ]
@@ -768,8 +768,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 									aButton fireEvent: BrDropdownHideWish new.
 									self viewFilterContext: aViewFilter value.
 									(self gtSummaryFor: GtPhlowEmptyView new context: GtPhlowContext new)
-										updateContent: aBrTab viewContentElement.
-									aButton fireEvent: BrDropdownHideWish new ] ] ]
+										updateContent: aBrTab viewContentElement ] ] ]
 ]
 
 { #category : #accessing }
