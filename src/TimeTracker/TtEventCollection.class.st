@@ -388,15 +388,21 @@ TtEventCollection >> buildEntriesByDay [
 							ifNone: [ GtSpotterDropdownButtonStencil new
 									object: TtLepiterPageSearchStart new;
 									actOn: [ :anActOnEvent :anItem :aBrButton | 
-										| viewElement |
-										viewElement := aBrButton phlow firstParentWithView phlow
-												firstParentWithView.	"self halt."
+										| aPage viewElement |
+										viewElement := aBrButton phlow firstParentWithViewContent phlow
+												firstParentWithViewContent.
 										anActOnEvent beActed.
-										each
-											links: ((anItem isKindOf: LePage)
-													ifTrue: [ anItem ]
-													ifFalse: [ anItem createWithoutPager ]).
-										aBrButton phlow spawnTool: each links asLepiterPagePhlowTool.
+										aPage := (anItem isKindOf: LePage)
+												ifTrue: [ anItem ]
+												ifFalse: [ anItem createWithoutPager ].
+										self rootCollection
+											add: (TtNote new
+													start: each start;
+													duration: each duration;
+													database: aPage database;
+													page: aPage;
+													collection: self rootCollection).
+										aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
 										self flag: #TODO.	"Update only button as updating whole view will move scrollbar. Maybe update in an task?"
 										(self
 											perform: viewElement id asSymbol
