@@ -979,12 +979,12 @@ TtEventCollection >> recalculateGroupedByDay [
 TtEventCollection >> reject: aBlock [
 	^ (self species withAll: (self items reject: aBlock))
 		page: self page;
-		categories: self categories
+		categories: self categories;
+		viewFilterContext: self viewFilterContext
 ]
 
 { #category : #accessing }
 TtEventCollection >> rootCollection [
-	self flag: #TODO.	"Need to change definition of this. Propagate in `withAll:`, `select:`, `reject:`, etc. Once we have custom page types, should remove the assumption that there will be a 'default' page. Just add slot and point to self on initialization and forward as mentioned above."
 	^ self class pageRegistry at: self page
 ]
 
