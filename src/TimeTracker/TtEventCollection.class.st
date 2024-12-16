@@ -297,11 +297,17 @@ TtEventCollection >> buildDonut: data [
 
 { #category : #views }
 TtEventCollection >> buildEntriesByDay [
-	| entriesByDay notes |
-	entriesByDay := self timeEntries groupedByWeek size = 1
-			ifTrue: [ self timeEntries groupedByDay associations sorted: #key ascending ]
-			ifFalse: [ self timeEntries groupedByDay associations sorted: #key descending ].
-	notes := self notes.
+	| entriesByDay notes timeEntries |
+	timeEntries := self timeEntries.
+	entriesByDay := timeEntries groupedByWeek size = 1
+			ifTrue: [ timeEntries groupedByDay associations sorted: #key ascending ]
+			ifFalse: [ timeEntries groupedByDay associations sorted: #key descending ].
+	self flag: #EXPENSIVE.	"Should we cache the below calculation?"
+	notes := self rootCollection notes asArray
+			flatCollect: [ :each | 
+				timeEntries asArray
+					select: [ :inner | each includes: inner ]
+					thenCollect: [ :inner | inner -> each ] ].
 	^ GtPhlowView new columnedTree
 		items: entriesByDay;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
@@ -369,15 +375,17 @@ TtEventCollection >> buildEntriesByDay [
 		column: 'Notes'
 			stencil: [ :each | 
 				| aButton |
-				aButton := [ BrButton new
+				aButton := [ :aPage | 
+					BrButton new
 						aptitude: BrGlamorousButtonWithIconAptitude;
 						icon: BrGlamorousVectorIcons note;
-						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: each links asLepiterPagePhlowTool ] ].
+						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ].
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ self flag: #TODO.	"Here we filter notes with `isContained` in. If so UI with nots icon plural and a dropdown to go to such page. Otherwise similar logic to below but add correct snippet type to page instead of addings to links variable"
-						each links
-							ifNil: [ GtSpotterDropdownButtonStencil new
+					ifFalse: [ notes
+							detect: [ :anAssociation | anAssociation key == each ]
+							ifFound: [ :anAssociation | aButton value: anAssociation value page ]
+							ifNone: [ GtSpotterDropdownButtonStencil new
 									object: TtLepiterPageSearchStart new;
 									actOn: [ :anActOnEvent :anItem :aBrButton | 
 										| viewElement |
@@ -388,14 +396,12 @@ TtEventCollection >> buildEntriesByDay [
 											links: ((anItem isKindOf: LePage)
 													ifTrue: [ anItem ]
 													ifFalse: [ anItem createWithoutPager ]).
-										self flag: #TODO.	"Seems like I have two pages with same name in same DB below, test."	"each links database pageNamed: [ anActOnEvent spotterStep searchQuery ] ifAbsent: [ self inform: 'Page not found'. each links updateTitle: anActOnEvent spotterStep searchQuery]."
 										aBrButton phlow spawnTool: each links asLepiterPagePhlowTool.
 										self flag: #TODO.	"Update only button as updating whole view will move scrollbar. Maybe update in an task?"
 										(self
 											perform: viewElement id asSymbol
 											withArguments: {GtPhlowEmptyView new.
-													GtPhlowContext new}) updateContent: viewElement ] ]
-							ifNotNil: aButton ] ];
+													GtPhlowContext new}) updateContent: viewElement ] ] ] ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
