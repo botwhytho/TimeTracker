@@ -934,7 +934,7 @@ TtEventCollection >> loadPage [
 
 { #category : #accessing }
 TtEventCollection >> notes [
-	^ self select: [ :each | each isKindOf: TtNote ]
+	^ self select: #isNote
 ]
 
 { #category : #accessing }
@@ -949,8 +949,7 @@ TtEventCollection >> page: aLepiterPage [
 
 { #category : #accessing }
 TtEventCollection >> pomodoros [
-	self flag: #TODO.	"Placeholder for when I integrate pomodoros into this package"
-	^ #()
+	^ self select: #isPomodoro
 ]
 
 { #category : #printing }
@@ -1015,7 +1014,7 @@ TtEventCollection >> thisWeek [
 
 { #category : #accessing }
 TtEventCollection >> timeEntries [
-	^ self select: [ :each | each isKindOf: TtTrackedTime ]
+	^ self select: #isTimeEntry
 ]
 
 { #category : #accessing }

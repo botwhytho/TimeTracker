@@ -77,6 +77,11 @@ TtNote >> database: aLeDatabase [
 	database := aLeDatabase
 ]
 
+{ #category : #testing }
+TtNote >> isNote [
+	^ true
+]
+
 { #category : #accessing }
 TtNote >> page [
 	^ page

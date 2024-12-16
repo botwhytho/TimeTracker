@@ -230,6 +230,11 @@ TtTrackedTime >> isRecurring: anObject [
 	isRecurring := anObject
 ]
 
+{ #category : #testing }
+TtTrackedTime >> isTimeEntry [
+	^ true
+]
+
 { #category : #accessing }
 TtTrackedTime >> labels [
 	^ labels
