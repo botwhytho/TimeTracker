@@ -279,6 +279,11 @@ TtTrackedTime >> rawData: anObject [
 ]
 
 { #category : #accessing }
+TtTrackedTime >> rootCollection [
+	^ self collection rootCollection
+]
+
+{ #category : #accessing }
 TtTrackedTime >> serializeSnippet: aTextSnippet [
 	^ NeoJSONObject
 		fromString: (String

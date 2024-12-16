@@ -88,6 +88,11 @@ TtNote >> page: aLePage [
 ]
 
 { #category : #accessing }
+TtNote >> rootCollection [
+	^ self collection rootCollection
+]
+
+{ #category : #accessing }
 TtNote >> uid [
 	^ uid
 ]
