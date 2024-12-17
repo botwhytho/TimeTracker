@@ -702,7 +702,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 	^ aSearch list
 		priority: 1;
 		title: 'Search by Tracked Time entries';
-		items: [ self ];
+		items: [ self timeEntries ];
 		itemName: [ :each | 
 			each start asDate yyyymmdd , ' | ' , each description
 				, (each details ifNotNil: [ :notNil | ': ' , notNil ] ifNil: [ '' ]) ];
