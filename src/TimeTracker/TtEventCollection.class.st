@@ -297,15 +297,18 @@ TtEventCollection >> buildDonut: data [
 
 { #category : #views }
 TtEventCollection >> buildEntriesByDay [
-	| entriesByDay notes timeEntries |
+	| entriesByDay notes timeEntries timeEntriesAndDays |
 	timeEntries := self timeEntries.
 	entriesByDay := timeEntries groupedByWeek size = 1
 			ifTrue: [ timeEntries groupedByDay associations sorted: #key ascending ]
 			ifFalse: [ timeEntries groupedByDay associations sorted: #key descending ].
+	timeEntriesAndDays := timeEntries asArray
+			, (self groupedByDay keys
+					collect: [ :each | Timespan starting: each duration: each asDuration ]).
 	self flag: #EXPENSIVE.	"Should we cache the below calculation?"
 	notes := self rootCollection notes asArray
 			flatCollect: [ :each | 
-				timeEntries asArray
+				timeEntriesAndDays
 					select: [ :inner | each includes: inner ]
 					thenCollect: [ :inner | inner -> each ] ].
 	^ GtPhlowView new columnedTree
@@ -374,36 +377,39 @@ TtEventCollection >> buildEntriesByDay [
 											background: Color transparent) ] ] ];
 		column: 'Notes'
 			stencil: [ :each | 
-				| aButton |
+				| aButton aTimespan |
+				aTimespan := each isAssociation
+						ifTrue: [ Timespan starting: each key duration: each key asDuration ]
+						ifFalse: [ each ].
 				aButton := [ :aPage | 
 					BrButton new
 						aptitude: BrGlamorousButtonWithIconAptitude;
 						icon: BrGlamorousVectorIcons note;
 						label: aPage title;
 						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ].
-				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ notes
-							detect: [ :anAssociation | anAssociation key == each ]
-							ifFound: [ :anAssociation | aButton value: anAssociation value page ]
-							ifNone: [ GtSpotterDropdownButtonStencil new
-									object: TtLepiterPageSearchStart new;
-									actOn: [ :anActOnEvent :anItem :aBrButton | 
-										| anOriginReference aPage aTargetReference hackNoteSnippet note viewElement |
-										viewElement := aBrButton phlow firstParentWithViewContent phlow
-												firstParentWithViewContent.
-										anActOnEvent beActed.
-										aPage := (anItem isKindOf: LePage)
-												ifTrue: [ anItem ]
-												ifFalse: [ anItem createWithoutPager ].
-										note := TtNote new
-												start: each start;
-												duration: each duration;
-												database: aPage database;
-												page: aPage;
-												collection: self rootCollection.
-										self rootCollection add: note.
-"										hackNoteSnippet := self page children
+				notes
+					detect: [ :anAssociation | 
+						aTimespan isTimeEntry
+							ifTrue: [ anAssociation key == aTimespan ]
+							ifFalse: [ anAssociation key = aTimespan ] ]
+					ifFound: [ :anAssociation | aButton value: anAssociation value page ]
+					ifNone: [  "]"GtSpotterDropdownButtonStencil new
+							object: TtLepiterPageSearchStart new;
+							actOn: [ :anActOnEvent :anItem :aBrButton | 
+								| anOriginReference aPage aTargetReference hackNoteSnippet note viewElement |
+								viewElement := aBrButton phlow firstParentWithViewContent phlow
+										firstParentWithViewContent.
+								anActOnEvent beActed.
+								aPage := (anItem isKindOf: LePage)
+										ifTrue: [ anItem ]
+										ifFalse: [ anItem createWithoutPager ].
+								note := TtNote new
+										start: aTimespan start;
+										duration: aTimespan duration;
+										database: aPage database;
+										page: aPage;
+										collection: self rootCollection.
+								self rootCollection add: note.	"										hackNoteSnippet := self page children
 												detect: [ :aSnippet | aSnippet isKindOf: TtNoteSnippet ].
 										anOriginReference := LeLinkSnippetUidReference
 												forSnippet: hackNoteSnippet.
@@ -412,11 +418,9 @@ TtEventCollection >> buildEntriesByDay [
 											addExplicitLink: (LeAttachedLink new
 													originReference: anOriginReference;
 													targetReference: aTargetReference)."
-										aBrButton fireEvent: BrDropdownHideWish new.
-										aBrButton parent replaceChild: aBrButton with: (aButton value: aPage).
-										aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
-
-													 ] ] ] ];
+								aBrButton fireEvent: BrDropdownHideWish new.
+								aBrButton parent replaceChild: aBrButton with: (aButton value: aPage).
+								aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ] ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
