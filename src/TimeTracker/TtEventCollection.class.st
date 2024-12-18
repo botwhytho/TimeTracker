@@ -704,6 +704,28 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
 ]
 
+{ #category : #'as yet unclassified' }
+TtEventCollection >> gtNotesFor: aView [
+	<gtView>
+	| notes notesByPage |
+	notes := self rootCollection notes asArray
+			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ].
+	notesByPage := (notes groupedBy: [ :each | each key page ]) associations
+			collect: [ :each | each key -> (self withAll: (each value collect: #value) flatten) ].
+	^ aView columnedTree
+		title: 'Notes';
+		priority: 5.5;
+		items: [ notesByPage ];
+		children: [ :each | each isAssociation ifTrue: [ {each value} ] ifFalse: [ #() ] ];
+		column: 'test'
+			text: [ :each | each isAssociation ifTrue: [ each key title ] ifFalse: [ each asString ] ];
+		sendTool: [ :anItem :anIndex | 
+			anItem isAssociation
+				ifTrue: [ anItem key asLepiterPagePhlowTool ]
+				ifFalse: [ GtInspectorTool forObject: anItem ] ];
+		expandAll
+]
+
 { #category : #search }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
