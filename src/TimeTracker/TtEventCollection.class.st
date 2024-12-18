@@ -379,6 +379,7 @@ TtEventCollection >> buildEntriesByDay [
 					BrButton new
 						aptitude: BrGlamorousButtonWithIconAptitude;
 						icon: BrGlamorousVectorIcons note;
+						label: aPage title;
 						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ].
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
@@ -388,26 +389,34 @@ TtEventCollection >> buildEntriesByDay [
 							ifNone: [ GtSpotterDropdownButtonStencil new
 									object: TtLepiterPageSearchStart new;
 									actOn: [ :anActOnEvent :anItem :aBrButton | 
-										| aPage viewElement |
+										| anOriginReference aPage aTargetReference hackNoteSnippet note viewElement |
 										viewElement := aBrButton phlow firstParentWithViewContent phlow
 												firstParentWithViewContent.
 										anActOnEvent beActed.
 										aPage := (anItem isKindOf: LePage)
 												ifTrue: [ anItem ]
 												ifFalse: [ anItem createWithoutPager ].
-										self rootCollection
-											add: (TtNote new
-													start: each start;
-													duration: each duration;
-													database: aPage database;
-													page: aPage;
-													collection: self rootCollection).
+										note := TtNote new
+												start: each start;
+												duration: each duration;
+												database: aPage database;
+												page: aPage;
+												collection: self rootCollection.
+										self rootCollection add: note.
+"										hackNoteSnippet := self page children
+												detect: [ :aSnippet | aSnippet isKindOf: TtNoteSnippet ].
+										anOriginReference := LeLinkSnippetUidReference
+												forSnippet: hackNoteSnippet.
+										aTargetReference := LeLinkPageUidReference forPageUid: aPage uid.
+										self page database
+											addExplicitLink: (LeAttachedLink new
+													originReference: anOriginReference;
+													targetReference: aTargetReference)."
+										aBrButton fireEvent: BrDropdownHideWish new.
+										aBrButton parent replaceChild: aBrButton with: (aButton value: aPage).
 										aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
-										self flag: #TODO.	"Update only button as updating whole view will move scrollbar. Maybe update in an task?"
-										(self
-											perform: viewElement id asSymbol
-											withArguments: {GtPhlowEmptyView new.
-													GtPhlowContext new}) updateContent: viewElement ] ] ] ];
+
+													 ] ] ] ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
