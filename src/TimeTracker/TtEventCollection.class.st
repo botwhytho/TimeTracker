@@ -546,7 +546,7 @@ TtEventCollection >> groupIntoContiguous [
 				collection last add: each.
 				collection ].
 	^ contiguousCollections
-		collect: [ :each | (Timespan starting: each first start ending: each last end) -> each ]
+		collect: [ :each | (Timespan starting: each first start ending: each last end rounded) -> each ]
 ]
 
 { #category : #acccessing }
