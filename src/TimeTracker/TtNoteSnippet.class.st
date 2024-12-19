@@ -1,6 +1,9 @@
 Class {
 	#name : #TtNoteSnippet,
 	#superclass : #LeUnknownSnippet,
+	#instVars : [
+		'domainObject'
+	],
 	#category : #TimeTracker
 }
 
@@ -19,4 +22,14 @@ TtNoteSnippet class >> initialize [
 TtNoteSnippet class >> leJsonV4Name [
 
 	^ 'noteSnippet'
+]
+
+{ #category : #accessing }
+TtNoteSnippet >> domainObject [
+	^ domainObject
+]
+
+{ #category : #accessing }
+TtNoteSnippet >> domainObject: aTtNote [
+	domainObject := aTtNote
 ]

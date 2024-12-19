@@ -957,11 +957,12 @@ TtEventCollection >> loadFromLepiter [
 					self items
 						add: ((NeoJSONReader fromString: each jsonString as: each class deserializerClass)
 								data
-								in: [ :aTrackedTime | 
-									aTrackedTime
+								in: [ :aTimeTrackerObject | 
+									aTimeTrackerObject
 										uid: each uidString;
-										collection: self;
-										yourself ]) ] ]
+										collection: self.
+									each domainObject: aTimeTrackerObject.
+									aTimeTrackerObject ]) ] ]
 ]
 
 { #category : #accessing }

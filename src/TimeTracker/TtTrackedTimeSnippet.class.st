@@ -1,6 +1,9 @@
 Class {
 	#name : #TtTrackedTimeSnippet,
 	#superclass : #LeUnknownSnippet,
+	#instVars : [
+		'domainObject'
+	],
 	#category : #TimeTracker
 }
 
@@ -19,4 +22,14 @@ TtTrackedTimeSnippet class >> initialize [
 TtTrackedTimeSnippet class >> leJsonV4Name [
 
 	^ 'trackedTimeSnippet'
+]
+
+{ #category : #accessing }
+TtTrackedTimeSnippet >> domainObject [
+	^ domainObject
+]
+
+{ #category : #accessing }
+TtTrackedTimeSnippet >> domainObject: aTtTrackedTime [
+	domainObject := aTtTrackedTime
 ]
