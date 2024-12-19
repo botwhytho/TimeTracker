@@ -77,6 +77,17 @@ TtNote >> database: aLeDatabase [
 	database := aLeDatabase
 ]
 
+{ #category : #'as yet unclassified' }
+TtNote >> gtPageFor: aView [
+	<gtView>
+	self page ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Linked Page';
+		priority: 0.5;
+		object: [ self page ];
+		view: #gtLiveFor:
+]
+
 { #category : #testing }
 TtNote >> isNote [
 	^ true

@@ -762,7 +762,9 @@ TtEventCollection >> gtNotesFor: aView [
 			anAction button
 				icon: BrGlamorousVectorIcons inspect;
 				tooltip: 'Inspect Note Objects';
-				action: [ :aBrButton :aBrTab | aBrButton phlow spawnObject: (notes groupedBy: [ :each | each key page ]) ] ];
+				action: [ :aBrButton :aBrTab | 
+					aBrButton phlow
+						spawnObject: ((notes collect: #key) groupedBy: #page) ] ];
 		expandAll
 ]
 
