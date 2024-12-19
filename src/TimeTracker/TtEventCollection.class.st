@@ -533,9 +533,10 @@ TtEventCollection >> defaultPage [
 
 { #category : #accessing }
 TtEventCollection >> groupIntoContiguous [
-	| contiguousCollections |
-	contiguousCollections := self items value allButFirst
-			inject: (OrderedCollection with: (OrderedCollection with: self first))
+	| contiguousCollections timeEntries |
+	timeEntries := self timeEntries.
+	contiguousCollections := timeEntries items value allButFirst
+			inject: (OrderedCollection with: (OrderedCollection with: timeEntries first))
 			into: [ :collection :each | 
 				(each isContiguous: collection last last)
 					ifFalse: [ collection add: OrderedCollection new ].
