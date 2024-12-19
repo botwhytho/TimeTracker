@@ -77,7 +77,28 @@ TtNote >> database: aLeDatabase [
 	database := aLeDatabase
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #deleting }
+TtNote >> delete [
+	self collection page
+		ifNotNil: [ :aPage | 
+			(aPage children detect: [ :aSnippet | aSnippet uidString = self uid ])
+				removeSelf ].
+	self rootCollection items remove: self
+]
+
+{ #category : #views }
+TtNote >> gtDeleteActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		icon: BrGlamorousVectorIcons remove;
+		tooltip: 'Delete the Tracked Time.';
+		priority: 2;
+		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
+			anEvent consumed: true.
+			self delete ]
+]
+
+{ #category : #views }
 TtNote >> gtPageFor: aView [
 	<gtView>
 	self page ifNil: [ ^ aView empty ].

@@ -44,7 +44,7 @@ TtNoteSnippet >> gtInspectNoteFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self domainObject ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 TtNoteSnippet >> gtPageFor: aView [
 	<gtView>
 	(self domainObject isNil and: [ self domainObject page isNil ])

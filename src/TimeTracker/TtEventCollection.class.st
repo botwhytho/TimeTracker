@@ -704,7 +704,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 TtEventCollection >> gtNotesFor: aView [
 	<gtView>
 	| notes notesByPage |
