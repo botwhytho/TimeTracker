@@ -83,7 +83,8 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			snippetJSON := self serializeSnippet: foundSnippet.
 			snippetJSON data: anEntity.
 			serialized := NeoJSONWriter toStringPretty: snippetJSON.
-			foundSnippet jsonString: serialized source: lepiterPage ]
+			foundSnippet jsonString: serialized source: lepiterPage.
+			foundSnippet domainObject ifNil: [ foundSnippet domainObject: anEntity ] ]
 		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
 			lepiterPage addSnippet: aTextSnippet.
 			snippetJSON := self serializeSnippet: aTextSnippet.
@@ -95,6 +96,8 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 					source: lepiterPage.
 			aTextSnippet removeSelf.
 			lepiterPage addSnippet: anUnknownSnippet.
+			anUnknownSnippet domainObject
+				ifNil: [ anUnknownSnippet domainObject: anEntity ].
 			anEntity uid: anUnknownSnippet uidString ]
 ]
 
