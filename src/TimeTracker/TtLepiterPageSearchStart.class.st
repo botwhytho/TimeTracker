@@ -59,6 +59,7 @@ TtLepiterPageSearchStart >> gtSpotterContainingSubPartsFor: aSearch [
 
 { #category : #accessing }
 TtLepiterPageSearchStart >> knowledgeBase [
+	self flag: #TODO.	"Enable cross-database search"
 	^ knowledgeBase
 		ifNil: [ LeDatabasesRegistry uniqueInstance currentLoadedDefaultLogicalDatabase ]
 ]
@@ -66,4 +67,11 @@ TtLepiterPageSearchStart >> knowledgeBase [
 { #category : #accessing }
 TtLepiterPageSearchStart >> knowledgeBase: anObject [
 	knowledgeBase := anObject
+]
+
+{ #category : #'as yet unclassified' }
+TtLepiterPageSearchStart >> printOn: aStream [
+	"super printOn: aStream."
+
+	aStream nextPutAll: 'Link time entry to new or existing Lepiter Page'
 ]

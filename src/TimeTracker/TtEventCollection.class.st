@@ -397,6 +397,7 @@ TtEventCollection >> buildEntriesByDay [
 							ifFalse: [ anAssociation key = aTimespan ] ]
 					ifFound: [ :anAssociation | aButton value: anAssociation value page ]
 					ifNone: [ GtSpotterDropdownButtonStencil new
+							tooltip: 'Link to New or Existing Lepiter Page';
 							object: TtLepiterPageSearchStart new;
 							actOn: [ :anActOnEvent :anItem :aBrButton | 
 								| aPage note viewElement |
