@@ -712,8 +712,9 @@ TtEventCollection >> gtInspectActionFor: anAction [
 TtEventCollection >> gtNotesFor: aView [
 	<gtView>
 	| notes notesByPage |
-	notes := self rootCollection notes asArray
-			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ].
+	notes := (self rootCollection notes asArray
+			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ])
+			select: [ :each | each value isNotEmpty ].
 	notesByPage := (notes groupedBy: [ :each | each key page ]) associations
 			collect: [ :each | each key -> (self withAll: (each value collect: #value) flatten) ].
 	^ aView columnedTree
