@@ -206,8 +206,8 @@ TtTrackedTime >> gtGoToTrelloFor: anAction [
 
 { #category : #accessing }
 TtTrackedTime >> isContiguous: aTrackedTime [
-	^ self end + 1 nanoSecond = aTrackedTime start
-		or: [ aTrackedTime end + 1 nanoSecond = self start ]
+	^ self end rounded = aTrackedTime start
+		or: [ aTrackedTime end rounded = self start ]
 ]
 
 { #category : #accessing }
