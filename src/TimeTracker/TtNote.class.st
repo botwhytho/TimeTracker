@@ -91,7 +91,7 @@ TtNote >> gtDeleteActionFor: anAction [
 	<gtAction>
 	^ anAction button
 		icon: BrGlamorousVectorIcons remove;
-		tooltip: 'Delete the Tracked Time.';
+		tooltip: 'Delete the Note.';
 		priority: 2;
 		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
 			anEvent consumed: true.

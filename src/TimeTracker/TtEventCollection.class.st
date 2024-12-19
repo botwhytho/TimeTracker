@@ -413,9 +413,16 @@ TtEventCollection >> buildEntriesByDay [
 										page: aPage;
 										collection: self rootCollection.
 								self rootCollection add: note.
+								aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
 								aBrButton fireEvent: BrDropdownHideWish new.
-								aBrButton parent replaceChild: aBrButton with: (aButton value: aPage).
-								aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ] ];
+								each isAssociation
+									ifTrue: [ (self
+											perform: viewElement id asSymbol
+											withArguments: {GtPhlowEmptyView new.
+													GtPhlowContext new}) updateContent: viewElement ]
+									ifFalse: [ aBrButton parent
+											replaceChild: aBrButton
+											with: (aButton value: aPage) ] ] ] ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
