@@ -947,20 +947,19 @@ TtEventCollection >> importFromTrello [
 	| response daysToImport existingDays |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
-	self rootCollection
-		serializeCollection;
-		loadFromLepiter.
-	existingDays := (self rootCollection collect: [ :each | each start asDate ] as: Set) asArray
-			sorted: #yourself descending.
+	self rootCollection loadFromLepiter.
+	existingDays := (self rootCollection
+			collect: [ :each | each start asDate ]
+			as: Set) asArray sorted: #yourself descending.
 	daysToImport := (response keys difference: existingDays) asArray
-			sorted: #yourself descending.
-	"daysToImport
+			sorted: #yourself descending.	"daysToImport
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
 		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
 	(daysToImport first: 1)
-		do: [ :day | TtTrelloParser new add: (response associationAt: day) toCollection: self rootCollection ]
-		 "response associations first in:
-		associationsDo: [ :day | TtTrelloParser new add: day toCollection: self ]"
+		do: [ :day | 
+			TtTrelloParser new
+				add: (response associationAt: day)
+				toCollection: self rootCollection ]
 ]
 
 { #category : #accessing }
@@ -999,7 +998,7 @@ TtEventCollection >> loadFromLepiter [
 			self page children asArray
 				select: [ :each | self class supportedSnippetTypes includes: each class ]
 				thenDo: [ :each | 
-					self items
+					self
 						add: ((NeoJSONReader fromString: each jsonString as: each class deserializerClass)
 								data
 								in: [ :aTimeTrackerObject | 
@@ -1007,7 +1006,8 @@ TtEventCollection >> loadFromLepiter [
 										uid: each uidString;
 										collection: self.
 									each domainObject: aTimeTrackerObject.
-									aTimeTrackerObject ]) ] ]
+									aTimeTrackerObject ]) ].
+			self serializeCollection ]
 ]
 
 { #category : #accessing }
