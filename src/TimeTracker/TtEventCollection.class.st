@@ -715,12 +715,51 @@ TtEventCollection >> gtNotesFor: aView [
 		priority: 5.5;
 		items: [ notesByPage ];
 		children: [ :each | each isAssociation ifTrue: [ {each value} ] ifFalse: [ #() ] ];
-		column: 'test'
+		column: 'Lepiter Pages & Linked Entries'
 			text: [ :each | each isAssociation ifTrue: [ each key title ] ifFalse: [ each asString ] ];
 		sendTool: [ :anItem :anIndex | 
 			anItem isAssociation
 				ifTrue: [ anItem key asLepiterPagePhlowTool ]
 				ifFalse: [ GtInspectorTool forObject: anItem ] ];
+		action: [ :anAction | 
+			anAction explicit
+				stencil: [ :aBrButton :aBrTab | 
+					| contiguousGroups |
+					contiguousGroups := self groupIntoContiguous collect: #key.
+					GtSpotterDropdownButtonStencil new
+						icon: BrGlamorousVectorIcons note;
+						label: 'Add Note';
+						tooltip: 'Link Lepiter page to all items in collection';
+						object: TtLepiterPageSearchStart new;
+						actOn: [ :anActOnEvent :anItem :aDropdownButton | 
+							| aPage note viewElement |
+							"self halt."
+							self flag: #BUG.	"See some mismatch between number of notes in collection vs page, also view doesn't seem to be updating."
+							viewElement := aDropdownButton phlow firstParentWithViewContent phlow
+									firstChildWithViewContent.
+							anActOnEvent beActed.
+							aPage := (anItem isKindOf: LePage)
+									ifTrue: [ anItem ]
+									ifFalse: [ anItem createWithoutPager ].
+							contiguousGroups
+								do: [ :aTimespan | 
+									note := TtNote new
+											start: aTimespan start;
+											duration: aTimespan duration;
+											database: aPage database;
+											page: aPage;
+											collection: self rootCollection.
+									self rootCollection add: note ].
+							aDropdownButton fireEvent: BrDropdownHideWish new.
+							aDropdownButton phlow spawnTool: aPage asLepiterPagePhlowTool.
+							aDropdownButton
+								enqueueTask: [ (self perform: #gtNotesFor: withArguments: {GtPhlowEmptyView new})
+										updateContent: viewElement ] asBlTask ] ] ];
+		action: [ :anAction | 
+			anAction button
+				icon: BrGlamorousVectorIcons inspect;
+				tooltip: 'Inspect Note Objects';
+				action: [ :aBrButton :aBrTab | aBrButton phlow spawnObject: (notes groupedBy: [ :each | each key page ]) ] ];
 		expandAll
 ]
 
