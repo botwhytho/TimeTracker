@@ -387,19 +387,19 @@ TtEventCollection >> buildEntriesByDay [
 				aTimespan := each isAssociation
 						ifTrue: [ Timespan starting: each key duration: each key asDuration ]
 						ifFalse: [ each ].
-				aButton := [ :aPage | 
+				aButton := [ :aPageCollection | 
 					BrButton new
-						aptitude: BrGlamorousButtonWithIconAptitude;
+						aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 						icon: BrGlamorousVectorIcons note;
-						label: aPage title;
-						action: [ :aBrButton :aBrButtonModel :anEvent | aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ].
-				notes
-					detect: [ :anAssociation | 
+						action: [ :aBrButton :aBrButtonModel :anEvent | anEvent consumed: true. aBrButton inform: 'pressed' "aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool" ];
+						in: [ :button | button label: (aPageCollection size > 1 ifTrue: [  '(' , aPageCollection size asString , ')'] ifFalse: [ '']) . button ] ].
+				(notes
+					select: [ :anAssociation | 
 						aTimespan isTimeEntry
 							ifTrue: [ anAssociation key == aTimespan ]
-							ifFalse: [ anAssociation key = aTimespan ] ]
-					ifFound: [ :anAssociation | aButton value: anAssociation value page ]
-					ifNone: [ GtSpotterDropdownButtonStencil new
+							ifFalse: [ anAssociation key = aTimespan ] ])
+					ifNotEmpty: [ :anAssociation | aButton value: anAssociation value  ]
+					ifEmpty: [ GtSpotterDropdownButtonStencil new
 							tooltip: 'Link to New or Existing Lepiter Page';
 							object: TtLepiterPageSearchStart new;
 							actOn: [ :anActOnEvent :anItem :aBrButton | 
