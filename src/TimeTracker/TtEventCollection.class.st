@@ -178,6 +178,9 @@ TtEventCollection >> buildBars: data [
 			BlElement new
 				id: categoryName;
 				border: (BlBorder paint: Color lightGray width: 1);
+				aptitude: (BrGlamorousWithLabelTooltipAptitude new
+						text: (aGtPlotterContext originalValue
+								in: [ :helper | helper sum / helper collection groupedByDay keys size roundUpTo: 1 minute ]));
 				when: BlClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
