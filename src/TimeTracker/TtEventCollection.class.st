@@ -689,9 +689,9 @@ TtEventCollection >> gtInspectActionFor: anAction [
 TtEventCollection >> gtNotesFor: aView [
 	<gtView>
 	| notes notesByPage |
-	notes := (self rootCollection notes asArray
-			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ])
-			select: [ :each | each value isNotEmpty ].
+	notes := self rootCollection notes asArray
+			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ]
+			thenSelect: [ :each | each value isNotEmpty ].
 	notesByPage := (notes groupedBy: [ :each | each key page ]) associations
 			collect: [ :each | each key -> (self withAll: (each value collect: #value) flatten) ].
 	^ aView columnedTree
@@ -717,23 +717,25 @@ TtEventCollection >> gtNotesFor: aView [
 						object: TtLepiterPageSearchStart new;
 						actOn: [ :anActOnEvent :anItem :aDropdownButton | 
 							| aPage note viewElement |
-							"self halt."
-							self flag: #BUG.	"See some mismatch between number of notes in collection vs page, also view doesn't seem to be updating."
 							viewElement := aDropdownButton phlow firstParentWithViewContent phlow
 									firstChildWithViewContent.
 							anActOnEvent beActed.
 							aPage := (anItem isKindOf: LePage)
 									ifTrue: [ anItem ]
 									ifFalse: [ anItem createWithoutPager ].
-							contiguousGroups
-								do: [ :aTimespan | 
-									note := TtNote new
-											start: aTimespan start;
-											duration: aTimespan duration;
-											database: aPage database;
-											page: aPage;
-											collection: self rootCollection.
-									self rootCollection add: note ].
+							self flag: #BUG.	"Prevent from creating redundant notes linking to same page. Below is NOT working"
+							(contiguousGroups
+								allSatisfy: [ :each | notes detect: [ :inner | inner key = each and: [ inner key page = aPage ] ] ifNone: [false] ])
+								ifTrue: [ self inform: 'Trying to create redundant note' ]
+								ifFalse: [ contiguousGroups
+										do: [ :aTimespan | 
+											note := TtNote new
+													start: aTimespan start;
+													duration: aTimespan duration;
+													database: aPage database;
+													page: aPage;
+													collection: self rootCollection.
+											self rootCollection add: note ] ].
 							aDropdownButton fireEvent: BrDropdownHideWish new.
 							aDropdownButton phlow spawnTool: aPage asLepiterPagePhlowTool.
 							aDropdownButton
@@ -743,9 +745,7 @@ TtEventCollection >> gtNotesFor: aView [
 			anAction button
 				icon: BrGlamorousVectorIcons inspect;
 				tooltip: 'Inspect Note Objects';
-				action: [ :aBrButton :aBrTab | 
-					aBrButton phlow
-						spawnObject: ((notes collect: #key) groupedBy: #page) ] ];
+				action: [ :aBrButton :aBrTab | aBrButton phlow spawnObject: ((notes collect: #key) groupedBy: #page) ] ];
 		expandAll
 ]
 
