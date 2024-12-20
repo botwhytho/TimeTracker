@@ -1,8 +1,8 @@
 Class {
 	#name : #TtPageLinks,
-	#superclass : #BlElement,
-	#traits : 'TBrLayoutResizable + TBrLayoutAlignable',
-	#classTraits : 'TBrLayoutResizable classTrait + TBrLayoutAlignable classTrait',
+	#superclass : #BrWidgetContainer,
+	#traits : 'TBrLayoutResizable',
+	#classTraits : 'TBrLayoutResizable classTrait',
 	#instVars : [
 		'addPageLinkButton',
 		'pageLinksButton'
@@ -12,12 +12,38 @@ Class {
 
 { #category : #initialization }
 TtPageLinks >> addPageLinkButton [
+	self flag: #TODO.	"Take into account selecting already linked pages."
 	^ addPageLinkButton
-		ifNil: [ addPageLinkButton := BrButton new
-					aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
-					icon: BrGlamorousVectorIcons search;
-					label: '';
-					action: [ :aBrButton :aBrButtonModel :aBlClickEvent | aBrButton fireEvent: (TtPageLinkAddedEvent new page: self pageLinks asArray first) ] ]
+		ifNil: [ addPageLinkButton := GtSpotterDropdownButtonStencil new
+					tooltip: 'Link to New or Existing Lepiter Page';
+					object: TtLepiterPageSearchStart new;
+					actOn: [ :anActOnEvent :anItem :aBrButton | 
+						| aPage note |
+						anActOnEvent beActed.
+						aPage := (anItem isKindOf: LePage)
+								ifTrue: [ anItem ]
+								ifFalse: [ anItem createWithoutPager ].
+						note := TtNote new
+								start: self timespan start;
+								duration: self timespan duration;
+								database: aPage database;
+								page: aPage;
+								collection: self collection.
+						self collection add: note.
+						self pageLinks add: note.
+						aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
+						aBrButton fireEvent: BrDropdownHideWish new ];
+					create ]
+]
+
+{ #category : #'accessing\t' }
+TtPageLinks >> collection [
+	^ self viewModel collection
+]
+
+{ #category : #'accessing\t' }
+TtPageLinks >> collection: aTtEventCollection [
+	self viewModel collection: aTtEventCollection
 ]
 
 { #category : #initialization }
@@ -28,7 +54,6 @@ TtPageLinks >> initialize [
 	self aptitude: BrLayoutAlignmentStatelessAptitude new.
 	self
 		matchParent;
-		alignCenter;
 		addChildren: {self addPageLinkButton.
 				self pageLinksButton}
 ]
@@ -40,7 +65,7 @@ TtPageLinks >> pageLinks [
 
 { #category : #accessing }
 TtPageLinks >> pageLinks: aCollection [
-	self viewModel pageLinks: aCollection
+	self viewModel pageLinks: aCollection asSet
 ]
 
 { #category : #initialization }
@@ -63,10 +88,20 @@ TtPageLinks >> pageLinksButton [
 													aptitude: BrGlamorousButtonWithLabelAptitude ];
 											itemDataBinder: [ :eachElement :eachPage :eachIndex | 
 												eachElement
-													label: eachPage title;
+													label: eachPage page title;
 													action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
 														aBlClickEvent consumed: true.
-														aBrButton phlow spawnTool: eachPage asLepiterPagePhlowTool.
+														pageLinksButton phlow spawnTool: eachPage page asLepiterPagePhlowTool.
 														aBrButton fireEvent: BrDropdownHideWish new ] ];
-											items: self pageLinks ]) ]
+											items: self pageLinks asArray ]) ]
+]
+
+{ #category : #'accessing\t' }
+TtPageLinks >> timespan [
+	^ self viewModel timespan
+]
+
+{ #category : #'accessing\t' }
+TtPageLinks >> timespan: aTimespan [
+	self viewModel timespan: aTimespan
 ]

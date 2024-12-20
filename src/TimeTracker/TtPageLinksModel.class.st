@@ -2,10 +2,22 @@ Class {
 	#name : #TtPageLinksModel,
 	#superclass : #BrWidgetModel,
 	#instVars : [
-		'pageLinks'
+		'pageLinks',
+		'timespan',
+		'collection'
 	],
 	#category : #TimeTracker
 }
+
+{ #category : #accessing }
+TtPageLinksModel >> collection [
+	^ collection
+]
+
+{ #category : #accessing }
+TtPageLinksModel >> collection: aTtEventCollection [
+	collection := aTtEventCollection
+]
 
 { #category : #initialization }
 TtPageLinksModel >> initializeListeners [
@@ -36,6 +48,16 @@ TtPageLinksModel >> pageLinks: aCollection [
 	self updatePageLinksButtonLabel.
 	pageLinks size = 0
 		ifTrue: [ self widget pageLinksButton visibility: BlVisibility gone ]
+]
+
+{ #category : #accessing }
+TtPageLinksModel >> timespan [
+	^ timespan
+]
+
+{ #category : #accessing }
+TtPageLinksModel >> timespan: aTimespan [
+	timespan := aTimespan
 ]
 
 { #category : #initialization }

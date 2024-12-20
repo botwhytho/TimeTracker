@@ -391,14 +391,21 @@ TtEventCollection >> buildEntriesByDay [
 					BrButton new
 						aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 						icon: BrGlamorousVectorIcons note;
-						action: [ :aBrButton :aBrButtonModel :anEvent | anEvent consumed: true. aBrButton inform: 'pressed' "aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool" ];
-						in: [ :button | button label: (aPageCollection size > 1 ifTrue: [  '(' , aPageCollection size asString , ')'] ifFalse: [ '']) . button ] ].
+						action: [ :aBrButton :aBrButtonModel :anEvent | 
+							anEvent consumed: true.
+							aBrButton inform: 'pressed'	"aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool" ];
+						in: [ :button | 
+							button
+								label: (aPageCollection size > 1
+										ifTrue: [ '(' , aPageCollection size asString , ')' ]
+										ifFalse: [ '' ]).
+							button ] ].
 				(notes
 					select: [ :anAssociation | 
 						aTimespan isTimeEntry
 							ifTrue: [ anAssociation key == aTimespan ]
 							ifFalse: [ anAssociation key = aTimespan ] ])
-					ifNotEmpty: [ :anAssociation | aButton value: anAssociation value  ]
+					ifNotEmpty: [ :anAssociation | aButton value: anAssociation value ]
 					ifEmpty: [ GtSpotterDropdownButtonStencil new
 							tooltip: 'Link to New or Existing Lepiter Page';
 							object: TtLepiterPageSearchStart new;
@@ -427,6 +434,22 @@ TtEventCollection >> buildEntriesByDay [
 									ifFalse: [ aBrButton parent
 											replaceChild: aBrButton
 											with: (aButton value: aPage) ] ] ] ];
+		column: 'Notes2'
+			stencil: [ :each | 
+				| aTimespan pageLinks |
+				aTimespan := each isAssociation
+						ifTrue: [ Timespan starting: each key duration: each key asDuration ]
+						ifFalse: [ each ].
+				pageLinks := notes
+						select: [ :anAssociation | 
+							aTimespan isTimeEntry
+								ifTrue: [ anAssociation key == aTimespan ]
+								ifFalse: [ anAssociation key = aTimespan ] ]
+						thenCollect: #value.
+				TtPageLinks new
+					timespan: aTimespan;
+					pageLinks: pageLinks;
+					collection: self rootCollection ];
 		column: 'Delete Day'
 			stencil: [ :each | 
 				each isAssociation
