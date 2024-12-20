@@ -30,7 +30,7 @@ TtPageLinks >> addPageLinkButton [
 								page: aPage;
 								collection: self collection.
 						self collection add: note.
-						self pageLinks add: note.
+						aBrButton fireEvent: (TtPageLinkAddedEvent new page: aPage).
 						aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
 						aBrButton fireEvent: BrDropdownHideWish new ];
 					create ]
