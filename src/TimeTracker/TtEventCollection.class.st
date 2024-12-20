@@ -383,59 +383,6 @@ TtEventCollection >> buildEntriesByDay [
 											background: Color transparent) ] ] ];
 		column: 'Notes'
 			stencil: [ :each | 
-				| aButton aTimespan |
-				aTimespan := each isAssociation
-						ifTrue: [ Timespan starting: each key duration: each key asDuration ]
-						ifFalse: [ each ].
-				aButton := [ :aPageCollection | 
-					BrButton new
-						aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
-						icon: BrGlamorousVectorIcons note;
-						action: [ :aBrButton :aBrButtonModel :anEvent | 
-							anEvent consumed: true.
-							aBrButton inform: 'pressed'	"aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool" ];
-						in: [ :button | 
-							button
-								label: (aPageCollection size > 1
-										ifTrue: [ '(' , aPageCollection size asString , ')' ]
-										ifFalse: [ '' ]).
-							button ] ].
-				(notes
-					select: [ :anAssociation | 
-						aTimespan isTimeEntry
-							ifTrue: [ anAssociation key == aTimespan ]
-							ifFalse: [ anAssociation key = aTimespan ] ])
-					ifNotEmpty: [ :anAssociation | aButton value: anAssociation value ]
-					ifEmpty: [ GtSpotterDropdownButtonStencil new
-							tooltip: 'Link to New or Existing Lepiter Page';
-							object: TtLepiterPageSearchStart new;
-							actOn: [ :anActOnEvent :anItem :aBrButton | 
-								| aPage note viewElement |
-								viewElement := aBrButton phlow firstParentWithViewContent phlow
-										firstParentWithViewContent.
-								anActOnEvent beActed.
-								aPage := (anItem isKindOf: LePage)
-										ifTrue: [ anItem ]
-										ifFalse: [ anItem createWithoutPager ].
-								note := TtNote new
-										start: aTimespan start;
-										duration: aTimespan duration;
-										database: aPage database;
-										page: aPage;
-										collection: self rootCollection.
-								self rootCollection add: note.
-								aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
-								aBrButton fireEvent: BrDropdownHideWish new.
-								each isAssociation
-									ifTrue: [ (self
-											perform: viewElement id asSymbol
-											withArguments: {GtPhlowEmptyView new.
-													GtPhlowContext new}) updateContent: viewElement ]
-									ifFalse: [ aBrButton parent
-											replaceChild: aBrButton
-											with: (aButton value: aPage) ] ] ] ];
-		column: 'Notes2'
-			stencil: [ :each | 
 				| aTimespan pageLinks |
 				aTimespan := each isAssociation
 						ifTrue: [ Timespan starting: each key duration: each key asDuration ]
