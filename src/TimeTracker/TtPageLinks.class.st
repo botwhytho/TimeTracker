@@ -65,7 +65,7 @@ TtPageLinks >> pageLinks [
 
 { #category : #accessing }
 TtPageLinks >> pageLinks: aCollection [
-	self viewModel pageLinks: aCollection asSet
+	self viewModel pageLinks: aCollection asIdentitySet
 ]
 
 { #category : #initialization }
