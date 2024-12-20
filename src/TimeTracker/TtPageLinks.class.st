@@ -12,7 +12,6 @@ Class {
 
 { #category : #initialization }
 TtPageLinks >> addPageLinkButton [
-	self flag: #TODO.	"Take into account selecting already linked pages."
 	^ addPageLinkButton
 		ifNil: [ addPageLinkButton := GtSpotterDropdownButtonStencil new
 					tooltip: 'Link to New or Existing Lepiter Page';
@@ -23,13 +22,14 @@ TtPageLinks >> addPageLinkButton [
 						aPage := (anItem isKindOf: LePage)
 								ifTrue: [ anItem ]
 								ifFalse: [ anItem createWithoutPager ].
-						note := TtNote new
-								start: self timespan start;
-								duration: self timespan duration;
-								database: aPage database;
-								page: aPage;
-								collection: self collection.
-						self collection add: note.
+						((self pageLinks collect: #page) includes: aPage)
+							ifFalse: [ note := TtNote new
+										start: self timespan start;
+										duration: self timespan duration;
+										database: aPage database;
+										page: aPage;
+										collection: self collection.
+								self collection add: note ].
 						aBrButton fireEvent: (TtPageLinkAddedEvent new page: aPage).
 						aBrButton phlow spawnTool: aPage asLepiterPagePhlowTool.
 						aBrButton fireEvent: BrDropdownHideWish new ];

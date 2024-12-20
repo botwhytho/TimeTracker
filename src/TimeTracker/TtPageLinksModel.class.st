@@ -32,8 +32,7 @@ TtPageLinksModel >> initializeListeners [
 TtPageLinksModel >> onTtPageLinkAddedEvent: anEvent [
 	self pageLinks add: anEvent page.
 	self updatePageLinksButtonLabel.
-	(self pageLinks size > 0
-		and: [ self widget pageLinksButton visibility = BlVisibility gone ])
+	self pageLinks size > 0
 		ifTrue: [ self widget pageLinksButton visibility: BlVisibility visible ]
 ]
 
