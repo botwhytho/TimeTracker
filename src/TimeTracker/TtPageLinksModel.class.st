@@ -18,9 +18,8 @@ TtPageLinksModel >> initializeListeners [
 
 { #category : #initialization }
 TtPageLinksModel >> onTtPageLinkAddedEvent: anEvent [
-	self pageLinks add: 42.
-	self pageLinks size > 1
-		ifTrue: [ self widget pageLinksButton label: self pageLinks size asString ].
+	self pageLinks add: anEvent page.
+	self updatePageLinksButtonLabel.
 	(self pageLinks size > 0
 		and: [ self widget pageLinksButton visibility = BlVisibility gone ])
 		ifTrue: [ self widget pageLinksButton visibility: BlVisibility visible ]
@@ -33,7 +32,14 @@ TtPageLinksModel >> pageLinks [
 
 { #category : #accessing }
 TtPageLinksModel >> pageLinks: aCollection [
-	pageLinks := aCollection.
+	pageLinks := aCollection asSet.
+	self updatePageLinksButtonLabel.
 	pageLinks size = 0
 		ifTrue: [ self widget pageLinksButton visibility: BlVisibility gone ]
+]
+
+{ #category : #initialization }
+TtPageLinksModel >> updatePageLinksButtonLabel [
+	self pageLinks size > 1
+		ifTrue: [ self widget pageLinksButton label: self pageLinks size asString ]
 ]
