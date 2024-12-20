@@ -180,7 +180,13 @@ TtEventCollection >> buildBars: data [
 				border: (BlBorder paint: Color lightGray width: 1);
 				aptitude: (BrGlamorousWithLabelTooltipAptitude new
 						text: (aGtPlotterContext originalValue
-								in: [ :helper | helper sum / helper collection groupedByDay keys size roundUpTo: 1 minute ]));
+								in: [ :helper | 
+									(helper sum / self groupedByDay keys size roundUpTo: 1 minute) asString
+										, ' avg, '
+										, (helper sum / helper collection groupedByDay keys size roundUpTo: 1 minute)
+												asString , '/day, '
+										, ((helper sum roundUpTo: 1 minute) asHours round: 1) asString
+										, ' total' ]));
 				when: BlClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
