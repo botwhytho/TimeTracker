@@ -10,7 +10,7 @@ Class {
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 	<gtSearch>
-	self flag: #TODO "What to do when you enspect a category instead of item?".
+	self flag: #BUG. "If we go 'into breadcrumbs' on the search, spawned objects are wrong"
 	^ aSearch list
 		priority: 1;
 		items: [ {LeNotePlaygroundStencil new
@@ -26,7 +26,6 @@ TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 	<gtSearch>
-	self flag: #TODO "What to do when you enspect a category instead of item?".
 	^ aSearch explicit
 		title: 'Named pages';
 		priority: 2;
@@ -39,7 +38,6 @@ TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 { #category : #spotter }
 TtLepiterPageSearchStart >> gtSpotterContainingSubPartsFor: aSearch [
 	<gtSearch>
-	self flag: #TODO "What to do when you enspect a category instead of item?".
 	^ aSearch explicit
 		priority: 3;
 		title: 'Page contents';
