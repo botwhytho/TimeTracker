@@ -204,13 +204,15 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																			textElement phlow firstParentWithViewContent phlow syncUpdate ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
-									icon: BrGlamorousVectorIcons add}.
+									icon: BrGlamorousVectorIcons add;
+									label: 'Create a new Child Category'}.
 					(aCategory isKindOf: TtRootCategory)
 						ifFalse: [ pane
 								addChild: (BrButton new
 										beTinySize;
 										aptitude: BrGlamorousButtonWithIconAptitude;
 										icon: BrGlamorousVectorIcons remove;
+										label: 'Delete Category';
 										action: [ :aBrButton :aBrButtonModel :anEvent | 
 											| isUsed |
 											anEvent consumed: true.
@@ -223,7 +225,9 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													anEvent target fireEvent: BrDropdownHideWish new ]
 												ifFalse: [ aCategory parentCategory children remove: aCategory.
 													self calculateHierarchy.
-													aBrButton phlow firstParentWithView phlow syncUpdate ] ]) ].
+													self root collection
+														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+													aBrButton phlow firstParentWithViewContent phlow syncUpdate ] ]) ].
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :arguments | 
@@ -233,6 +237,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												beTinySize;
 												aptitude: BrGlamorousButtonWithIconAptitude;
 												icon: BrGlamorousVectorIcons accept;
+												label: 'Use Category';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
 													| aCollection aTtTrackedTime categorizeButton viewElement |
 													aCollection := arguments first.
