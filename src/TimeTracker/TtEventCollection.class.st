@@ -849,10 +849,9 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 { #category : #accessing }
 TtEventCollection >> gtWeekFor: anAction [
 	<gtAction>
-	self flag: #TODO.	"Using calendar SVG asset from different package, duplicate or add GtPomodoro as dependency."
 	^ anAction dropdown
-		icon: [ BrGlamorousVectorIcons calendar asElement asScalableElement size: 20 @ 20 ]
-				asStencil;
+		icon: [ BrGlamorousVectorIcons timeTrackerCalendar asElement asScalableElement
+				size: 20 @ 20 ] asStencil;
 		tooltip: 'Select a Week to Analyze';
 		priority: 1;
 		content: [ :aButton | 
