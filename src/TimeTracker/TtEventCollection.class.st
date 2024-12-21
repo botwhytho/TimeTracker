@@ -695,9 +695,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 TtEventCollection >> gtNotesFor: aView [
 	<gtView>
 	| notes notesByPage |
-	notes := self rootCollection notes asArray
-			collect: [ :each | each -> (self timeEntries asArray select: [ :inner | each includes: inner ]) ]
-			thenSelect: [ :each | each value isNotEmpty ].
+	notes := self noteToTrackedTimeAssociations.
 	notesByPage := (notes groupedBy: [ :each | each key page ]) associations
 			collect: [ :each | each key -> (self withAll: (each value collect: #value) flatten) ].
 	^ aView columnedTree
@@ -729,10 +727,13 @@ TtEventCollection >> gtNotesFor: aView [
 							aPage := (anItem isKindOf: LePage)
 									ifTrue: [ anItem ]
 									ifFalse: [ anItem createWithoutPager ].
-							self flag: #BUG.	"Prevent from creating redundant notes linking to same page. Below is NOT working"
 							(contiguousGroups
-								allSatisfy: [ :each | notes detect: [ :inner | inner key = each and: [ inner key page = aPage ] ] ifNone: [false] ])
-								ifTrue: [ self inform: 'Trying to create redundant note' ]
+								allSatisfy: [ :aGroup | 
+									self noteToTrackedTimeAssociations
+										detect: [ :existingNote | (existingNote key as: Timespan) = aGroup and: [ existingNote key page = aPage ] ]
+										ifFound: [ true ]
+										ifNone: [ false ] ])
+								ifTrue: [  ];
 								ifFalse: [ contiguousGroups
 										do: [ :aTimespan | 
 											note := TtNote new
@@ -741,17 +742,19 @@ TtEventCollection >> gtNotesFor: aView [
 													database: aPage database;
 													page: aPage;
 													collection: self rootCollection.
-											self rootCollection add: note ] ].
+											self rootCollection add: note ].
+									aDropdownButton
+										enqueueTask: [ (self perform: #gtNotesFor: withArguments: {GtPhlowEmptyView new})
+												updateContent: viewElement ] asBlTask ].
 							aDropdownButton fireEvent: BrDropdownHideWish new.
-							aDropdownButton phlow spawnTool: aPage asLepiterPagePhlowTool.
-							aDropdownButton
-								enqueueTask: [ (self perform: #gtNotesFor: withArguments: {GtPhlowEmptyView new})
-										updateContent: viewElement ] asBlTask ] ] ];
+							aDropdownButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ] ];
 		action: [ :anAction | 
 			anAction button
 				icon: BrGlamorousVectorIcons inspect;
 				tooltip: 'Inspect Note Objects';
-				action: [ :aBrButton :aBrTab | aBrButton phlow spawnObject: ((notes collect: #key) groupedBy: #page) ] ];
+				action: [ :aBrButton :aBrTab | 
+					aBrButton phlow
+						spawnObject: ((self noteToTrackedTimeAssociations collect: #key) groupedBy: #page) ] ];
 		expandAll
 ]
 
@@ -1004,6 +1007,16 @@ TtEventCollection >> loadPage [
 		ifNil: [ [ page := self perform: #customPage ]
 				on: MessageNotUnderstood
 				do: [ page := self defaultPage ] ]
+]
+
+{ #category : #filtering }
+TtEventCollection >> noteToTrackedTimeAssociations [
+	^ self rootCollection notes asArray
+		collect: [ :aTtNote | 
+			aTtNote
+				-> (self timeEntries asArray
+						select: [ :aTtTrackedTime | aTtNote includes: aTtTrackedTime ]) ]
+		thenSelect: [ :each | each value isNotEmpty ]
 ]
 
 { #category : #accessing }
