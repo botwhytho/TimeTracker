@@ -80,20 +80,14 @@ TtPageLinks >> pageLinksButton [
 											label: pageLinksButton label;
 											icon: BrGlamorousVectorIcons note;
 											aptitude: BrGlamorousButtonWithIconAndLabelAptitude ]
-									content: [ BrSimpleList new
-											padding: (BlInsets all: 5);
-											itemStencil: [ BrButton new
-													hMatchParent;
-													vFitContent;
-													aptitude: BrGlamorousButtonWithLabelAptitude ];
-											itemDataBinder: [ :eachElement :eachPage :eachIndex | 
-												eachElement
-													label: eachPage page title;
-													action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-														aBlClickEvent consumed: true.
-														pageLinksButton phlow spawnTool: eachPage page asLepiterPagePhlowTool.
-														aBrButton fireEvent: BrDropdownHideWish new ] ];
-											items: self pageLinks asArray ]) ]
+									content: [ BrGlamorousSimpleContextMenuContent new
+											items: ((self pageLinks asArray
+													sorted: [ :eachPageLink | eachPageLink page title ] ascending)
+													collect: [ :eachPageLink | 
+														eachPageLink page title
+															-> [ :aBrButton | 
+																aBrButton phlow spawnTool: eachPageLink page asLepiterPagePhlowTool.
+																aBrButton fireEvent: BrDropdownHideWish new ] ]) ]) ]
 ]
 
 { #category : #'accessing\t' }
