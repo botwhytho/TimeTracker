@@ -356,7 +356,7 @@ TtEventCollection >> buildEntriesByDay [
 							aptitude: BrGlamorousToggleWithIconAndLabelAptitude + BrGlamorousButtonExteriorAptitude
 									+ BrGlamorousButtonRectangularAptitude;
 							addAptitude: (BrWithExplicitDropdownAptitude new
-									stencil: [ BrFrame new
+									stencil: [ MyBrFrame new
 											size: 1000 @ 1000;
 											aptitude: BrGlamorousAnchoredAptitude;
 											in: [ :aBrFrame | 
