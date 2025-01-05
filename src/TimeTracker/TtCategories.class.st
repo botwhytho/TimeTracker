@@ -239,12 +239,11 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												icon: BrGlamorousVectorIcons accept;
 												label: 'Use Category';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
-													| aCollection aDropdown aTtTrackedTime categorizeButton rowIndex viewElement |
+													| aCollection aDropdown aTtTrackedTime categorizeButton viewElement |
 													aCollection := arguments first.
 													aTtTrackedTime := arguments second.
 													categorizeButton := arguments third.
 													aDropdown := arguments fourth.
-													rowIndex := arguments fifth.
 													viewElement := categorizeButton phlow firstParentWithViewContent
 															phlow firstParentWithViewContent.
 													anEvent consumed: true.
@@ -257,7 +256,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
-																(GtPhlowContext new at: #row put: rowIndex)}) updateContent: viewElement ]) ] ]
+																GtPhlowContext new}) updateContent: viewElement ]) ] ]
 						ifAbsent: [  ].
 					pane ];
 				with: self.

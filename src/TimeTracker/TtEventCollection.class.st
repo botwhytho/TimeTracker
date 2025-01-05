@@ -372,8 +372,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 																	put: {self.
 																			each.
 																			aButton.
-																			aDropdown.
-																			rowIndex};
+																			aDropdown};
 																yourself)) asElement ]).
 						each category
 							ifNotNil: [ :notNil | 
@@ -425,16 +424,17 @@ TtEventCollection >> buildEntriesByDay: aContext [
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll;
 		asElementDo: [ :element | 
-			element id: #buildEntriesByDay.
-			aContext
-				at: #row
-				ifPresent: [ :rowIndex | 
-					| aBrTree |
+			self
+				detect: [ :each | each category isNil ]
+				ifFound: [ :aTrackedTime | 
+					| anIndex aBrTree indexInTree |
+					anIndex := self items identityIndexOf: aTrackedTime.
 					aBrTree := element childAt: 2.
+					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
-						scrollToIndex: rowIndex;
-						selectOne: rowIndex + 1 ]
-				ifAbsent: [  ].
+						scrollToIndex: ((indexInTree - 3) max: 1);
+						selectOne: indexInTree ]
+				ifNone: [  ].
 			element ]
 ]
 
