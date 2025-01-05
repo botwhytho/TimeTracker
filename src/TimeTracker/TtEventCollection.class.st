@@ -351,28 +351,28 @@ TtEventCollection >> buildEntriesByDay [
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ | aButton |
-						aButton := BrButton new.
+						aButton := BrToggle new.
 						aButton
-							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
-									+ ((BrGlamorousWithDropdownAptitude
-											handle: [ BrButton new
-													aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
-													label: ('Categorize' asRopedText fontSize: 12);
-													icon: (BlElement new
-															size: 15 @ 15;
-															geometry: BlCircleGeometry new;
-															background: Color transparent) ]
-											content: [ BrHorizontalPane new
-													size: 1000 @ 1000;
-													padding: (BlInsets all: 15);
-													addChild: (self categories
-															TtCategoriesFor: GtPhlowView empty
-															context: (GtPhlowContext new
-																	at: #TtTrackedTime
-																		put: {self.
-																				each.
-																				aButton};
-																	yourself)) asElement ]) preferredExtent: 1000 @ 1000).
+							aptitude: BrGlamorousToggleWithIconAndLabelAptitude + BrGlamorousButtonExteriorAptitude
+									+ BrGlamorousButtonRectangularAptitude;
+							addAptitude: (BrWithExplicitDropdownAptitude new
+									stencil: [ BrFrame new
+											size: 1000 @ 1000;
+											aptitude: BrGlamorousAnchoredAptitude;
+											in: [ :aBrFrame | 
+												aBrFrame
+													border: (aBrFrame border
+															copyWithPaint: (BlColorPaint color: aBrFrame border paint color darker darker darker darker)).
+												aBrFrame ];
+											padding: (BlInsets all: 15);
+											addChild: (self categories
+													TtCategoriesFor: GtPhlowView empty
+													context: (GtPhlowContext new
+															at: #TtTrackedTime
+																put: {self.
+																		each.
+																		aButton};
+															yourself)) asElement ]).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton
@@ -382,7 +382,7 @@ TtEventCollection >> buildEntriesByDay [
 											geometry: BlCircleGeometry new;
 											background: each category color) ]
 							ifNil: [ aButton
-									label: ('Categorize' asRopedText fontSize: 12);
+									label: 'Categorize' asRopedText;
 									icon: (BlElement new
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;

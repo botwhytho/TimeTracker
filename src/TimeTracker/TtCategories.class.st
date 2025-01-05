@@ -250,7 +250,11 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection class serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
-													categorizeButton fireEvent: BrDropdownHideWish new.
+													categorizeButton aptitude children
+														detect: [ :each | each isKindOf: BrWithExplicitDropdownAptitude ]
+														ifFound: #hide
+														ifNone: [ nil ].
+													categorizeButton deactivate.
 													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
