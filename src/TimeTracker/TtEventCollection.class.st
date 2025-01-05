@@ -308,7 +308,7 @@ TtEventCollection >> buildDonut: data [
 ]
 
 { #category : #views }
-TtEventCollection >> buildEntriesByDay [
+TtEventCollection >> buildEntriesByDay: aContext [
 	| entriesByDay notes timeEntries timeEntriesAndDays |
 	timeEntries := self timeEntries.
 	entriesByDay := timeEntries groupedByWeek size = 1
@@ -347,32 +347,34 @@ TtEventCollection >> buildEntriesByDay [
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
 		column: 'Category'
-			stencil: [ :each | 
+			stencil: [ :each :rowIndex :columnIndex | 
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ | aButton |
+					ifFalse: [ | aButton aDropdown |
 						aButton := BrToggle new.
 						aButton
 							aptitude: BrGlamorousToggleWithIconAndLabelAptitude + BrGlamorousButtonExteriorAptitude
 									+ BrGlamorousButtonRectangularAptitude;
-							addAptitude: (BrWithExplicitDropdownAptitude new
-									stencil: [ MyBrFrame new
-											size: 1000 @ 1000;
-											aptitude: BrGlamorousAnchoredAptitude;
-											in: [ :aBrFrame | 
-												aBrFrame
-													border: (aBrFrame border
-															copyWithPaint: (BlColorPaint color: aBrFrame border paint color darker darker darker darker)).
-												aBrFrame ];
-											padding: (BlInsets all: 15);
-											addChild: (self categories
-													TtCategoriesFor: GtPhlowView empty
-													context: (GtPhlowContext new
-															at: #TtTrackedTime
-																put: {self.
-																		each.
-																		aButton};
-															yourself)) asElement ]).
+							addAptitude: (aDropdown := BrWithExplicitDropdownAptitude new
+										stencil: [ MyBrFrame new
+												size: 1000 @ 1000;
+												aptitude: BrGlamorousAnchoredAptitude;
+												in: [ :aBrFrame | 
+													aBrFrame
+														border: (aBrFrame border
+																copyWithPaint: (BlColorPaint color: aBrFrame border paint color darker darker darker darker)).
+													aBrFrame ];
+												padding: (BlInsets all: 15);
+												addChild: (self categories
+														TtCategoriesFor: GtPhlowView empty
+														context: (GtPhlowContext new
+																at: #TtTrackedTime
+																	put: {self.
+																			each.
+																			aButton.
+																			aDropdown.
+																			rowIndex};
+																yourself)) asElement ]).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton
@@ -422,7 +424,18 @@ TtEventCollection >> buildEntriesByDay [
 					ifFalse: [ BlElement new size: 1 @ 1 ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll;
-		asElementDo: [ :element | element id: #buildEntriesByDay ]
+		asElementDo: [ :element | 
+			element id: #buildEntriesByDay.
+			aContext
+				at: #row
+				ifPresent: [ :rowIndex | 
+					| aBrTree |
+					aBrTree := element childAt: 2.
+					aBrTree
+						scrollToIndex: rowIndex;
+						selectOne: rowIndex + 1 ]
+				ifAbsent: [  ].
+			element ]
 ]
 
 { #category : #'building ui' }
@@ -658,7 +671,7 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 		stencil: [ BrFrame new
 				id: #gtEntriesByDayFor:context:;
 				matchParent;
-				addChild: self buildEntriesByDay ]
+				addChild: (self buildEntriesByDay: aContext) ]
 ]
 
 { #category : #import }
@@ -810,7 +823,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 					elevation: (BlRelativeElevation elevation: 1000);
 					beBottom;
 					target: dailySummary.
-			entriesByDay := self buildEntriesByDay.
+			entriesByDay := self buildEntriesByDay: aContext.
 			horizontalPane
 				addChildren: {self buildDonut: data.
 						self buildBars: data}.

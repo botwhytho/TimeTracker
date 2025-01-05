@@ -239,10 +239,12 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												icon: BrGlamorousVectorIcons accept;
 												label: 'Use Category';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
-													| aCollection aTtTrackedTime categorizeButton viewElement |
+													| aCollection aDropdown aTtTrackedTime categorizeButton rowIndex viewElement |
 													aCollection := arguments first.
 													aTtTrackedTime := arguments second.
 													categorizeButton := arguments third.
+													aDropdown := arguments fourth.
+													rowIndex := arguments fifth.
 													viewElement := categorizeButton phlow firstParentWithViewContent
 															phlow firstParentWithViewContent.
 													anEvent consumed: true.
@@ -250,15 +252,12 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection class serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
-													categorizeButton aptitude children
-														detect: [ :each | each isKindOf: BrWithExplicitDropdownAptitude ]
-														ifFound: #hide
-														ifNone: [ nil ].
+													aDropdown hide.
 													categorizeButton deactivate.
 													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
-																GtPhlowContext new}) updateContent: viewElement ]) ] ]
+																(GtPhlowContext new at: #row put: rowIndex)}) updateContent: viewElement ]) ] ]
 						ifAbsent: [  ].
 					pane ];
 				with: self.
