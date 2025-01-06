@@ -119,6 +119,11 @@ TtEventCollection >> TtCategoriesFor: aView [
 ]
 
 { #category : #filtering }
+TtEventCollection >> allCategorized [
+	^ self select: [ :each | each category isNotNil ]
+]
+
+{ #category : #filtering }
 TtEventCollection >> allEqualTo: aTtTrackedTime [
 	"Returns all entries happening at the same time. Had to define identityBefore/identityAfter (that use `identityIndexOf:`) for this to work properly as `indexOf:` just compares by `=`"
 
@@ -147,6 +152,11 @@ TtEventCollection >> allOverlappingWith: aTtTrackedTime [
 		select: [ :each | 
 			(each == aTtTrackedTime) not
 				and: [ (aTtTrackedTime includes: each) or: [ each includes: aTtTrackedTime ] ] ]
+]
+
+{ #category : #filtering }
+TtEventCollection >> allUncategorized [
+	^ self select: [ :each | each category isNil ]
 ]
 
 { #category : #accessing }
