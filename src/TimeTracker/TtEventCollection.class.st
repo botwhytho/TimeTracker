@@ -367,7 +367,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 									+ BrGlamorousButtonRectangularAptitude;
 							addAptitude: (aDropdown := BrWithExplicitDropdownAptitude new
 										stencil: [ MyBrFrame new
-												size: ((GtWorld spaceWithId:GtWorld defaultId do: #yourself) extent * 3/4);
+												size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
+														in: [ :screenSize | (screenSize x * 0.3) @ screenSize y * 0.9 ]);
 												aptitude: BrGlamorousAnchoredAptitude;
 												in: [ :aBrFrame | 
 													aBrFrame
@@ -442,7 +443,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 					aBrTree := element childAt: 2.
 					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
-						scrollToIndex: ((indexInTree - 3) max: 1);
+						scrollToIndex: (indexInTree - 3 max: 1);
 						selectOne: indexInTree ]
 				ifNone: [  ].
 			element ]
