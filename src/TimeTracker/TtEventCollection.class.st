@@ -367,7 +367,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 									+ BrGlamorousButtonRectangularAptitude;
 							addAptitude: (aDropdown := BrWithExplicitDropdownAptitude new
 										stencil: [ MyBrFrame new
-												size: 1000 @ 1000;
+												size: ((GtWorld spaceWithId:GtWorld defaultId do: #yourself) extent * 3/4);
 												aptitude: BrGlamorousAnchoredAptitude;
 												in: [ :aBrFrame | 
 													aBrFrame
