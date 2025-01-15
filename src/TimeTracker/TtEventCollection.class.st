@@ -306,7 +306,7 @@ TtEventCollection >> buildDonut: data [
 										anEvent currentTarget border: aColor.
 										element
 											nextSiblingDo: [ :aDonut | aDonut childNamed: categoryName ifFound: [ :found | found border: aColor ] ] ] ];
-						geometry: (BlAnnulusSector new
+						geometry: (BlAnnulusSectorGeometry new
 								startAngle: each startAngle;
 								endAngle: each endAngle;
 								innerRadius: 0.85);
