@@ -876,8 +876,11 @@ TtEventCollection >> gtTrackedDaysFor: anAction [
 	^ anAction button
 		label: (self groupedByDay keys
 				in: [ :days | 
-					days size asString , '/' , ((days max - days min) days + 1) asString
-						, ' tracked' ]);
+					| tracked total |
+					tracked := days size.
+					total := (days max - days min) days + 1.
+					tracked asString , '/' , total asString , ' tracked ('
+						, (tracked / total * 100 roundTo: 1) asString , '%)' ]);
 		priority: -1
 ]
 
