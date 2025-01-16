@@ -892,7 +892,7 @@ TtEventCollection >> gtWeekFor: anAction [
 		content: [ :aButton | 
 			| firstDate element |
 			firstDate := nil.
-			element := GtCalendarElement
+			element := MyGtCalendarElement
 					forDate: self rootCollection groupedByDay keys max.
 			element
 				when: GtCalendarDateClickedEvent
