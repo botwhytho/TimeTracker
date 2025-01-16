@@ -870,6 +870,17 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 										updateContent: aBrTab viewContentElement ] ] ]
 ]
 
+{ #category : #inspecting }
+TtEventCollection >> gtTrackedDaysFor: anAction [
+	<gtAction>
+	^ anAction button
+		label: (self groupedByDay keys
+				in: [ :days | 
+					days size asString , '/' , ((days max - days min) days + 1) asString
+						, ' tracked' ]);
+		priority: -1
+]
+
 { #category : #accessing }
 TtEventCollection >> gtWeekFor: anAction [
 	<gtAction>
