@@ -99,12 +99,11 @@ TtNote >> gtDeleteActionFor: anAction [
 ]
 
 { #category : #views }
-TtNote >> gtPageFor: aView [
+TtNote >> gtPreviewFor: aView [
 	<gtView>
 	self page ifNil: [ ^ aView empty ].
 	^ aView forward
 		title: 'Linked Page';
-		priority: 0.5;
 		object: [ self page ];
 		view: #gtLiveFor:
 ]

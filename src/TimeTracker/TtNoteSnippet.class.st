@@ -53,5 +53,5 @@ TtNoteSnippet >> gtPageFor: aView [
 		title: 'Linked Page';
 		priority: 1.5;
 		object: [ self domainObject ];
-		view: #gtPageFor:
+		view: #gtPreviewFor:
 ]
