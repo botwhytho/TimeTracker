@@ -873,14 +873,23 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 { #category : #inspecting }
 TtEventCollection >> gtTrackedDaysFor: anAction [
 	<gtAction>
+	| isSingleCategory |
+	isSingleCategory := self groupedByCategory keys size = 2.
 	^ anAction button
 		label: (self groupedByDay keys
 				in: [ :days | 
-					| tracked total |
-					tracked := days size.
-					total := (days max - days min) days + 1.
-					tracked asString , '/' , total asString , ' tracked ('
-						, (tracked / total * 100 roundTo: 1) asString , '%)' ]);
+					| firstDay lastDay trackedDays totalDays |
+					firstDay := days min.
+					lastDay := days max.
+					trackedDays := days size.
+					totalDays := (days max - days min) days + 1.
+					isSingleCategory
+						ifTrue: [ | totalTrackedDays |
+							totalTrackedDays := self rootCollection groupedByDay keys size.
+							trackedDays asString , '/' , totalTrackedDays asString , ' tracked ('
+								, (trackedDays / totalTrackedDays * 100 roundTo: 1) asString , '%)' ]
+						ifFalse: [ trackedDays asString , '/' , totalDays asString , ' tracked ('
+								, (trackedDays / totalDays * 100 roundTo: 1) asString , '%)' ] ]);
 		priority: -1
 ]
 
