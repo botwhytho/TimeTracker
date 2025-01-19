@@ -166,6 +166,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 					pane
 						border: (BlBorder paint: Color gray width: 1);
 						padding: (BlInsets all: 5);
+						background: Color white;
 						fitContent;
 						alignCenter;
 						addChildren: {textElement
@@ -310,9 +311,10 @@ TtCategories >> gtItemsByCategoryFor: aView [
 		column: 'Category'
 			text: [ :each | each key name ]
 			spawn: #key;
-		column: 'Items' text: [ :each | each value size ];
+		column: 'Items' text: [ :each | each value size ] weight: 0.25;
 		column: 'Has Children'
-			text: [ :each | each key children isEmpty ifTrue: [ '' ] ifFalse: [ 'Yes' ] ];
+			icon: [ :each | each key children isEmpty ifTrue: [ BlElement new ] ifFalse: [ BrGlamorousVectorIcons accept  ] ]
+			weight: 0.25;
 		send: #value
 ]
 
