@@ -369,12 +369,6 @@ TtEventCollection >> buildEntriesByDay: aContext [
 										stencil: [ MyBrFrame new
 												size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
 														in: [ :screenSize | (screenSize x * 0.3) @ screenSize y * 0.9 ]);
-												aptitude: BrGlamorousAnchoredAptitude;
-												in: [ :aBrFrame | 
-													aBrFrame
-														border: (aBrFrame border
-																copyWithPaint: (BlColorPaint color: aBrFrame border paint color darker darker darker darker)).
-													aBrFrame ];
 												padding: (BlInsets all: 15);
 												addChild: (self categories
 														TtCategoriesFor: GtPhlowView empty

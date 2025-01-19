@@ -33,7 +33,7 @@ BrWithExplicitDropdownAptitude >> initializeEventHandlers [
 	clickOutsideEventHandler := BlEventHandler
 			on: BlMouseUpEvent
 			do: [ :anEvent | 
-				self handleClickedOutsideMouseUpEvent: anEvent.
+				self onClickedOutsideMouseUpEvent: anEvent.
 				self widget deactivate ].
 
 	pressEscEventHandler := BlShortcutWithAction new
