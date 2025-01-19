@@ -86,7 +86,10 @@ TtCategory >> gtParentAndChildrenFor: aView [
 		items: [ self parentAndChildren ];
 		children: #value;
 		column: 'Category'
-			text: [ :each | each key isString ifTrue: [ each key ] ifFalse: [ each key name ] ];
+			text: [ :each | 
+				each key isString
+					ifTrue: [ each key ]
+					ifFalse: [ each key ifNil: [ '' ] ifNotNil: #name ] ];
 		send: #key;
 		expandAll
 ]
