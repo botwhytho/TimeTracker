@@ -288,6 +288,14 @@ TtCategories >> collection: anObject [
 	collection := anObject
 ]
 
+{ #category : #views }
+TtCategories >> gtCollectionActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		label: 'Colllection';
+		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | aBrButton phlow spawnObject: self collection ]
+]
+
 { #category : #initialization }
 TtCategories >> initialize [
 	super initialize.

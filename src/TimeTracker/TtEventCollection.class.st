@@ -1010,10 +1010,10 @@ TtEventCollection >> loadCategories [
 		detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
 		ifFound: [ :aCategorySnippet | 
 			| someCategories |
-			someCategories := TtCategories
+			someCategories := (TtCategories
 					fromRoot: (NeoJSONReader
 							fromString: aCategorySnippet jsonString
-							as: CategorySnippetDeserializer) data.
+							as: CategorySnippetDeserializer) data) collection: self.
 			someCategories root
 				collection: self;
 				uid: aCategorySnippet uidString.

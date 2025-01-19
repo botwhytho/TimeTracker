@@ -207,6 +207,28 @@ TtTrackedTime >> gtGoToTrelloFor: anAction [
 			WebBrowser openOn: 'https://trello.com/c/' , self daySerializedFrom ]
 ]
 
+{ #category : #views }
+TtTrackedTime >> gtPreviewFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'In Brief';
+		items: [ self gtSummary ];
+		column: 'Property'
+			text: #key
+			width: 120;
+		column: 'Value' text: #value;
+		send: #value
+]
+
+{ #category : #views }
+TtTrackedTime >> gtSummary [
+	^ {'Start' -> start.
+		'Duration' -> duration.
+		'Description' -> description.
+		'Details' -> details.
+		'Category' -> category}
+]
+
 { #category : #accessing }
 TtTrackedTime >> isContiguous: aTrackedTime [
 	^ self end rounded = aTrackedTime start

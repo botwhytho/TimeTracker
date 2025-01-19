@@ -77,6 +77,32 @@ TtCategory >> defaultColor [
 	^ defaultColor ifNil: [ defaultColor := self stringToColorHash ]
 ]
 
+{ #category : #views }
+TtCategory >> gtParentAndChildrenFor: aView [
+	<gtView>
+	^ aView columnedTree
+		title: 'Local Hierarchy';
+		priority: 5;
+		items: [ self parentAndChildren ];
+		children: #value;
+		column: 'Category'
+			text: [ :each | each key isString ifTrue: [ each key ] ifFalse: [ each key name ] ];
+		send: #key;
+		expandAll
+]
+
+{ #category : #action }
+TtCategory >> gtRootActionFor: anAction [
+	<gtAction>
+	| isRoot |
+	isRoot := self isKindOf: TtRootCategory.
+	^ anAction button
+		label: (isRoot ifTrue: [ 'Hierarchy' ] ifFalse: [ 'Root' ]);
+		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | 
+			aBrButton phlow
+				spawnObject: (isRoot ifTrue: [ self hierarchy ] ifFalse: [ self rootCategory ]) ]
+]
+
 { #category : #accessing }
 TtCategory >> hierarchy [
 	^ hierarchy ifNil: [ self rootCategory hierarchy ]
@@ -95,6 +121,12 @@ TtCategory >> name [
 { #category : #accessing }
 TtCategory >> name: aName [
 	name := aName
+]
+
+{ #category : #views }
+TtCategory >> parentAndChildren [
+	^ {'Parent Category' -> {self parentCategory -> #()}.
+		'Children Categories' -> (children collect: [ :each | each -> #() ])}
 ]
 
 { #category : #accessing }

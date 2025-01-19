@@ -18,6 +18,24 @@ TtRootCategory >> collection: aTtEventCollection [
 	collection := aTtEventCollection
 ]
 
+{ #category : #views }
+TtRootCategory >> gtCollectionActionFor: anAction [
+	<gtAction>
+	^ anAction button
+		label: 'Colllection';
+		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | aBrButton phlow spawnObject: self collection ]
+]
+
+{ #category : #views }
+TtRootCategory >> gtHierarchyFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Hierarchy';
+		priority: 1;
+		object: [ hierarchy ];
+		view: #TtCategoriesFor:context:
+]
+
 { #category : #accessing }
 TtRootCategory >> uid [
 	^ uid
