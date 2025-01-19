@@ -9,7 +9,7 @@ BrWithExplicitDropdownAptitude >> initialize [
 	super initialize.
 	self
 		usePrimaryMouseButton;
-		beWidgetBoundsRelocator
+		withWidgetBoundsRelocator
 ]
 
 { #category : #initialization }
