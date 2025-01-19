@@ -115,7 +115,9 @@ TtEventCollection >> TtCategoriesFor: aView [
 		title: 'Categories';
 		priority: 6;
 		object: self categories;
-		view: #TtCategoriesFor:context:
+		view: #TtCategoriesFor:context:;
+		actionButtonLabel: 'Categories'
+			action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self categories ]
 ]
 
 { #category : #filtering }

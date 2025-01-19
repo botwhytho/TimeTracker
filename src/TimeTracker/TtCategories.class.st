@@ -296,6 +296,26 @@ TtCategories >> gtCollectionActionFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | aBrButton phlow spawnObject: self collection ]
 ]
 
+{ #category : #views }
+TtCategories >> gtItemsByCategoryFor: aView [
+	<gtView>
+	| itemsByCategory emptyCategories |
+	itemsByCategory := self collection groupedByCategory.
+	emptyCategories := self allButFirst items difference: itemsByCategory keys.
+	emptyCategories do: [ :each | itemsByCategory at: each put: #() ].
+	^ aView columnedList
+		title: 'Items by Category';
+		priority: 20;
+		items: [ itemsByCategory associations sorted: [ :each | each value size ] descending ];
+		column: 'Category'
+			text: [ :each | each key name ]
+			spawn: #key;
+		column: 'Items' text: [ :each | each value size ];
+		column: 'Has Children'
+			text: [ :each | each key children isEmpty ifTrue: [ '' ] ifFalse: [ 'Yes' ] ];
+		send: #value
+]
+
 { #category : #initialization }
 TtCategories >> initialize [
 	super initialize.
