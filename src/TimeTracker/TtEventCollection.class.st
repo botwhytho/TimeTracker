@@ -7,7 +7,8 @@ Class {
 		'categories',
 		'page',
 		'viewFilterContext',
-		'includeUntracked'
+		'includeUntracked',
+		'groupingLevel'
 	],
 	#classInstVars : [
 		'uniqueInstance',
@@ -601,7 +602,8 @@ TtEventCollection >> groupedBy: aBlock [
 						page: self page;
 						categories: self categories;
 						viewFilterContext: self viewFilterContext;
-						includeUntracked: self includeUntracked) ].
+						includeUntracked: self includeUntracked;
+						groupingLevel: self groupingLevel) ].
 
 	^ result
 ]
@@ -610,7 +612,13 @@ TtEventCollection >> groupedBy: aBlock [
 TtEventCollection >> groupedByCategory [
 	| daysWithUntrackedTime grouped |
 	grouped := self
-			groupedBy: [ :each | each category ifNil: [ TtCategories uncategorized ] ].
+			groupedBy: [ :each | 
+				each category
+					ifNil: [ TtCategories uncategorized ]
+					ifNotNil: [ :aCategory | 
+						self groupingLevel isSymbol
+							ifTrue: [ aCategory topMostCategory ]
+							ifFalse: [ aCategory moveUpHierarchy: self groupingLevel ] ] ].
 	daysWithUntrackedTime := self groupedByDay associations
 			select: [ :anAssociation | 
 				(anAssociation value
@@ -670,6 +678,16 @@ TtEventCollection >> groupedByTimespan [
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByWeek [
 	^ self groupedBy: [ :each | each start asWeek ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> groupingLevel [
+	^ groupingLevel ifNil: [ groupingLevel := 1 ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> groupingLevel: anObject [
+	groupingLevel := anObject
 ]
 
 { #category : #views }
@@ -873,6 +891,29 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 				self toggleUntracked.
 				(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
 					updateContent: aBrTab viewContentElement ];
+		actionDropdownButtonLabel: 'Grouping Level'
+			content: [ :aButton :aBrTab | 
+				| labelMapping |
+				labelMapping := {'Original' -> 1.
+						'2nd Level' -> 2.
+						'3rd level' -> 3.
+						'4th Level' -> 4.
+						'5th Level' -> 5.
+						'Top Level' -> #topMostCategory}.
+				BrSimpleList new
+					margin: (BlInsets all: 5);
+					items: labelMapping;
+					itemStencil: [ BrLabel new hMatchParent
+							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
+					itemDataBinder: [ :aLabel :aViewFilter | 
+						aLabel
+							text: aViewFilter key;
+							when: BlClickEvent
+								do: [ :_ | 
+									aButton fireEvent: BrDropdownHideWish new.
+									self groupingLevel: aViewFilter value.
+									(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
+										updateContent: aBrTab viewContentElement ] ] ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
 				| labelMapping |
@@ -1154,7 +1195,8 @@ TtEventCollection >> reject: aBlock [
 		page: self page;
 		categories: self categories;
 		viewFilterContext: self viewFilterContext;
-		includeUntracked: self includeUntracked
+		includeUntracked: self includeUntracked;
+		groupingLevel: self groupingLevel
 ]
 
 { #category : #accessing }
@@ -1168,7 +1210,8 @@ TtEventCollection >> select: aBlock [
 		page: self page;
 		categories: self categories;
 		viewFilterContext: self viewFilterContext;
-		includeUntracked: self includeUntracked
+		includeUntracked: self includeUntracked;
+		groupingLevel: self groupingLevel
 ]
 
 { #category : #import }
@@ -1233,5 +1276,6 @@ TtEventCollection >> withAll: aCollection [
 		categories: self categories;
 		viewFilterContext: self viewFilterContext;
 		includeUntracked: self includeUntracked;
+		groupingLevel: self groupingLevel;
 		addAll: aCollection
 ]
