@@ -370,8 +370,9 @@ TtEventCollection >> buildEntriesByDay: aContext [
 									+ BrGlamorousButtonRectangularAptitude;
 							addAptitude: (aDropdown := BrWithExplicitDropdownAptitude new
 										stencil: [ MyBrFrame new
+												flag: #TODO; "Need a better way to make this bigger considering category hierarchies will have varying aspect ratios"
 												size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
-														in: [ :screenSize | (screenSize x * 0.3) @ screenSize y * 0.9 ]);
+														in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
 												padding: (BlInsets all: 15);
 												addChild: (self categories
 														TtCategoriesFor: GtPhlowView empty
