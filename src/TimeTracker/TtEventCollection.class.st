@@ -682,9 +682,11 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 ]
 
 { #category : #import }
-TtEventCollection >> gtImportActionFor: anAction [
+TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	<gtAction>
 	self flag: #TODO.	"Generalize import through some type of interface"
+	(aContext navigation previousContext object isKindOf: TtEventCollection)
+		ifTrue: [ ^ anAction noAction ].
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
 		label: 'Import';
