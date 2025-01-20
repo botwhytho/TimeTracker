@@ -689,7 +689,7 @@ TtEventCollection >> gtImportActionFor: anAction [
 		icon: BrGlamorousVectorIcons inspect;
 		label: 'Import';
 		tooltip: 'Import new data';
-		priority: 0;
+		priority: 0.5;
 		action: [ :aButton :aBrTab | 
 			| aContainer |
 			self importFromTrello.
@@ -776,6 +776,22 @@ TtEventCollection >> gtNotesFor: aView [
 					aBrButton phlow
 						spawnObject: ((self noteToTrackedTimeAssociations collect: #key) groupedBy: #page) ] ];
 		expandAll
+]
+
+{ #category : #'gt - advice' }
+TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
+	<gtAdvice>
+	| categorizedWithPlaceholder |
+	categorizedWithPlaceholder := self
+			select: [ :each | each category isKindOf: TtPlaceholderCategory ].
+	categorizedWithPlaceholder ifEmpty: [ ^ aGtAdvice none ].
+	^ aGtAdvice item
+		priority: -50;
+		description: [ :class | 
+			'Collection has placeholder categories. Please categorize these entries.'
+				asRopedText ];
+		compute: [ categorizedWithPlaceholder ];
+		action: [ :class | GtPhlowObjectAdviceAction object: categorizedWithPlaceholder ]
 ]
 
 { #category : #search }
@@ -872,6 +888,7 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 	| isSingleCategory |
 	isSingleCategory := self groupedByCategory keys size = 2.
 	^ anAction button
+	priority: 0.25;
 		label: (self groupedByDay keys
 				in: [ :days | 
 					| firstDay lastDay trackedDays totalDays |
@@ -889,8 +906,7 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 							trackedDays asString , '/' , totalTrackedDays asString , ' tracked ('
 								, (trackedDays / totalTrackedDays * 100 roundTo: 1) asString , '%)' ]
 						ifFalse: [ trackedDays asString , '/' , totalDays asString , ' tracked ('
-								, (trackedDays / totalDays * 100 roundTo: 1) asString , '%)' ] ]);
-		priority: -1
+								, (trackedDays / totalDays * 100 roundTo: 1) asString , '%)' ] ])
 ]
 
 { #category : #accessing }
