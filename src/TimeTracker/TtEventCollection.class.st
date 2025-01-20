@@ -893,7 +893,7 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 	| isSingleCategory |
 	isSingleCategory := self groupedByCategory keys size = 2.
 	^ anAction button
-	priority: 0.25;
+		priority: 0.25;
 		label: (self groupedByDay keys
 				in: [ :days | 
 					| firstDay lastDay trackedDays totalDays |
@@ -903,11 +903,11 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 					totalDays := (days max - days min) days + 1.
 					isSingleCategory
 						ifTrue: [ | totalTrackedDays |
-							totalTrackedDays := (aContext navigation previousContext object
-									in: [ :anObject | 
-										(anObject isNil or: [ (anObject isKindOf: TtEventCollection) not ])
-											ifTrue: [ self rootCollection ]
-											ifFalse: [ anObject ] ]) groupedByDay keys size.
+							totalTrackedDays := ((aContext navigation previousContext isNil
+									or: [ (aContext navigation previousContext object isKindOf: TtEventCollection) not ])
+									ifTrue: [ self rootCollection ]
+									ifFalse: [ aContext navigation previousContext object ]) groupedByDay
+									keys size.
 							trackedDays asString , '/' , totalTrackedDays asString , ' tracked ('
 								, (trackedDays / totalTrackedDays * 100 roundTo: 1) asString , '%)' ]
 						ifFalse: [ trackedDays asString , '/' , totalDays asString , ' tracked ('

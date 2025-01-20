@@ -259,7 +259,18 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														withArguments: {GtPhlowEmptyView new.
 																GtPhlowContext new}) updateContent: viewElement ]) ] ]
 						ifAbsent: [ (aContext navigation object isKindOf: TtEventCollection)
-								ifTrue: [ "self inform: 'Calling from collection'" "WORKS" ] ].
+								ifTrue: [ pane
+										addChild: (BrButton new
+												aptitude: (BrGlamorousButtonWithLabelAptitude new foreground: Color red );
+												label: 'USE FOR ALL';
+												action: [ :aBrButton :aBrButtonModel :anEvent | 
+													| aCollection |
+													aCollection := aContext navigation object.
+													anEvent consumed: true.
+													aCollection timeEntries
+														do: [ :aTtTrackedTime | 
+															aTtTrackedTime category: aCategory.
+															aCollection class serializeWithLepiter: aTtTrackedTime ] ]) ] ].
 					pane ];
 				with: self.
 			view edges
