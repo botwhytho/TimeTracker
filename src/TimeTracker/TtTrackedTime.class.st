@@ -216,7 +216,29 @@ TtTrackedTime >> gtPreviewFor: aView [
 		column: 'Property'
 			text: #key
 			width: 120;
-		column: 'Value' text: #value;
+		column: 'Value'
+			stencil: [ :each | 
+				(#('Description' 'Details') includes: each key)
+					ifTrue: [ | label |
+						label := BrEditableLabel new.
+						label
+							aptitude: (BrGlamorousEditableLabelAptitude new
+									glamorousCodeFont;
+									defaultForeground: Color black;
+									fontSize: 13);
+							text: each value;
+							when: BrEditorAcceptWish
+								do: [ :aWish | 
+									| newValue |
+									newValue := aWish text asString.
+									each key = 'Description'
+										ifTrue: [ self description: newValue ]
+										ifFalse: [ self details: newValue ].
+									self collection rootCollection
+										ifNotNil: [ :notNil | notNil class serializeWithLepiter: self ] ] ]
+					ifFalse: [ BrLabel new
+							aptitude: BrGlamorousLabelAptitude;
+							text: each key ] ];
 		send: #value
 ]
 
