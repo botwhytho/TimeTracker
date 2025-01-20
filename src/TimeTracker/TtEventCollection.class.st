@@ -894,11 +894,11 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		actionDropdownButtonLabel: 'Grouping Level'
 			content: [ :aButton :aBrTab | 
 				| labelMapping |
-				labelMapping := {'Original' -> 1.
-						'2nd Level' -> 2.
-						'3rd level' -> 3.
-						'4th Level' -> 4.
-						'5th Level' -> 5.
+				labelMapping := {'Original' -> 0.
+						'2nd Level' -> 1.
+						'3rd level' -> 2.
+						'4th Level' -> 3.
+						'5th Level' -> 4.
 						'Top Level' -> #topMostCategory}.
 				BrSimpleList new
 					margin: (BlInsets all: 5);
