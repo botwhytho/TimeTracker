@@ -12,7 +12,7 @@ TtTrelloImporter class >> fetch [
 					get: 'https://api.trello.com/1/lists/' , TrelloTimeTrackerList , '/cards?key='
 							, TrelloKey , '&token=' , TrelloToken).
 	^ (result
-		reject: [ :item | [ [ (item at: 'name') asDate ] ifError: [ false ] ] value isBoolean ]
+		reject: [ :item | ([ (item at: 'name') asDate ] ifError: [ false ]) isBoolean ]
 		thenCollect: [ :item | 
 			(item at: 'name') asDate
 				-> {'description' -> (item at: 'desc').

@@ -686,7 +686,9 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	<gtAction>
 	self flag: #TODO.	"Generalize import through some type of interface"
-	(aContext navigation previousContext object isKindOf: TtEventCollection)
+	(aContext navigation previousContext
+		ifNil: [ false ]
+		ifNotNil: [ :notNil | notNil object isKindOf: TtEventCollection ])
 		ifTrue: [ ^ anAction noAction ].
 	^ anAction button
 		icon: BrGlamorousVectorIcons inspect;
@@ -786,7 +788,7 @@ TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 	<gtAdvice>
 	| categorizedWithPlaceholder |
 	categorizedWithPlaceholder := self
-			select: [ :each | each category isPlaceholder ].
+			select: [ :each | each category ifNil: [ false ] ifNotNil: [ :notNil | notNil isPlaceholder ] ].
 	categorizedWithPlaceholder ifEmpty: [ ^ aGtAdvice none ].
 	^ aGtAdvice item
 		priority: -50;
@@ -1007,11 +1009,12 @@ TtEventCollection >> importFromTrello [
 	existingDays := (self rootCollection
 			collect: [ :each | each start asDate ]
 			as: Set) asArray sorted: #yourself descending.
-	daysToImport := (response keys difference: existingDays) asArray
-			sorted: #yourself descending.	"daysToImport
+	daysToImport := ((response keys reject: [ :each | each = Date today ])
+			difference: existingDays) asArray sorted: #yourself ascending.
+	daysToImport
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
-		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
-	(daysToImport first: 1)
+		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ].
+	daysToImport
 		do: [ :day | 
 			TtTrelloParser new
 				add: (response associationAt: day)
