@@ -6,7 +6,8 @@ Class {
 	#instVars : [
 		'categories',
 		'page',
-		'viewFilterContext'
+		'viewFilterContext',
+		'includeUntracked'
 	],
 	#classInstVars : [
 		'uniqueInstance',
@@ -599,7 +600,8 @@ TtEventCollection >> groupedBy: aBlock [
 				put: ((self species withAll: value)
 						page: self page;
 						categories: self categories;
-						viewFilterContext: self viewFilterContext) ].
+						viewFilterContext: self viewFilterContext;
+						includeUntracked: self includeUntracked) ].
 
 	^ result
 ]
@@ -615,10 +617,11 @@ TtEventCollection >> groupedByCategory [
 					groupedBy: [ :each | each value as: each value class superclass ]) keys sum
 					< 1 day ]
 			thenCollect: #key.
-	daysWithUntrackedTime
-		ifNotEmpty: [ grouped
-				at: TtCategories untracked
-				put: (self select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ].
+	self includeUntracked
+		ifTrue: [ daysWithUntrackedTime
+				ifNotEmpty: [ grouped
+						at: TtCategories untracked
+						put: (self select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ] ].
 	^ grouped
 ]
 
@@ -865,6 +868,11 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 							resizer.
 							entriesByDay}.
 			verticalPane ];
+		actionButtonLabel: 'Toggle Untracked'
+			action: [ :aButton :aBrTab | 
+				self toggleUntracked.
+				(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
+					updateContent: aBrTab viewContentElement ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
 				| labelMapping |
@@ -884,7 +892,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 								do: [ :_ | 
 									aButton fireEvent: BrDropdownHideWish new.
 									self viewFilterContext: aViewFilter value.
-									(self gtSummaryFor: GtPhlowEmptyView new context: GtPhlowContext new)
+									(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
 										updateContent: aBrTab viewContentElement ] ] ]
 ]
 
@@ -1023,6 +1031,16 @@ TtEventCollection >> importFromTrello [
 ]
 
 { #category : #accessing }
+TtEventCollection >> includeUntracked [
+	^ includeUntracked ifNil: [ includeUntracked := true ]
+]
+
+{ #category : #accessing }
+TtEventCollection >> includeUntracked: aBoolean [
+	includeUntracked := aBoolean
+]
+
+{ #category : #accessing }
 TtEventCollection >> items [
 	^ items ifNil: [
 		items := SortedCollection new ]
@@ -1135,7 +1153,8 @@ TtEventCollection >> reject: aBlock [
 	^ (self species withAll: (self items reject: aBlock))
 		page: self page;
 		categories: self categories;
-		viewFilterContext: self viewFilterContext
+		viewFilterContext: self viewFilterContext;
+		includeUntracked: self includeUntracked
 ]
 
 { #category : #accessing }
@@ -1148,7 +1167,8 @@ TtEventCollection >> select: aBlock [
 	^ (self species withAll: (self items select: aBlock))
 		page: self page;
 		categories: self categories;
-		viewFilterContext: self viewFilterContext
+		viewFilterContext: self viewFilterContext;
+		includeUntracked: self includeUntracked
 ]
 
 { #category : #import }
@@ -1171,6 +1191,12 @@ TtEventCollection >> thisWeek [
 { #category : #accessing }
 TtEventCollection >> timeEntries [
 	^ self select: #isTimeEntry
+]
+
+{ #category : #views }
+TtEventCollection >> toggleUntracked [
+	self includeUntracked.
+	includeUntracked := includeUntracked not
 ]
 
 { #category : #accessing }
@@ -1206,5 +1232,6 @@ TtEventCollection >> withAll: aCollection [
 		page: self page;
 		categories: self categories;
 		viewFilterContext: self viewFilterContext;
+		includeUntracked: self includeUntracked;
 		addAll: aCollection
 ]
