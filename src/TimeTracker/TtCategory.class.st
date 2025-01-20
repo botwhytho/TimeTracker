@@ -131,6 +131,11 @@ TtCategory >> hierarchy: aTtCategories [
 ]
 
 { #category : #accessing }
+TtCategory >> isPlaceholder [
+	^ false
+]
+
+{ #category : #accessing }
 TtCategory >> name [
 	^ name
 ]

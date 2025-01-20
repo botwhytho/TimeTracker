@@ -16,3 +16,8 @@ TtPlaceholderCategory class >> categories [
 TtPlaceholderCategory class >> fromName: categoryName [
 	^ self categories at: categoryName ifAbsentPut: [ self new name: categoryName ]
 ]
+
+{ #category : #accessing }
+TtPlaceholderCategory >> isPlaceholder [
+	^ true
+]

@@ -783,7 +783,7 @@ TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 	<gtAdvice>
 	| categorizedWithPlaceholder |
 	categorizedWithPlaceholder := self
-			select: [ :each | each category isKindOf: TtPlaceholderCategory ].
+			select: [ :each | each category isPlaceholder ].
 	categorizedWithPlaceholder ifEmpty: [ ^ aGtAdvice none ].
 	^ aGtAdvice item
 		priority: -50;
