@@ -704,6 +704,26 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 				addChild: (self buildEntriesByDay: aContext) ]
 ]
 
+{ #category : #views }
+TtEventCollection >> gtGroupedByDetailFor: aView [
+	<gtView>
+	(self items noneSatisfy: [ :each | each details isNotNil ])
+		ifTrue: [ ^ aView empty ].
+	^ aView columnedList
+		title: 'Grouped By Detail';
+		priority: 1;
+		items: [ (self
+				groupedBy: [ :each | 
+					{each description capitalized.
+						each details ifNil: [ '' ] ifNotNil: [ :notNil | notNil capitalized ]} ])
+				associations sorted: [ :each | each value items sum ] descending ];
+		column: 'Activity' text: [ :each | each key first ];
+		column: 'Details' text: [ :each | each key second ];
+		column: 'Ocurrences' text: [ :each | each value size ];
+		column: 'Total Time' text: [ :each | each value items sum roundTo: 1 minute ];
+		send: #value
+]
+
 { #category : #import }
 TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	<gtAction>
