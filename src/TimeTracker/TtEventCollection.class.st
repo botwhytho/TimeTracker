@@ -682,7 +682,7 @@ TtEventCollection >> groupedByWeek [
 
 { #category : #accessing }
 TtEventCollection >> groupingLevel [
-	^ groupingLevel ifNil: [ groupingLevel := 1 ]
+	^ groupingLevel ifNil: [ groupingLevel := 0 ]
 ]
 
 { #category : #accessing }
@@ -856,6 +856,16 @@ TtEventCollection >> gtSearchFor: aSearch [
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
+	| groupingLevelLabel groupingLevelLabelMapping |
+	groupingLevelLabelMapping := {'Original' -> 0.
+			'2nd Level' -> 1.
+			'3rd level' -> 2.
+			'4th Level' -> 3.
+			'5th Level' -> 4.
+			'Top Level' -> #topMostCategory}.
+	groupingLevelLabel := ['Grouping ('
+					, (groupingLevelLabelMapping detect: [ :each | each value = self groupingLevel ])
+							key , ')' ].
 	^ aView explicit
 		title: ((self groupedBy: #asWeek) keys size = 1
 				ifTrue: [ 'Weekly Summary' ]
@@ -891,18 +901,11 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 				self toggleUntracked.
 				(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
 					updateContent: aBrTab viewContentElement ];
-		actionDropdownButtonLabel: 'Grouping Level'
+		actionDropdownButtonLabel: groupingLevelLabel value
 			content: [ :aButton :aBrTab | 
-				| labelMapping |
-				labelMapping := {'Original' -> 0.
-						'2nd Level' -> 1.
-						'3rd level' -> 2.
-						'4th Level' -> 3.
-						'5th Level' -> 4.
-						'Top Level' -> #topMostCategory}.
 				BrSimpleList new
 					margin: (BlInsets all: 5);
-					items: labelMapping;
+					items: groupingLevelLabelMapping;
 					itemStencil: [ BrLabel new hMatchParent
 							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
 					itemDataBinder: [ :aLabel :aViewFilter | 
@@ -912,18 +915,19 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 								do: [ :_ | 
 									aButton fireEvent: BrDropdownHideWish new.
 									self groupingLevel: aViewFilter value.
+									aButton label: groupingLevelLabel value.
 									(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
 										updateContent: aBrTab viewContentElement ] ] ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
-				| labelMapping |
-				labelMapping := {'Group by Category' -> #Category.
+				| groupByLabelMapping |
+				groupByLabelMapping := {'Group by Category' -> #Category.
 						'Group by Recurrence' -> #IsRecurring.
 						'Group by Planned' -> #IsPlanned.
 						'Group by Re-scheduled' -> #FirstTimeScheduled}.
 				BrSimpleList new
 					margin: (BlInsets all: 5);
-					items: labelMapping;
+					items: groupByLabelMapping;
 					itemStencil: [ BrLabel new hMatchParent
 							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
 					itemDataBinder: [ :aLabel :aViewFilter | 
