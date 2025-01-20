@@ -146,6 +146,20 @@ TtCategory >> isPlaceholder [
 ]
 
 { #category : #accessing }
+TtCategory >> moveUpHierarchy: anInteger [
+	| category counter |
+	anInteger < 1 ifTrue: [ ^ self ].
+	category := self.
+	counter := anInteger.
+	[ counter > 0
+		and: [ (category parentCategory isKindOf: TtRootCategory) not
+				and: [ category parentCategory isNotNil ] ] ]
+		whileTrue: [ category := category parentCategory.
+			counter := counter - 1 ].
+	^ category
+]
+
+{ #category : #accessing }
 TtCategory >> name [
 	^ name
 ]
@@ -219,4 +233,14 @@ TtCategory >> stringToColorHash2 [
 		h: hue
 		s: saturation
 		v: brightness
+]
+
+{ #category : #accessing }
+TtCategory >> topMostCategory [
+	| category |
+	category := self.
+	[ (category parentCategory isKindOf: TtRootCategory) not
+		and: [ category parentCategory isNotNil ] ]
+		whileTrue: [ category := category parentCategory ].
+	^ category
 ]
