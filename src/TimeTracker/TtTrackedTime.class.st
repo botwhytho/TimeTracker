@@ -238,7 +238,7 @@ TtTrackedTime >> gtPreviewFor: aView [
 										ifNotNil: [ :notNil | notNil class serializeWithLepiter: self ] ] ]
 					ifFalse: [ BrLabel new
 							aptitude: BrGlamorousLabelAptitude;
-							text: each key ] ];
+							text: each value ] ];
 		send: #value
 ]
 

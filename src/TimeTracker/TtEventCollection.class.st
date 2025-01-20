@@ -707,8 +707,6 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 { #category : #views }
 TtEventCollection >> gtGroupedByDetailFor: aView [
 	<gtView>
-	(self items noneSatisfy: [ :each | each details isNotNil ])
-		ifTrue: [ ^ aView empty ].
 	^ aView columnedList
 		title: 'Grouped By Detail';
 		priority: 1;
@@ -719,6 +717,7 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 				associations sorted: [ :each | each value items sum ] descending ];
 		column: 'Activity' text: [ :each | each key first ];
 		column: 'Details' text: [ :each | each key second ];
+		column: 'Category' text: [ :each | each value first category name ];
 		column: 'Ocurrences' text: [ :each | each value size ];
 		column: 'Average Time'
 			text: [ :each | each value items average roundTo: 1 minute ];
