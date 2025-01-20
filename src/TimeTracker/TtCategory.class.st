@@ -52,6 +52,11 @@ TtCategory >> <= other [
 	^ self name <= other name
 ]
 
+{ #category : #comparing }
+TtCategory >> = anObject [
+	^ self species = anObject species and: [ self name = anObject name ]
+]
+
 { #category : #accessing }
 TtCategory >> children [
 	^ children ifNil: [ children := SortedCollection new ]
@@ -118,6 +123,11 @@ TtCategory >> gtRootActionFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | 
 			aBrButton phlow
 				spawnObject: (isRoot ifTrue: [ self hierarchy ] ifFalse: [ self rootCategory ]) ]
+]
+
+{ #category : #comparing }
+TtCategory >> hash [
+	^ self class hash hashMultiply bitXor: self name hash
 ]
 
 { #category : #accessing }

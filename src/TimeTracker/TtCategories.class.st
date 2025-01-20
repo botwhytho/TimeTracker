@@ -258,10 +258,11 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
 																GtPhlowContext new}) updateContent: viewElement ]) ] ]
-						ifAbsent: [ (aContext navigation object isKindOf: TtEventCollection)
+						ifAbsent: [ ([ aContext navigation object isKindOf: TtEventCollection ]
+								ifError: [ false ])
 								ifTrue: [ pane
 										addChild: (BrButton new
-												aptitude: (BrGlamorousButtonWithLabelAptitude new foreground: Color red );
+												aptitude: (BrGlamorousButtonWithLabelAptitude new foreground: Color red);
 												label: 'USE FOR ALL';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
 													| aCollection |
@@ -313,6 +314,9 @@ TtCategories >> gtCollectionActionFor: anAction [
 TtCategories >> gtItemsByCategoryFor: aView [
 	<gtView>
 	| itemsByCategory emptyCategories |
+	self collection
+		ifNil: [ ^ aView empty ]
+		ifNotNil: [ :notNil | notNil ifEmpty: [ ^ aView empty ] ].
 	itemsByCategory := self collection groupedByCategory.
 	emptyCategories := self allButFirst items difference: itemsByCategory keys.
 	emptyCategories do: [ :each | itemsByCategory at: each put: #() ].
@@ -323,9 +327,14 @@ TtCategories >> gtItemsByCategoryFor: aView [
 		column: 'Category'
 			text: [ :each | each key name ]
 			spawn: #key;
-		column: 'Items' text: [ :each | each value size ] weight: 0.25;
+		column: 'Items'
+			text: [ :each | each value size ]
+			weight: 0.25;
 		column: 'Has Children'
-			icon: [ :each | each key children isEmpty ifTrue: [ BlElement new ] ifFalse: [ BrGlamorousVectorIcons accept  ] ]
+			icon: [ :each | 
+				each key children isEmpty
+					ifTrue: [ BlElement new ]
+					ifFalse: [ BrGlamorousVectorIcons accept ] ]
 			weight: 0.25;
 		send: #value
 ]
