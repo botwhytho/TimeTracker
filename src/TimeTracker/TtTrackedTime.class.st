@@ -52,7 +52,7 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 						categoryName := jsonReader next.
 						aCollection categories
 							detect: [ :each | each name = categoryName ]
-							ifNone: [ nil ] ];
+							ifNone: [ categoryName ifNotNil: [ TtPlaceholderCategory fromName: categoryName ] ] ];
 					writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ]
 ]
 

@@ -77,6 +77,20 @@ TtCategory >> defaultColor [
 	^ defaultColor ifNil: [ defaultColor := self stringToColorHash ]
 ]
 
+{ #category : #action }
+TtCategory >> gtColorFor: anAction [
+	<gtAction>
+	| isRoot |
+	isRoot := self isKindOf: TtRootCategory.
+	^ anAction explicit
+		priority: -5;
+		stencil: [ BrButton new
+				aptitude: BrGlamorousButtonWithIconAptitude;
+				in: [ :aButton | 
+					aButton icon: (aButton icon asElement background: self color).
+					aButton ] ]
+]
+
 { #category : #views }
 TtCategory >> gtParentAndChildrenFor: aView [
 	<gtView>
@@ -129,7 +143,10 @@ TtCategory >> name: aName [
 { #category : #views }
 TtCategory >> parentAndChildren [
 	^ {'Parent Category' -> {self parentCategory -> #()}.
-		'Children Categories' -> (children collect: [ :each | each -> #() ])}
+		'Children Categories'
+			-> (children
+					ifNil: [ {children -> #()} ]
+					ifNotNil: [ children collect: [ :each | each -> #() ] ])}
 ]
 
 { #category : #accessing }
