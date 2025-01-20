@@ -867,7 +867,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 ]
 
 { #category : #inspecting }
-TtEventCollection >> gtTrackedDaysFor: anAction [
+TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 	<gtAction>
 	| isSingleCategory |
 	isSingleCategory := self groupedByCategory keys size = 2.
@@ -881,7 +881,11 @@ TtEventCollection >> gtTrackedDaysFor: anAction [
 					totalDays := (days max - days min) days + 1.
 					isSingleCategory
 						ifTrue: [ | totalTrackedDays |
-							totalTrackedDays := self rootCollection groupedByDay keys size.
+							totalTrackedDays := (aContext navigation previousContext object
+									in: [ :anObject | 
+										(anObject isNil or: [ (anObject isKindOf: TtEventCollection) not ])
+											ifTrue: [ self rootCollection ]
+											ifFalse: [ anObject ] ]) groupedByDay keys size.
 							trackedDays asString , '/' , totalTrackedDays asString , ' tracked ('
 								, (trackedDays / totalTrackedDays * 100 roundTo: 1) asString , '%)' ]
 						ifFalse: [ trackedDays asString , '/' , totalDays asString , ' tracked ('
