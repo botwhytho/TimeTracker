@@ -258,7 +258,8 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
 																GtPhlowContext new}) updateContent: viewElement ]) ] ]
-						ifAbsent: [  ].
+						ifAbsent: [ (aContext navigation object isKindOf: TtEventCollection)
+								ifTrue: [ "self inform: 'Calling from collection'" "WORKS" ] ].
 					pane ];
 				with: self.
 			view edges

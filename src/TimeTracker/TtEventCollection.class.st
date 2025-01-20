@@ -108,7 +108,7 @@ TtEventCollection class >> supportedSnippetTypes [
 ]
 
 { #category : #views }
-TtEventCollection >> TtCategoriesFor: aView [
+TtEventCollection >> TtCategoriesFor: aView context: aContext [
 	<gtView>
 	self categories ifNil: [ ^ aView empty ].
 	^ aView forward
@@ -116,7 +116,8 @@ TtEventCollection >> TtCategoriesFor: aView [
 		priority: 6;
 		object: self categories;
 		view: #TtCategoriesFor:context:;
-		actionButtonLabel: 'Categories'
+		actionButtonIcon: BrGlamorousVectorIcons inspect
+			label: 'Categories'
 			action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self categories ]
 ]
 
