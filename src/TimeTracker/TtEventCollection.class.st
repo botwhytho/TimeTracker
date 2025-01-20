@@ -863,9 +863,18 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 			'4th Level' -> 3.
 			'5th Level' -> 4.
 			'Top Level' -> #topMostCategory}.
-	groupingLevelLabel := ['Grouping ('
-					, (groupingLevelLabelMapping detect: [ :each | each value = self groupingLevel ])
-							key , ')' ].
+	groupingLevelLabel := [ 'Grouping ('
+			, (groupingLevelLabelMapping detect: [ :each | each value = self groupingLevel ])
+					key , ')' ].
+	aContext navigation previousContext
+		ifNotNil: [ :notNil | 
+			((notNil object isKindOf: TtEventCollection)
+				and: [ notNil object == self rootCollection ])
+				ifTrue: [ groupingLevel isSymbol
+						ifTrue: [ self groupingLevel: 0.
+							self includeUntracked: false ] ] ].
+	self groupedByCategory keys size = (1 + self includeUntracked asBit)
+		ifTrue: [ self includeUntracked: true ].
 	^ aView explicit
 		title: ((self groupedBy: #asWeek) keys size = 1
 				ifTrue: [ 'Weekly Summary' ]
