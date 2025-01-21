@@ -9,3 +9,8 @@ MyBrFrame >> hide [
 	self flag: #HACK. "Maintaingng this here for compatibility with BrWithExplicitMenuAptitude. Remove this class when upstream catches up"
 	self removeFromParent.
 ]
+
+{ #category : #'api - hooks' }
+MyBrFrame >> onMenuDisplayed: aMyBrFrame [
+	
+]

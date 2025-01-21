@@ -705,6 +705,23 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 ]
 
 { #category : #views }
+TtEventCollection >> gtGroupedByDescriptionFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Grouped By Description';
+		priority: 2;
+		items: [ (self groupedBy: [ :each | each description capitalized ]) associations
+				sorted: [ :each | each value items sum ] descending ];
+		column: 'Activity' text: #key;
+		column: 'Category' text: [ :each | each value first category name ];
+		column: 'Ocurrences' text: [ :each | each value size ];
+		column: 'Average Time'
+			text: [ :each | each value items average roundTo: 1 minute ];
+		column: 'Total Time' text: [ :each | each value items sum roundTo: 1 minute ];
+		send: [ :each | each value size = 1 ifTrue: [ each value first ] ifFalse: [ each value ] ]
+]
+
+{ #category : #views }
 TtEventCollection >> gtGroupedByDetailFor: aView [
 	<gtView>
 	^ aView columnedList
