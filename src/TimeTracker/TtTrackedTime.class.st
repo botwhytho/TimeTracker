@@ -198,6 +198,7 @@ TtTrackedTime >> gtDeleteActionFor: anAction [
 { #category : #action }
 TtTrackedTime >> gtGoToTrelloFor: anAction [
 	<gtAction>
+	self daySerializedFrom ifNil: [ ^ anAction noAction ].
 	^ anAction button
 		icon: BrGlamorousVectorIcons link;
 		tooltip: 'Open day in browser.';
