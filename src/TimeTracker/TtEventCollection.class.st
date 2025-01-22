@@ -366,25 +366,24 @@ TtEventCollection >> buildEntriesByDay: aContext [
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ | aButton aDropdown |
-						aButton := BrToggle new.
+						aButton := BrButton new.
 						aButton
-							aptitude: BrGlamorousToggleWithIconAndLabelAptitude + BrGlamorousButtonExteriorAptitude
-									+ BrGlamorousButtonRectangularAptitude;
-							addAptitude: (aDropdown := MyBrWithExplicitDropdownAptitude new
-										stencil: [ MyBrFrame new
-												flag: #TODO; "Need a better way to make this bigger considering category hierarchies will have varying aspect ratios"
-												size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
-														in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
-												padding: (BlInsets all: 15);
-												addChild: (self categories
-														TtCategoriesFor: GtPhlowView empty
-														context: (GtPhlowContext new
-																at: #TtTrackedTime
-																	put: {self.
-																			each.
-																			aButton.
-																			aDropdown};
-																yourself)) asElement ]).
+							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
+									+ (aDropdown := BrWithExplicitDropdownAptitude new
+												stencil: [ MyBrFrame new
+														flag: #TODO; "Need a better way to make this bigger considering category hierarchies will have varying aspect ratios"
+														size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
+																in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
+														padding: (BlInsets all: 15);
+														addChild: (self categories
+																TtCategoriesFor: GtPhlowView empty
+																context: (GtPhlowContext new
+																		at: #TtTrackedTime
+																			put: {self.
+																					each.
+																					aButton.
+																					aDropdown};
+																		yourself)) asElement ]).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton

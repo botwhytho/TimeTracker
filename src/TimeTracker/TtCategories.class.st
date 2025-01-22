@@ -253,7 +253,6 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													aDropdown hide.
-													categorizeButton deactivate.
 													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
