@@ -716,7 +716,10 @@ TtEventCollection >> gtGroupedByDescriptionFor: aView [
 		column: 'Ocurrences' text: [ :each | each value size ];
 		column: 'Average Time'
 			text: [ :each | each value items average roundTo: 1 minute ];
-		column: 'Total Time' text: [ :each | each value items sum roundTo: 1 minute ];
+		column: 'Total Time'
+			text: [ :each | 
+				(each value items sum roundTo: 1 minute)
+					in: [ :aDuration | aDuration asString , ' (' , (aDuration asHours round: 1) asString , ' hours)' ] ];
 		send: [ :each | each value size = 1 ifTrue: [ each value first ] ifFalse: [ each value ] ]
 ]
 
