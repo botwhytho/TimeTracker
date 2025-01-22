@@ -4,13 +4,6 @@ Class {
 	#category : #TimeTracker
 }
 
-{ #category : #'instance creation' }
-MyBrWithExplicitDropdownAptitude class >> handle: aHandleStencil content: aContentStencil [
-	^ self new
-		handle: aHandleStencil
-		submenu: (BrMenuExplicit new stencil: aContentStencil)
-]
-
 { #category : #initialization }
 MyBrWithExplicitDropdownAptitude >> initialize [
 	super initialize.
