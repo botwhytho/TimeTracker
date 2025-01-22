@@ -1,18 +1,18 @@
 Class {
-	#name : #BrWithExplicitDropdownAptitude,
+	#name : #MyBrWithExplicitDropdownAptitude,
 	#superclass : #BrWithExplicitMenuAptitude,
 	#category : #TimeTracker
 }
 
 { #category : #'instance creation' }
-BrWithExplicitDropdownAptitude class >> handle: aHandleStencil content: aContentStencil [
+MyBrWithExplicitDropdownAptitude class >> handle: aHandleStencil content: aContentStencil [
 	^ self new
 		handle: aHandleStencil
 		submenu: (BrMenuExplicit new stencil: aContentStencil)
 ]
 
 { #category : #initialization }
-BrWithExplicitDropdownAptitude >> initialize [
+MyBrWithExplicitDropdownAptitude >> initialize [
 	super initialize.
 	self
 		usePrimaryMouseButton;
@@ -20,7 +20,7 @@ BrWithExplicitDropdownAptitude >> initialize [
 ]
 
 { #category : #initialization }
-BrWithExplicitDropdownAptitude >> initializeEventHandlers [
+MyBrWithExplicitDropdownAptitude >> initializeEventHandlers [
 	addedToSceneEventHandler := BlEventHandler
 			on: BlElementAddedToSceneGraphEvent
 			do: [ :anEvent | self onWidgetAddedToSceneGraph: anEvent ].
@@ -51,7 +51,7 @@ BrWithExplicitDropdownAptitude >> initializeEventHandlers [
 ]
 
 { #category : #'event handling' }
-BrWithExplicitDropdownAptitude >> onMouseUp: anEvent [
+MyBrWithExplicitDropdownAptitude >> onMouseUp: anEvent [
 	anEvent button = mouseButton ifFalse: [ ^ self ].
 
 	(modifiersMatcher value: anEvent modifiers) ifFalse: [ ^ self ].

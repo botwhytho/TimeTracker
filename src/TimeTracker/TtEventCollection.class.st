@@ -370,7 +370,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 						aButton
 							aptitude: BrGlamorousToggleWithIconAndLabelAptitude + BrGlamorousButtonExteriorAptitude
 									+ BrGlamorousButtonRectangularAptitude;
-							addAptitude: (aDropdown := BrWithExplicitDropdownAptitude new
+							addAptitude: (aDropdown := MyBrWithExplicitDropdownAptitude new
 										stencil: [ MyBrFrame new
 												flag: #TODO; "Need a better way to make this bigger considering category hierarchies will have varying aspect ratios"
 												size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
