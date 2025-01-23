@@ -1372,14 +1372,16 @@ TtEventCollection >> viewFilterContext: anObject [
 
 { #category : #accessing }
 TtEventCollection >> weekFromDate: aDate [
-	| lastSunday nextMonday today |
-	today := aDate.
+	| lastSunday nextMonday today thisWeek|
+"	today := aDate.
 	lastSunday := (today
 			- (today weekdayIndex - 1 = 0 ifTrue: [ 7 ] ifFalse: [ today weekdayIndex - 1 ])
 					days) asDate.
 	nextMonday := (lastSunday + 8 days) asDate.
 	^ self
-		select: [ :each | each start asDate > lastSunday and: [ each start asDate < nextMonday ] ]
+		select: [ :each | each start asDate > lastSunday and: [ each start asDate < nextMonday ] ]"
+	thisWeek := aDate asMonth weeks detect: [:aWeek | aWeek includes: aDate].
+	^ self select: [:each| thisWeek includes: each ]
 ]
 
 { #category : #'instance - creation' }
