@@ -704,6 +704,44 @@ TtEventCollection >> groupingLevel: anObject [
 	groupingLevel := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+TtEventCollection >> gtCalendarViewFor: aView [
+	<gtView>
+	(self items collectAsSet: #category) size > 1 ifTrue: [ ^ aView empty ].
+	^ aView explicit
+		title: 'Calendar View';
+		priority: 4;
+		stencil: [ | calendar byDay |
+			calendar := (MyGtCalendarElement forDate: self last start asDate)
+					asScalableElement.
+			byDay := self groupedByDay associations.
+			calendar
+				enqueueTask: [ (calendar query // #dayContainer) all
+						do: [ :aContainer | 
+							byDay
+								detect: [ :aDay | 
+									aDay key dayOfMonth asString
+										= (aContainer children first label asString
+												in: [ :aString | (aString beginsWith: '0') ifTrue: [ aString allButFirst ] ifFalse: [ aString ] ]) ]
+								ifFound: [ :found | 
+									| element |
+									element := BlElement new.
+									aContainer
+										addChild: (element
+												id: #categoryElement;
+												zIndex: 1000;
+												constraintsDo: [ :c | 
+													c ignoreByLayout.
+													c vertical matchParent.
+													c horizontal exact: aContainer extent x ];
+												background: (found value first category color alpha: 0.25);
+												when: BlClickEvent
+													do: [ :aBlClickEvent | 
+														aBlClickEvent consumed: true.
+														element phlow spawnObject: found value ]) ] ] ] asBlTask.
+			calendar ]
+]
+
 { #category : #views }
 TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 	<gtView>
