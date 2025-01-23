@@ -24,11 +24,11 @@ MyGtCalendarElement >> buildDays [
 		to: current dayOfWeek - 1
 		do: [ :i | self addChild: (BlElement new size: 0 @ 0) ].
 	[ current < last ]
-		whileTrue: [ | label selectedDate |
+		whileTrue: [ | label labelAptitude selectedDate |
 			selectedDate := current.
 			label := BrButton new
 					id: #dayLabel;
-					aptitude: BrGlamorousLabelAptitude new;
+					aptitude: (labelAptitude := BrGlamorousLabelAptitude new);
 					hMatchParent;
 					vFitContent;
 					padding: (BlInsets all: 1);
@@ -40,6 +40,15 @@ MyGtCalendarElement >> buildDays [
 							dispatchEvent: (GtCalendarDateClickedWithModifiersEvent
 									forDate: selectedDate
 									modifiers: anEvent modifiers) ].
+			labelAptitude
+				labelDo: [ :aLabel | 
+					aLabel text size = 1
+						ifTrue: [ aLabel
+								text: (('0' , aLabel text asString) asRopedText
+										in: [ :aRopedText | 
+											(aRopedText from: 1 to: 1) foreground: Color transparent.
+											aRopedText ]) ].
+					aLabel text glamorousMonospace ].
 			date = current
 				ifTrue: [ label
 						geometry: BlCircleGeometry new;
@@ -48,10 +57,7 @@ MyGtCalendarElement >> buildDays [
 				addChild: (BrHorizontalPane new
 						id: #dayContainer;
 						fitContent;
-						"constraintsDo: [ :c | 
-							c vertical fitContent.
-							c horizontal fitContent ];"
-						addChild: label).	
+						addChild: label).
 			current := current addDays: 1 ]
 ]
 
