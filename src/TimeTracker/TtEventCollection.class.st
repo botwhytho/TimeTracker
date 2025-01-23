@@ -632,6 +632,22 @@ TtEventCollection >> groupedByCategory [
 	^ grouped
 ]
 
+{ #category : #views }
+TtEventCollection >> groupedByCategoryForLineGraph [
+	^ (((self groupedByCategory
+		associationsSelect: [ :each | (#('Uncategorized' 'Untracked') includes: each key name) not ])
+		associations
+		collect: [ :each | 
+			each key
+				-> (each value groupedByDay associations
+						collect: [ :inner | 
+							{#category -> each key.
+								#duration -> (inner value items sum: #duration) asHours.
+								#date -> inner key.
+								#color -> each key color} asDictionary as: NeoJSONObject ]) ])
+		collect: #value) flatten sorted: [ :each | each date ] ascending
+]
+
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate ]
@@ -776,6 +792,34 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		tooltip: 'View ALL historical data';
 		priority: 1;
 		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
+]
+
+{ #category : #views }
+TtEventCollection >> gtLineGraphFor: aView [
+	<gtView>
+	^ aView explicit
+		title: 'Line Graph';
+		priority: 4;
+		stencil: [ | aChart aData aRawData |
+			aRawData := self groupedByCategoryForLineGraph.
+			aData := GtPlotterDataGroup new values: aRawData.
+			self flag: #TODO.	"name and color don't seem to work?"
+			aData
+				groupedBy: #category
+				labelled: #name
+				colored: #color.
+			aChart := GtPlotterLineChart new
+					with: aData;
+					valueX: [ :e | e at: #date ];
+					scaleX: GtPlotterTimeScale new;
+					titleX: 'Date';
+					ticksX: (self groupedBy: #asWeek) keys size;
+					valueY: [ :e | e at: #duration ];
+					scaleY: GtPlotterLinearScale new;
+					titleY: 'Hours per Day';
+					ticksY: ((aRawData collect: #duration)
+							in: [ :durations | (durations max - durations min) asInteger ]).
+			aChart ]
 ]
 
 { #category : #views }
