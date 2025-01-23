@@ -48,6 +48,7 @@ MyGtCalendarElement >> buildDays [
 										in: [ :aRopedText | 
 											(aRopedText from: 1 to: 1) foreground: Color transparent.
 											aRopedText ]) ].
+					self flag: #HACH.	"Fix layouting, shouldn't depend on font that may not exist everywhe"
 					aLabel text fontName: 'Consolas' ].
 			date = current
 				ifTrue: [ label
