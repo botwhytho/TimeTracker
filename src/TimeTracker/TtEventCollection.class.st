@@ -643,9 +643,8 @@ TtEventCollection >> groupedByCategoryForLineGraph [
 						collect: [ :inner | 
 							{#category -> each key.
 								#duration -> (inner value items sum: #duration) asHours.
-								#date -> inner key.
-								#color -> each key color} asDictionary as: NeoJSONObject ]) ])
-		collect: #value) flatten sorted: [ :each | each date ] ascending
+								#date -> inner key} asDictionary as: NeoJSONObject ]) ]) collect: #value)
+		flatten sorted: [ :each | each date ] ascending
 ]
 
 { #category : #'accessing - grouping' }
@@ -803,18 +802,19 @@ TtEventCollection >> gtLineGraphFor: aView [
 		stencil: [ | aChart aData aRawData |
 			aRawData := self groupedByCategoryForLineGraph.
 			aData := GtPlotterDataGroup new values: aRawData.
-			self flag: #TODO.	"name and color don't seem to work?"
-			aData
-				groupedBy: #category
-				labelled: #name
-				colored: #color.
+			aData := aData
+					groupedBy: #category
+					labelled: #name
+					colored: #color.
 			aChart := GtPlotterLineChart new
 					with: aData;
-					valueX: [ :e | e at: #date ];
+					valueX: #date;
 					scaleX: GtPlotterTimeScale new;
 					titleX: 'Date';
-					ticksX: (self groupedBy: #asWeek) keys size;
-					valueY: [ :e | e at: #duration ];
+					ticksX: ((self groupedBy: #asWeek) keys size
+							in: [ :size | size > 1 ifTrue: [ size ] ifFalse: [ (aRawData groupedBy: #date) keys size - 1 ] ]);
+					labelFormatX: self labelFormatX;
+					valueY: #duration;
 					scaleY: GtPlotterLinearScale new;
 					titleY: 'Hours per Day';
 					ticksY: ((aRawData collect: #duration)
@@ -1182,6 +1182,22 @@ TtEventCollection >> includeUntracked: aBoolean [
 TtEventCollection >> items [
 	^ items ifNil: [
 		items := SortedCollection new ]
+]
+
+{ #category : #views }
+TtEventCollection >> labelFormatX [
+^ [ :each | 
+						(self groupedBy: #asWeek) keys size
+							in: [ :size | 
+								size > 1
+									ifTrue: [ (each asMonth
+											in: [ :aMonth | aMonth year asString , '-' , (aMonth monthName first: 3) ])
+											, '-Wk'
+											, (each asMonth weeks detectIndex: [ :inner | inner includes: each ]) asString ]
+									ifFalse: [ each asDate
+											in: [ :aDate | 
+												(aDate weekday first: 3) , ', ' , (aDate month monthName first: 3) , ' '
+													, aDate dayOfMonth asString ] ] ] ]
 ]
 
 { #category : #accessing }
