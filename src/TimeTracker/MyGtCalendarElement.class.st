@@ -48,7 +48,7 @@ MyGtCalendarElement >> buildDays [
 										in: [ :aRopedText | 
 											(aRopedText from: 1 to: 1) foreground: Color transparent.
 											aRopedText ]) ].
-					aLabel text glamorousMonospace ].
+					aLabel text fontName: 'Consolas' ].
 			date = current
 				ifTrue: [ label
 						geometry: BlCircleGeometry new;
