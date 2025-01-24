@@ -93,8 +93,8 @@ MyGtCalendarElement >> buildHeader [
 				| label localXPosition |
 				aBlClickEvent consumed: true.
 				label := headerLabelAptitude label.
-				localXPosition := (label
-						globalPointToLocal: aBlClickEvent position) x / label width.
+				localXPosition := (label globalPointToLocal: aBlClickEvent position) x
+						/ label width.
 				localXPosition * label text size > (label text asString findString: ' ')
 					ifTrue: [ label phlow spawnObject: currentMonth asYear ]
 					ifFalse: [ label phlow spawnObject: currentMonth asMonth ] ].
@@ -103,13 +103,11 @@ MyGtCalendarElement >> buildHeader [
 		ifTrue: [ headerLabelAptitude
 				labelDo: [ :aLabel | 
 					| spaceIndex |
-					spaceIndex := aLabel text asString findString: ' '.	"("
-					aLabel text
-						onClick: [  "from: 1 to: spaceIndex - 1)":aTBrTextEditorTextualPiece :aWorldElement :anEditorElement :anEvent | 
-							self halt.
-							self inform: 'Test'.
-							anEvent consumed: true.
-							anEditorElement phlow spawnObject: currentMonth asMonth ] ] ].
+					spaceIndex := aLabel text asString findString: ' '.
+					(aLabel text from: 1 to: spaceIndex - 1)
+						highlight: Color veryVeryLightGray lighter.
+					(aLabel text from: spaceIndex + 1 to: aLabel text asString size)
+						highlight: Color veryVeryLightGray lighter ] ].
 	self
 		addChild: (controls
 				ifTrue: [ BrButton new
