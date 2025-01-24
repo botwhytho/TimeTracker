@@ -29,8 +29,7 @@ MyGtCalendarElement >> buildDays [
 			label := BrButton new
 					id: #dayLabel;
 					aptitude: (labelAptitude := BrGlamorousLabelAptitude new);
-					hMatchParent;
-					vFitContent;
+					fitContent;
 					padding: (BlInsets all: 1);
 					layout: BlLinearLayout horizontal alignCenter;
 					label: current dayOfMonth printString;
