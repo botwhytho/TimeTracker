@@ -5,7 +5,8 @@ Class {
 		'date',
 		'currentMonth',
 		'controls',
-		'dayElements'
+		'dayElements',
+		'highlightToday'
 	],
 	#category : #'TimeTracker-Calendar'
 }
@@ -44,8 +45,9 @@ MyGtCalendarElement >> buildDays [
 							self
 								dispatchEvent: (GtCalendarDateClickedWithModifiersEvent
 										forDate: selectedDate
-										modifiers: anEvent modifiers) ].
-					date = current
+										modifiers: anEvent modifiers) ] ].
+			self highlightToday
+				ifTrue: [ date = current
 						ifTrue: [ label
 								geometry: BlCircleGeometry new;
 								border: (BlBorder paint: BrGlamorousColors textHighlightColor width: 2) ] ].
@@ -63,6 +65,7 @@ MyGtCalendarElement >> buildDays [
 
 { #category : #'private ui' }
 MyGtCalendarElement >> buildHeader [
+	| headerLabelAptitude |
 	self
 		addChild: (controls
 				ifTrue: [ BrButton new
@@ -77,23 +80,36 @@ MyGtCalendarElement >> buildHeader [
 							self enqueueTask: (BlTaskAction new action: [ self buildMonth ]) ] ]
 				ifFalse: [ BlElement new size: 0 @ 0 ]).
 	self
-		addChild: (BrHorizontalPane new
+		addChild: (BrLabel new
+				id: #monthAndYear;
+				aptitude: (headerLabelAptitude := BrGlamorousLabelAptitude new);
 				hMatchParent;
 				vFitContent;
 				constraintsDo: [ :c | c grid horizontal span: 5 ];
-				flag: #TODO; "Dropdowns and/or editable labels to select month and year"
-				addChildren: {BrLabel new
-							id: #month;
-							aptitude: BrGlamorousLabelAptitude new;
-							hMatchParent;
-							layout: BlLinearLayout horizontal alignCenter;
-							text: currentMonth monthName asString.
-						BrLabel new
-							id: #year;
-							aptitude: BrGlamorousLabelAptitude new;
-							hMatchParent;
-							layout: BlLinearLayout horizontal alignCenter;
-							text: currentMonth year printString}).
+				layout: BlLinearLayout horizontal alignCenter;
+				text: currentMonth monthName asString , ' ' , currentMonth year printString);
+		when: BlClickEvent
+			do: [ :aBlClickEvent | 
+				| label localXPosition |
+				aBlClickEvent consumed: true.
+				label := headerLabelAptitude label.
+				localXPosition := (label
+						globalPointToLocal: aBlClickEvent position) x / label width.
+				localXPosition * label text size > (label text asString findString: ' ')
+					ifTrue: [ label phlow spawnObject: currentMonth asYear ]
+					ifFalse: [ label phlow spawnObject: currentMonth asMonth ] ].
+	self flag: #TODO.	"Dropdowns and/or editable labels to select month and year"
+	controls
+		ifTrue: [ headerLabelAptitude
+				labelDo: [ :aLabel | 
+					| spaceIndex |
+					spaceIndex := aLabel text asString findString: ' '.	"("
+					aLabel text
+						onClick: [  "from: 1 to: spaceIndex - 1)":aTBrTextEditorTextualPiece :aWorldElement :anEditorElement :anEvent | 
+							self halt.
+							self inform: 'Test'.
+							anEvent consumed: true.
+							anEditorElement phlow spawnObject: currentMonth asMonth ] ] ].
 	self
 		addChild: (controls
 				ifTrue: [ BrButton new
@@ -134,7 +150,7 @@ MyGtCalendarElement >> date: aDate [
 	self buildMonth
 ]
 
-{ #category : #'private ui' }
+{ #category : #accessing }
 MyGtCalendarElement >> dayElements [
 	^ dayElements ifNil: [ dayElements := Dictionary new ]
 ]
@@ -154,11 +170,22 @@ MyGtCalendarElement >> enableControls [
 	controls := true
 ]
 
+{ #category : #accessing }
+MyGtCalendarElement >> highlightToday [
+	^ highlightToday
+]
+
+{ #category : #accessing }
+MyGtCalendarElement >> highlightToday: aBoolean [
+	highlightToday := aBoolean
+]
+
 { #category : #initialization }
 MyGtCalendarElement >> initialize [
 	super initialize.
 	self columnCount: 7.
 	self width: self defaultWidth.
 	self vFitContent.
-	self disableControls
+	self disableControls.
+	self highlightToday: true.
 ]
