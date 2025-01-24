@@ -88,16 +88,20 @@ MyGtCalendarElement >> buildHeader [
 				constraintsDo: [ :c | c grid horizontal span: 5 ];
 				layout: BlLinearLayout horizontal alignCenter;
 				text: currentMonth monthName asString , ' ' , currentMonth year printString);
-		when: BlClickEvent
-			do: [ :aBlClickEvent | 
-				| label localXPosition |
-				aBlClickEvent consumed: true.
-				label := headerLabelAptitude label.
-				localXPosition := (label globalPointToLocal: aBlClickEvent position) x
-						/ label width.
-				localXPosition * label text size > (label text asString findString: ' ')
-					ifTrue: [ label phlow spawnObject: currentMonth asYear ]
-					ifFalse: [ label phlow spawnObject: currentMonth asMonth ] ].
+		in: [ :aLabel | 
+			controls
+				ifTrue: [ aLabel
+						when: BlClickEvent
+						do: [ :aBlClickEvent | 
+							| label localXPosition |
+							aBlClickEvent consumed: true.
+							label := headerLabelAptitude label.
+							localXPosition := (label globalPointToLocal: aBlClickEvent position) x
+									/ label width.
+							localXPosition * label text size > (label text asString findString: ' ')
+								ifTrue: [ label phlow spawnObject: currentMonth asYear ]
+								ifFalse: [ label phlow spawnObject: currentMonth asMonth ] ] ].
+			aLabel ].
 	self flag: #TODO.	"Dropdowns and/or editable labels to select month and year"
 	controls
 		ifTrue: [ headerLabelAptitude

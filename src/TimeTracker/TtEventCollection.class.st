@@ -707,8 +707,10 @@ TtEventCollection >> groupingLevel: anObject [
 
 { #category : #'as yet unclassified' }
 TtEventCollection >> gtCalendarViewFor: aView [
+	"(self items collectAsSet: #category)"
+
 	<gtView>
-	(self items collectAsSet: #category) size > 1 ifTrue: [ ^ aView empty ].
+	self groupedByCategory keys size > 2 ifTrue: [ ^ aView empty ].
 	^ aView explicit
 		title: 'Calendar View';
 		priority: 4;
@@ -719,25 +721,22 @@ TtEventCollection >> gtCalendarViewFor: aView [
 					columnCount: 3.
 			months keys min index % 3
 				in: [ :anIndex | 
-					anIndex = 0
-						ifTrue: [ 2 timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ].
-					anIndex = 1
-						ifTrue: [ 1 timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
+					anIndex ~= 1
+						ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
+								timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
 			grid
 				addChildren: ((self groupedBy: [ :each | each start asMonth ]) associations
 						collect: [ :aMonth | 
 							| calendar byDay |
-							calendar := (MyGtCalendarElement forDate: aMonth value last start asDate)
-									asScalableElement.
+							calendar := MyGtCalendarElement new
+									highlightToday: false;
+									date: aMonth value last start asDate.
 							byDay := aMonth value groupedByDay associations.
 							calendar
-								enqueueTask: [ (calendar query // #dayContainer) all
+								enqueueTask: [ calendar dayElements
 										do: [ :aContainer | 
 											byDay
-												detect: [ :aDay | 
-													aDay key dayOfMonth asString
-														= (aContainer children first label asString
-																in: [ :aString | (aString beginsWith: '0') ifTrue: [ aString allButFirst ] ifFalse: [ aString ] ]) ]
+												detect: [ :aDay | aDay key dayOfMonth asString = aContainer children first label asString ]
 												ifFound: [ :found | 
 													| element |
 													element := BlElement new.
@@ -747,14 +746,14 @@ TtEventCollection >> gtCalendarViewFor: aView [
 																zIndex: 1000;
 																constraintsDo: [ :c | 
 																	c ignoreByLayout.
-																	c vertical matchParent.
-																	c horizontal exact: aContainer extent x ];
+																	c vertical exact: aContainer children first height * 0.95.
+																	c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
 																background: (found value first category color alpha: 0.25);
 																when: BlClickEvent
 																	do: [ :aBlClickEvent | 
 																		aBlClickEvent consumed: true.
 																		element phlow spawnObject: found value ]) ] ] ] asBlTask.
-							calendar ]) ]
+							calendar asScalableElement margin: (BlInsets all: 10) ]) ]
 ]
 
 { #category : #views }
