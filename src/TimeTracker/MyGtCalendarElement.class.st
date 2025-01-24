@@ -3,14 +3,17 @@ Class {
 	#superclass : #BrHorizontalGrid,
 	#instVars : [
 		'date',
-		'currentMonth'
+		'currentMonth',
+		'controls',
+		'dayElements'
 	],
 	#category : #'TimeTracker-Calendar'
 }
 
 { #category : #'instance creation' }
 MyGtCalendarElement class >> forDate: aDate [
-	^ (self new)
+	^ self new
+		enableControls;
 		date: aDate;
 		yourself
 ]
@@ -32,67 +35,78 @@ MyGtCalendarElement >> buildDays [
 					fitContent;
 					padding: (BlInsets all: 1);
 					layout: BlLinearLayout horizontal alignCenter;
-					label: current dayOfMonth printString;
-					action: [ self dispatchEvent: (GtCalendarDateClickedEvent forDate: selectedDate) ];
-					actionWithModifiers: [ :aButtonElement :aButtonModel :anEvent | 
-						self
-							dispatchEvent: (GtCalendarDateClickedWithModifiersEvent
-									forDate: selectedDate
-									modifiers: anEvent modifiers) ].
-			labelAptitude
-				labelDo: [ :aLabel | 
-					aLabel text size = 1
-						ifTrue: [ aLabel
-								text: (('0' , aLabel text asString) asRopedText
-										in: [ :aRopedText | 
-											(aRopedText from: 1 to: 1) foreground: Color transparent.
-											aRopedText ]) ].
-					self flag: #HACH.	"Fix layouting, shouldn't depend on font that may not exist everywhe"
-					aLabel text fontName: 'Consolas' ].
-			date = current
+					label: current dayOfMonth printString.
+
+			controls
 				ifTrue: [ label
-						geometry: BlCircleGeometry new;
-						border: (BlBorder paint: BrGlamorousColors textHighlightColor width: 2) ].
+						action: [ self dispatchEvent: (GtCalendarDateClickedEvent forDate: selectedDate) ];
+						actionWithModifiers: [ :aButtonElement :aButtonModel :anEvent | 
+							self
+								dispatchEvent: (GtCalendarDateClickedWithModifiersEvent
+										forDate: selectedDate
+										modifiers: anEvent modifiers) ].
+					date = current
+						ifTrue: [ label
+								geometry: BlCircleGeometry new;
+								border: (BlBorder paint: BrGlamorousColors textHighlightColor width: 2) ] ].
 			self
-				addChild: (BrHorizontalPane new
+				addChild: (BrVerticalPane new
+						clipChildren: false;
 						id: #dayContainer;
 						fitContent;
-						addChild: label).
+						addChild: label;
+						in: [ :aBrVerticalPane | 
+							self dayElements at: current dayOfMonth put: aBrVerticalPane.
+							aBrVerticalPane ]).
 			current := current addDays: 1 ]
 ]
 
 { #category : #'private ui' }
 MyGtCalendarElement >> buildHeader [
 	self
-		addChild: (BrButton new
-				id: #previousMonth;
-				size: 10 @ 10;
-				margin: (BlInsets top: 5 left: 5);
-				aptitude: BrGlamorousButtonIconAptitude;
-				icon: BrGlamorousVectorIcons left;
-				layout: BlLinearLayout horizontal alignCenter;
-				beTinySize;
-				action: [ currentMonth := currentMonth addMonths: -1.
-					self enqueueTask: (BlTaskAction new action: [ self buildMonth ]) ]).
+		addChild: (controls
+				ifTrue: [ BrButton new
+						id: #previousMonth;
+						size: 10 @ 10;
+						margin: (BlInsets top: 5 left: 5);
+						aptitude: BrGlamorousButtonIconAptitude;
+						icon: BrGlamorousVectorIcons left;
+						layout: BlLinearLayout horizontal alignCenter;
+						beTinySize;
+						action: [ currentMonth := currentMonth addMonths: -1.
+							self enqueueTask: (BlTaskAction new action: [ self buildMonth ]) ] ]
+				ifFalse: [ BlElement new size: 0 @ 0 ]).
 	self
-		addChild: (BrLabel new
-				id: #monthAndYear;
-				aptitude: BrGlamorousLabelAptitude new;
-				constraintsDo: [ :c | c grid horizontal span: 5 ];
+		addChild: (BrHorizontalPane new
 				hMatchParent;
-				layout: BlLinearLayout horizontal alignCenter;
-				text: currentMonth monthName asString , ' ' , currentMonth year printString).
+				vFitContent;
+				constraintsDo: [ :c | c grid horizontal span: 5 ];
+				flag: #TODO; "Dropdowns and/or editable labels to select month and year"
+				addChildren: {BrLabel new
+							id: #month;
+							aptitude: BrGlamorousLabelAptitude new;
+							hMatchParent;
+							layout: BlLinearLayout horizontal alignCenter;
+							text: currentMonth monthName asString.
+						BrLabel new
+							id: #year;
+							aptitude: BrGlamorousLabelAptitude new;
+							hMatchParent;
+							layout: BlLinearLayout horizontal alignCenter;
+							text: currentMonth year printString}).
 	self
-		addChild: (BrButton new
-				id: #nextMonth;
-				size: 10 @ 10;
-				margin: (BlInsets top: 5 left: 7);
-				aptitude: BrGlamorousButtonIconAptitude;
-				icon: BrGlamorousVectorIcons right;
-				layout: BlLinearLayout horizontal alignCenter;
-				beTinySize;
-				action: [ currentMonth := currentMonth addMonths: 1.
-					self enqueueTask: (BlTaskAction new action: [ self buildMonth ]) ]).
+		addChild: (controls
+				ifTrue: [ BrButton new
+						id: #nextMonth;
+						size: 10 @ 10;
+						margin: (BlInsets top: 5 left: 7);
+						aptitude: BrGlamorousButtonIconAptitude;
+						icon: BrGlamorousVectorIcons right;
+						layout: BlLinearLayout horizontal alignCenter;
+						beTinySize;
+						action: [ currentMonth := currentMonth addMonths: 1.
+							self enqueueTask: (BlTaskAction new action: [ self buildMonth ]) ] ]
+				ifFalse: [ BlElement new size: 0 @ 0 ]).
 	(Week dayNames collect: [ :aDayName | aDayName first: 3 ])
 		do: [ :aDay | 
 			self
@@ -108,6 +122,7 @@ MyGtCalendarElement >> buildHeader [
 { #category : #'private ui' }
 MyGtCalendarElement >> buildMonth [
 	self removeChildren.
+	self dayElements removeAll.
 	self buildHeader.
 	self buildDays
 ]
@@ -119,10 +134,31 @@ MyGtCalendarElement >> date: aDate [
 	self buildMonth
 ]
 
+{ #category : #'private ui' }
+MyGtCalendarElement >> dayElements [
+	^ dayElements ifNil: [ dayElements := Dictionary new ]
+]
+
+{ #category : #initialization }
+MyGtCalendarElement >> defaultWidth [
+	^ 150
+]
+
+{ #category : #initialization }
+MyGtCalendarElement >> disableControls [
+	controls := false
+]
+
+{ #category : #'instance creation' }
+MyGtCalendarElement >> enableControls [
+	controls := true
+]
+
 { #category : #initialization }
 MyGtCalendarElement >> initialize [
 	super initialize.
 	self columnCount: 7.
-	self width: 150.
-	self vFitContent
+	self width: self defaultWidth.
+	self vFitContent.
+	self disableControls
 ]
