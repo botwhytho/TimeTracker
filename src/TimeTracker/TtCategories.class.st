@@ -231,7 +231,11 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aBrButton phlow firstParentWithViewContent phlow syncUpdate ] ]) ].
 					aContext
 						at: #TtTrackedTime
-						ifPresent: [ :arguments | 
+						ifPresent: [ :arguments | | aDropdown | 
+						aDropdown := arguments fourth.
+					 pane when: BlClickEvent do: [:aBlClickEvent | aBlClickEvent consumed: true. 
+					 pane phlow spawnObject: aCategory.
+					 aDropdown hide. ].
 							(aCategory isKindOf: TtRootCategory)
 								ifFalse: [ pane
 										addChild: (BrButton new
@@ -240,11 +244,10 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												icon: BrGlamorousVectorIcons accept;
 												label: 'Use Category';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
-													| aCollection aDropdown aTtTrackedTime categorizeButton viewElement |
+													| aCollection  aTtTrackedTime categorizeButton viewElement |
 													aCollection := arguments first.
 													aTtTrackedTime := arguments second.
 													categorizeButton := arguments third.
-													aDropdown := arguments fourth.
 													viewElement := categorizeButton phlow firstParentWithViewContent
 															phlow firstParentWithViewContent.
 													anEvent consumed: true.
@@ -257,7 +260,9 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.
 																GtPhlowContext new}) updateContent: viewElement ]) ] ]
-						ifAbsent: [ ([ aContext navigation object isKindOf: TtEventCollection ]
+						ifAbsent: [ 
+						pane when: BlClickEvent do: [:aBlClickEvent | aBlClickEvent consumed: true. pane phlow spawnObject: aCategory ].
+						([ aContext navigation object isKindOf: TtEventCollection ]
 								ifError: [ false ])
 								ifTrue: [ pane
 										addChild: (BrButton new
