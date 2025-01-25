@@ -365,26 +365,26 @@ TtEventCollection >> buildEntriesByDay: aContext [
 			stencil: [ :each :rowIndex :columnIndex | 
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
-					ifFalse: [ | aButton aDropdown |
+					ifFalse: [ | aButton |
 						aButton := BrButton new.
 						aButton
 							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
 									+ (BrWithExplicitDropdownAptitude new
-											stencil: [ aDropdown := BrMenuExplicit new
-														stencil: [ BrFrame new
-																size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
-																		in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
-																padding: (BlInsets all: 15);
-																addChild: (self categories
-																		TtCategoriesFor: GtPhlowView empty
-																		context: (GtPhlowContext new
-																				at: #TtTrackedTime
-																					put: {self.
-																							each.
-																							aButton.
-																							aDropdown};
-																				yourself)) asElement ].
-												aDropdown ]).
+											stencil: [ BrMenuExplicit new
+													stencil: [ :anExplicitMenu | 
+														BrFrame new
+															size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
+																	in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
+															padding: (BlInsets all: 15);
+															addChild: (self categories
+																	TtCategoriesFor: GtPhlowView empty
+																	context: (GtPhlowContext new
+																			at: #TtTrackedTime
+																				put: {self.
+																						each.
+																						aButton.
+																						anExplicitMenu};
+																			yourself)) asElement ] ]).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton
