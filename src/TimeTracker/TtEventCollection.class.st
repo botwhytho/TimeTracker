@@ -362,7 +362,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
 		column: 'Category'
-			stencil: [ :each :rowIndex :columnIndex | 
+			stencil: [ :each :rowIndex :columnIndex |
+				self flag: #TODO. "Wrap category view in domain object, have a unique Instance and re-use/cache?" 
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ | aButton |
