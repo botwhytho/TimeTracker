@@ -99,9 +99,19 @@ TtCategory >> gtColorFor: anAction [
 { #category : #views }
 TtCategory >> gtEntriesByDayFor: aView [
 	<gtView>
+	| entries |
+	entries := [ self rootCategory collection
+			select: [ :each | each category = self ] ].
+	self rootCategory
+		in: [ :rootCategory | 
+			rootCategory
+				ifNil: [ ^ aView empty ]
+				ifNotNil: [ rootCategory collection
+						ifNil: [ ^ aView empty ]
+						ifNotNil: [ entries value ifEmpty: [ ^ aView empty ] ] ] ].
 	^ aView forward
 		title: 'Entries by Day';
-		object: [ self rootCategory collection select: [ :each | each category = self ] ];
+		object: [ entries value ];
 		view: #gtEntriesByDayFor:context:
 ]
 
