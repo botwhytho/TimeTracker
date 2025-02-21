@@ -97,6 +97,15 @@ TtCategory >> gtColorFor: anAction [
 ]
 
 { #category : #views }
+TtCategory >> gtEntriesByDayFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Entries by Day';
+		object: [ self rootCategory collection select: [ :each | each category = self ] ];
+		view: #gtEntriesByDayFor:context:
+]
+
+{ #category : #views }
 TtCategory >> gtParentAndChildrenFor: aView [
 	<gtView>
 	^ aView columnedTree
