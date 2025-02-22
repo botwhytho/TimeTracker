@@ -362,8 +362,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ each generateCheckboxForBoolean: #firstTimeScheduled ] ];
 		column: 'Category'
-			stencil: [ :each :rowIndex :columnIndex |
-				self flag: #TODO. "Wrap category view in domain object, have a unique Instance and re-use/cache?" 
+			stencil: [ :each :rowIndex :columnIndex | 
+				self flag: #TODO.	"Wrap category view in domain object, have a unique Instance and re-use/cache?"
 				each isAssociation
 					ifTrue: [ BlElement new size: 1 @ 1 ]
 					ifFalse: [ | aButton |
@@ -444,8 +444,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 					aBrTree := element childAt: 2.
 					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
-						scrollToIndex: (indexInTree - 3 max: 1);
-						selectOne: indexInTree ]
+						scrollToIndex: (indexInTree - 3 - entriesByDay size max: 1);
+						selectOne: indexInTree - entriesByDay size + 1 ]
 				ifNone: [  ].
 			element ]
 ]
