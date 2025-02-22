@@ -112,7 +112,11 @@ TtCategory >> gtEntriesByDayFor: aView [
 	^ aView forward
 		title: 'Entries by Day';
 		object: [ entries value ];
-		view: #gtEntriesByDayFor:context:
+		view: #gtEntriesByDayFor:context:;
+		actionButtonLabel: 'Inspect Entries'
+			action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | 
+				aBlClickEvent consumed: true.
+				aBrButton phlow spawnObject: entries value ]
 ]
 
 { #category : #views }
