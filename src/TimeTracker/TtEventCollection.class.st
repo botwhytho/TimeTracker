@@ -1117,39 +1117,73 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 { #category : #accessing }
 TtEventCollection >> gtWeekFor: anAction [
 	<gtAction>
-	^ anAction dropdown
+	^ anAction button
 		icon: [ BrGlamorousVectorIcons timeTrackerCalendar asElement asScalableElement
 				size: 20 @ 20 ] asStencil;
-		tooltip: 'Select a Week to Analyze';
+		tooltip: 'Select Days to Analyze/Compare';
 		priority: 1;
-		content: [ :aButton | 
+		action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | 
 			| firstDate element |
 			firstDate := nil.
-			element := MyGtCalendarElement
-					forDate: self rootCollection groupedByDay keys max.
-			element
-				when: GtCalendarDateClickedEvent
-					do: [ :anEvent | 
-						anEvent consumed: true.
-						aButton fireEvent: BrDropdownHideWish new.
-						aButton phlow
-							spawnObject: (self rootCollection weekFromDate: anEvent date) ];
-				when: GtCalendarDateClickedWithModifiersEvent
-					do: [ :anEvent | 
-						anEvent modifiers = BlKeyModifiers shift
-							ifTrue: [ firstDate
-									ifNil: [ firstDate := anEvent date ]
-									ifNotNil: [ | sortedDates |
-										sortedDates := {firstDate.
-												anEvent date} sorted: #yourself ascending.
-										aButton fireEvent: BrDropdownHideWish new.
-										aButton phlow
-											spawnObject: (self rootCollection
-													select: [ :each | 
-														each start asDate >= sortedDates first
-															and: [ each start asDate <= sortedDates second ] ]).
-										firstDate := nil ].
-								anEvent consumed: true ] ] ]
+			aBrButton
+				addAptitude: (BrWithExplicitDropdownAptitude new
+						stencil: [ BrMenuExplicit new
+								stencil: [ :anExplicitMenu | 
+									element := MyGtCalendarElement
+											forDate: self rootCollection groupedByDay keys max.
+									element
+										when: GtCalendarDateClickedEvent
+											do: [ :anEvent | 
+												anEvent consumed: true.
+												aBrButton phlow
+													spawnObject: (self rootCollection weekFromDate: anEvent date).
+												anExplicitMenu hide ];
+										when: GtCalendarDateClickedWithModifiersEvent
+											do: [ :anEvent | 
+												anEvent modifiers = BlKeyModifiers shift
+													ifTrue: [ firstDate
+															ifNil: [ firstDate := anEvent date ]
+															ifNotNil: [ | sortedDates |
+																sortedDates := {firstDate.
+																		anEvent date} sorted: #yourself ascending.
+																aBrButton phlow
+																	spawnObject: (self rootCollection
+																			select: [ :each | 
+																				each start asDate >= sortedDates first
+																					and: [ each start asDate <= sortedDates second ] ]).
+																firstDate := nil.
+																anExplicitMenu hide ].
+														anEvent consumed: true ] ] ] ]) ];
+		primaryModifierAction: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | 
+			| calendar1 calendar2 week1 week2 |
+			aBrButton
+				addAptitude: (BrWithExplicitDropdownAptitude new
+						stencil: [ BrMenuExplicit new
+								stencil: [ :anExplicitMenu | 
+									calendar1 := MyGtCalendarElement
+											forDate: self rootCollection groupedByDay keys max.
+									calendar1
+										when: GtCalendarDateClickedEvent
+										do: [ :anEvent | 
+											anEvent consumed: true.
+											week1 := self rootCollection weekFromDate: anEvent date ].
+									calendar2 := MyGtCalendarElement
+											forDate: self rootCollection groupedByDay keys max.
+									calendar2
+										when: GtCalendarDateClickedEvent
+										do: [ :anEvent | 
+											anEvent consumed: true.
+											week2 := self rootCollection weekFromDate: anEvent date.
+											aBrButton phlow
+												spawnObject: (GtPhlowExplicitTool new
+														name: 'Compare Weeks';
+														stencil: [ BrHorizontalPane new matchParent
+																addChildren: {GtPager createWrappedOn: week1 gtDefaultInspectorTool.
+																		GtPager createWrappedOn: week2 gtDefaultInspectorTool} ]).
+											anExplicitMenu hide ].
+									BrHorizontalPane new fitContent
+										addChildren: {calendar1.
+												calendar2} ] ]) ]
 ]
 
 { #category : #accessing }
