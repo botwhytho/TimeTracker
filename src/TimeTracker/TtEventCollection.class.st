@@ -370,7 +370,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 						aButton := BrButton new.
 						aButton
 							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
-									+ (BrWithExplicitDropdownAptitude new
+									+ (BrWithExplicitDropdownAptitude new withoutHandle;
 											stencil: [ BrMenuExplicit new
 													stencil: [ :anExplicitMenu | 
 														BrFrame new
@@ -1126,7 +1126,7 @@ TtEventCollection >> gtWeekFor: anAction [
 			| firstDate element |
 			firstDate := nil.
 			aBrButton
-				addAptitude: (BrWithExplicitDropdownAptitude new
+				addAptitude: (BrWithExplicitDropdownAptitude new withoutHandle;
 						stencil: [ BrMenuExplicit new
 								stencil: [ :anExplicitMenu | 
 									element := MyGtCalendarElement
@@ -1157,7 +1157,7 @@ TtEventCollection >> gtWeekFor: anAction [
 		primaryModifierAction: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | 
 			| calendar1 calendar2 week1 week2 |
 			aBrButton
-				addAptitude: (BrWithExplicitDropdownAptitude new
+				addAptitude: (BrWithExplicitDropdownAptitude new withoutHandle;
 						stencil: [ BrMenuExplicit new
 								stencil: [ :anExplicitMenu | 
 									calendar1 := MyGtCalendarElement
