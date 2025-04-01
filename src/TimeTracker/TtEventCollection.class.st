@@ -31,7 +31,7 @@ TtEventCollection class >> gtPageRegistryFor: aView [
 		priority: 1;
 		items: [ self pageRegistry associations ];
 		column: 'Database' text: [ :each | each key database databaseName ];
-		column: 'Page' text: [ :each | each key title ];
+		column: 'Page' text: [ :each | each key title ] spawn: [:anAssociation :index | anAssociation key] ;
 		send: [ :each | each value latestWeek ]
 ]
 
