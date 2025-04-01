@@ -6,7 +6,8 @@ Class {
 		'currentMonth',
 		'controls',
 		'dayElements',
-		'highlightToday'
+		'highlightToday',
+		'elementComputation'
 	],
 	#category : #'TimeTracker-Calendar'
 }
@@ -15,6 +16,15 @@ Class {
 MyGtCalendarElement class >> forDate: aDate [
 	^ self new
 		enableControls;
+		date: aDate;
+		yourself
+]
+
+{ #category : #'instance creation' }
+MyGtCalendarElement class >> forDate: aDate asElementDo: aValuable [
+	^ self new
+		enableControls;
+		elementComputation: aValuable;
 		date: aDate;
 		yourself
 ]
@@ -142,7 +152,13 @@ MyGtCalendarElement >> buildMonth [
 	self removeChildren.
 	self dayElements removeAll.
 	self buildHeader.
-	self buildDays
+	self buildDays.
+	self elementComputation ifNotNil: [ :notNil | notNil value: self ]
+]
+
+{ #category : #accessing }
+MyGtCalendarElement >> currentMonth [
+	^ currentMonth
 ]
 
 { #category : #accessing }
@@ -165,6 +181,16 @@ MyGtCalendarElement >> defaultWidth [
 { #category : #initialization }
 MyGtCalendarElement >> disableControls [
 	controls := false
+]
+
+{ #category : #accessing }
+MyGtCalendarElement >> elementComputation [
+	^ elementComputation
+]
+
+{ #category : #accessing }
+MyGtCalendarElement >> elementComputation: aValuable [
+	elementComputation := aValuable
 ]
 
 { #category : #'instance creation' }

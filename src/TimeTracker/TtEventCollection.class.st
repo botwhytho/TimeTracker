@@ -1126,11 +1126,23 @@ TtEventCollection >> gtWeekFor: anAction [
 			| firstDate element |
 			firstDate := nil.
 			aBrButton
-				addAptitude: (BrWithExplicitDropdownAptitude new withoutHandle;
+				addAptitude: (BrWithExplicitDropdownAptitude new
+						withoutHandle;
 						stencil: [ BrMenuExplicit new
 								stencil: [ :anExplicitMenu | 
+									| daysWithData |
+									daysWithData := self rootCollection groupedByDay keys.
 									element := MyGtCalendarElement
-											forDate: self rootCollection groupedByDay keys max.
+											forDate: daysWithData max
+											asElementDo: [ :calendarElement | 
+												| daysInMonth |
+												daysInMonth := daysWithData
+														select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+														thenCollect: #dayOfMonth.
+												calendarElement dayElements
+													associationsDo: [ :anAssociation | 
+														(daysInMonth includes: anAssociation key)
+															ifTrue: [ anAssociation value background: Color veryVeryLightGray ] ] ].
 									element
 										when: GtCalendarDateClickedEvent
 											do: [ :anEvent | 
@@ -1147,6 +1159,7 @@ TtEventCollection >> gtWeekFor: anAction [
 																sortedDates := {firstDate.
 																		anEvent date} sorted: #yourself ascending.
 																aBrButton phlow
+																	flag: #TODO; "Need to deal with daylight savings time"
 																	spawnObject: (self rootCollection
 																			select: [ :each | 
 																				each start asDate >= sortedDates first
@@ -1157,7 +1170,8 @@ TtEventCollection >> gtWeekFor: anAction [
 		primaryModifierAction: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | 
 			| calendar1 calendar2 week1 week2 |
 			aBrButton
-				addAptitude: (BrWithExplicitDropdownAptitude new withoutHandle;
+				addAptitude: (BrWithExplicitDropdownAptitude new
+						withoutHandle;
 						stencil: [ BrMenuExplicit new
 								stencil: [ :anExplicitMenu | 
 									calendar1 := MyGtCalendarElement
