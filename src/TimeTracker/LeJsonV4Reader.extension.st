@@ -6,13 +6,12 @@ LeJsonV4Reader >> unknownSnippetTypeFrom: map [
 
 	| children class snippet type |
 	"map is considered a snippet if it has all the keys of LeBlock"
-	((LeSnippet leJsonV4AttributeMapping collect: #key as: Set)
+	((LeSnippet leJsonV4AttributeMapping collect: #key as: GtStringContentSet)
 		difference: map keys) ifNotEmpty: [ self error: 'Unknown snippet type' ].
 
-	children := map at: #children.
-	map at: #children put: LeSnippets new.
+	children := map at: 'children'.
+	map at: 'children' put: LeSnippets new.
 	type := map at: #__type.
-	self flag: #TODO "Should probably figure out proper custom snippet types for 'TimeTracker' package uses".
 	class := LeUnknownSnippet withAllSubclasses
 			detect: [ :each | each leJsonV4Name = type ]
 			ifNone: [ LeUnknownSnippet ].
@@ -25,6 +24,7 @@ LeJsonV4Reader >> unknownSnippetTypeFrom: map [
 							prettyPrint: true ]).
 	snippet
 		children: children;
-		uid: (map at: #uid).
+		uid: (map at: 'uid'). 
+	map at: 'editTime' ifPresent: [ :editTime | snippet editTime: editTime ].
 	^ snippet
 ]
