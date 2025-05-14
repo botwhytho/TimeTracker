@@ -820,19 +820,58 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 		ifNil: [ false ]
 		ifNotNil: [ :notNil | notNil object isKindOf: TtEventCollection ])
 		ifTrue: [ ^ anAction noAction ].
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		label: 'Import';
-		tooltip: 'Import new data';
+	^ anAction explicit
 		priority: 0.5;
-		action: [ :aButton :aBrTab | 
-			| aContainer |
-			self importFromTrello.
-			self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
-			aContainer := aBrTab phlow firstParentWithViewContent parent parent.
-			aContainer parent
-				replaceChild: aContainer
-				with: (GtInspector newOn: self rootCollection latestWeek) ]
+		stencil: [ :aBrTab | 
+			BrButton new
+				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
+				icon: BrGlamorousVectorIcons inspect;
+				label: 'Import';
+				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+					| aContainer |
+					aBrButton
+						aptitudeDo: [ :anAptitude | 
+							anAptitude
+								withAllActorsBreadthFirstDo: [ :eachActor | 
+									BrGlamorousWithExplicitDropdownAptitude = eachActor class
+										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
+					self importFromTrello.
+					self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
+					aContainer := aBrTab phlow firstParentWithViewContent parent parent.
+					aContainer parent
+						replaceChild: aContainer
+						with: (GtInspector newOn: self rootCollection latestWeek) ];
+				actionWithModifiers: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+					aBlClickEvent modifiers = BlKeyModifiers primary
+						ifTrue: [ | aDropdownAptitude |
+							aBrButton
+								aptitudeDo: [ :anAptitude | 
+									anAptitude
+										withAllActorsBreadthFirstDo: [ :eachActor | 
+											BrGlamorousWithExplicitDropdownAptitude = eachActor class
+												ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
+							aBrButton
+								addAptitude: (aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new
+											withoutHandle;
+											stencil: [ | aMenuItems |
+												aMenuItems := BrMenuItems new.
+												aMenuItems
+													addItemLabel: 'Cut'
+													action: [ NonInteractiveTranscript stdout show: 'Cut '.
+														aDropdownAptitude hide ].
+												aMenuItems
+													addItemLabel: 'Copy'
+													shortcut: 'CMD+C'
+													action: [ NonInteractiveTranscript stdout show: 'Copy '.
+														aDropdownAptitude hide ].
+												aMenuItems
+													addItemId: #'menu-paste-item'
+													label: 'Paste'
+													shortcut: 'CMD+V'
+													action: [ NonInteractiveTranscript stdout show: 'Paste '.
+														aDropdownAptitude hide ].
+												aMenuItems ]).
+							aDropdownAptitude show ] ] ]
 ]
 
 { #category : #inspecting }
