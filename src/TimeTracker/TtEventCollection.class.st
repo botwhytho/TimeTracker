@@ -823,21 +823,20 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	^ anAction explicit
 		priority: 0.5;
 		stencil: [ :aBrTab | 
+			| aContainer |
+			aContainer := aBrTab phlow firstParentWithViewContent parent parent.
 			BrButton new
 				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 				icon: BrGlamorousVectorIcons inspect;
 				label: 'Import';
 				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-					| aContainer |
 					aBrButton
 						aptitudeDo: [ :anAptitude | 
 							anAptitude
 								withAllActorsBreadthFirstDo: [ :eachActor | 
 									BrGlamorousWithExplicitDropdownAptitude = eachActor class
-										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
-					self importFromTrello.
+										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].	"self importAllFromTrello."
 					self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
-					aContainer := aBrTab phlow firstParentWithViewContent parent parent.
 					aContainer parent
 						replaceChild: aContainer
 						with: (GtInspector newOn: self rootCollection latestWeek) ];
@@ -856,19 +855,25 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 											stencil: [ | aMenuItems |
 												aMenuItems := BrMenuItems new.
 												aMenuItems
-													addItemLabel: 'Cut'
-													action: [ NonInteractiveTranscript stdout show: 'Cut '.
+													addItemLabel: 'Import Latest'
+													action: [ self importLatestFromTrello.
+														aContainer parent
+															replaceChild: aContainer
+															with: (GtInspector newOn: self rootCollection latestWeek).
 														aDropdownAptitude hide ].
 												aMenuItems
-													addItemLabel: 'Copy'
-													shortcut: 'CMD+C'
-													action: [ NonInteractiveTranscript stdout show: 'Copy '.
+													addItemLabel: 'Import Earliest'
+													action: [ self importEarliestFromTrello.
+														aContainer parent
+															replaceChild: aContainer
+															with: (GtInspector newOn: self rootCollection latestWeek).
 														aDropdownAptitude hide ].
 												aMenuItems
-													addItemId: #'menu-paste-item'
-													label: 'Paste'
-													shortcut: 'CMD+V'
-													action: [ NonInteractiveTranscript stdout show: 'Paste '.
+													addItemLabel: 'Import All'
+													action: [ self importAllFromTrello.
+														aContainer parent
+															replaceChild: aContainer
+															with: (GtInspector newOn: self rootCollection latestWeek).
 														aDropdownAptitude hide ].
 												aMenuItems ]).
 							aDropdownAptitude show ] ] ]
@@ -1308,7 +1313,17 @@ TtEventCollection >> hourlyTicksElement [
 ]
 
 { #category : #import }
-TtEventCollection >> importFromTrello [
+TtEventCollection >> importAllFromTrello [
+	self importFromTrello: Float infinity
+]
+
+{ #category : #import }
+TtEventCollection >> importEarliestFromTrello [
+	self importFromTrello: 1
+]
+
+{ #category : #import }
+TtEventCollection >> importFromTrello: aNumber [
 	| response daysToImport existingDays |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
@@ -1317,15 +1332,25 @@ TtEventCollection >> importFromTrello [
 			collect: [ :each | each start asDate ]
 			as: Set) asArray sorted: #yourself descending.
 	daysToImport := ((response keys reject: [ :each | each = Date today ])
-			difference: existingDays) asArray sorted: #yourself ascending.
-	daysToImport
+			difference: existingDays) asArray
+			sorted: (#yourself
+					in: [ :anObject | 
+						aNumber negative
+							ifTrue: [ anObject perform: #descending ]
+							ifFalse: [ anObject perform: #ascending ] ]).
+	"daysToImport
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
-		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ].
-	daysToImport
+		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
+	(daysToImport first: (aNumber abs min: daysToImport size))
 		do: [ :day | 
 			TtTrelloParser new
 				add: (response associationAt: day)
 				toCollection: self rootCollection ]
+]
+
+{ #category : #import }
+TtEventCollection >> importLatestFromTrello [
+	self importFromTrello: -1
 ]
 
 { #category : #accessing }
