@@ -36,6 +36,13 @@ TtRootCategory >> gtHierarchyFor: aView [
 		view: #TtCategoriesFor:context:
 ]
 
+{ #category : #search }
+TtRootCategory >> gtSpotterForCategoryFor: aSearch [
+	"Be able to search category hierarchiex"
+
+	
+]
+
 { #category : #accessing }
 TtRootCategory >> uid [
 	^ uid
