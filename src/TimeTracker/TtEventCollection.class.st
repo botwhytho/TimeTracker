@@ -875,6 +875,10 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 															replaceChild: aContainer
 															with: (GtInspector newOn: self rootCollection latestWeek).
 														aDropdownAptitude hide ].
+												aMenuItems
+													addItemLabel: 'List Pending Days'
+													action: [ aBrButton phlow spawnObject: self unimportedDaysCalendar.
+														aDropdownAptitude hide ].
 												aMenuItems ]).
 							aDropdownAptitude show ] ] ]
 ]
@@ -1323,7 +1327,7 @@ TtEventCollection >> importEarliestFromTrello [
 ]
 
 { #category : #import }
-TtEventCollection >> importFromTrello: aNumber [
+TtEventCollection >> importFromTrello: aNumberOrDate [
 	| response daysToImport existingDays |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
@@ -1331,18 +1335,21 @@ TtEventCollection >> importFromTrello: aNumber [
 	existingDays := (self rootCollection
 			collect: [ :each | each start asDate ]
 			as: Set) asArray sorted: #yourself descending.
-	daysToImport := ((response keys reject: [ :each | each = Date today ])
-			difference: existingDays) asArray
-			sorted: (#yourself
-					in: [ :anObject | 
-						aNumber negative
-							ifTrue: [ anObject perform: #descending ]
-							ifFalse: [ anObject perform: #ascending ] ]).
-	"daysToImport
+	daysToImport := aNumberOrDate class = Date
+			ifTrue: [ ((response keys select: [ :each | each = aNumberOrDate ]) difference: existingDays) asArray ]
+			ifFalse: [ ((response keys reject: [ :each | each = Date today ])
+					difference: existingDays) asArray
+					sorted: (#yourself
+							in: [ :anObject | 
+								aNumberOrDate negative
+									ifTrue: [ anObject perform: #descending ]
+									ifFalse: [ anObject perform: #ascending ] ]) ].	"daysToImport
 		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
 		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
-	(daysToImport first: (aNumber abs min: daysToImport size))
-		do: [ :day | 
+	(daysToImport
+		first: (([ aNumberOrDate abs ] on: MessageNotUnderstood do: [ 1 ])
+				min: daysToImport size))
+		do: [ :day |
 			TtTrelloParser new
 				add: (response associationAt: day)
 				toCollection: self rootCollection ]
@@ -1388,6 +1395,19 @@ TtEventCollection >> labelFormatX [
 { #category : #accessing }
 TtEventCollection >> latestWeek [
 	^ self rootCollection weekFromDate: self rootCollection groupedByDay keys max
+]
+
+{ #category : #import }
+TtEventCollection >> listUnimportedDays [
+	| response daysToImport existingDays |
+	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
+	self rootCollection loadFromLepiter.
+	existingDays := (self rootCollection
+			collect: [ :each | each start asDate ]
+			as: Set) asArray sorted: #yourself descending.
+	daysToImport := ((response keys reject: [ :each | each = Date today ])
+			difference: existingDays) asArray sorted: #yourself ascending.
+	^ daysToImport
 ]
 
 { #category : #accessing }
@@ -1538,6 +1558,55 @@ TtEventCollection >> timeEntries [
 TtEventCollection >> toggleUntracked [
 	self includeUntracked.
 	includeUntracked := includeUntracked not
+]
+
+{ #category : #import }
+TtEventCollection >> unimportedDaysCalendar [
+	| grid days months |
+	days := self listUnimportedDays.
+	months := days groupedBy: [ :each | each start asMonth ].
+	grid := BrHorizontalGrid new
+			matchParent;
+			columnCount: 3.
+	months keys min index % 3
+		in: [ :anIndex | 
+			anIndex ~= 1
+				ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
+						timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
+	grid
+		addChildren: ((months associations sorted: #key ascending)
+				collect: [ :aMonth | 
+					| calendar daysWithData |
+					calendar := MyGtCalendarElement new
+							highlightToday: false;
+							date: aMonth value last start asDate.
+					daysWithData := aMonth value.
+					calendar
+						enqueueTask: [ calendar dayElements
+								do: [ :aContainer | 
+									daysWithData
+										detect: [ :aDay | aDay dayOfMonth asString = aContainer children first label asString ]
+										ifFound: [ :found | 
+											| element |
+											element := BlElement new.
+											aContainer
+												addChild: (element
+														id: #categoryElement;
+														zIndex: 1000;
+														constraintsDo: [ :c | 
+															c ignoreByLayout.
+															c vertical exact: aContainer children first height * 0.95.
+															c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
+														background: (Color orange alpha: 0.25);
+														when: BlClickEvent
+															do: [ :aBlClickEvent | 
+																aBlClickEvent consumed: true.
+																self importFromTrello: found value.
+																element phlow
+																	spawnObject: (self rootCollection weekFromDate: found value) ]) ] ] ]
+								asBlTask.
+					calendar asScalableElement margin: (BlInsets all: 10) ]).
+	^ grid
 ]
 
 { #category : #accessing }
