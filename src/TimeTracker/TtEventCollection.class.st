@@ -829,58 +829,47 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 				icon: BrGlamorousVectorIcons inspect;
 				label: 'Import';
+				flag: #CAUTION; "The first 3 options in dropdown update an object inspector in place, implementation could break if Gt internals change"
 				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+					| aDropdownAptitude |
 					aBrButton
 						aptitudeDo: [ :anAptitude | 
 							anAptitude
 								withAllActorsBreadthFirstDo: [ :eachActor | 
 									BrGlamorousWithExplicitDropdownAptitude = eachActor class
-										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].	"self importAllFromTrello."
-					self flag: #CAUTION.	"This updates an object inspector in place, implementation could break if Gt internals change"
-					aContainer parent
-						replaceChild: aContainer
-						with: (GtInspector newOn: self rootCollection latestWeek) ];
-				actionWithModifiers: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-					aBlClickEvent modifiers = BlKeyModifiers primary
-						ifTrue: [ | aDropdownAptitude |
-							aBrButton
-								aptitudeDo: [ :anAptitude | 
-									anAptitude
-										withAllActorsBreadthFirstDo: [ :eachActor | 
-											BrGlamorousWithExplicitDropdownAptitude = eachActor class
-												ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
-							aBrButton
-								addAptitude: (aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new
-											withoutHandle;
-											stencil: [ | aMenuItems |
-												aMenuItems := BrMenuItems new.
-												aMenuItems
-													addItemLabel: 'Import Latest'
-													action: [ self importLatestFromTrello.
-														aContainer parent
-															replaceChild: aContainer
-															with: (GtInspector newOn: self rootCollection latestWeek).
-														aDropdownAptitude hide ].
-												aMenuItems
-													addItemLabel: 'Import Earliest'
-													action: [ self importEarliestFromTrello.
-														aContainer parent
-															replaceChild: aContainer
-															with: (GtInspector newOn: self rootCollection latestWeek).
-														aDropdownAptitude hide ].
-												aMenuItems
-													addItemLabel: 'Import All'
-													action: [ self importAllFromTrello.
-														aContainer parent
-															replaceChild: aContainer
-															with: (GtInspector newOn: self rootCollection latestWeek).
-														aDropdownAptitude hide ].
-												aMenuItems
-													addItemLabel: 'List Pending Days'
-													action: [ aBrButton phlow spawnObject: self unimportedDaysCalendar.
-														aDropdownAptitude hide ].
-												aMenuItems ]).
-							aDropdownAptitude show ] ] ]
+										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
+					aBrButton
+						addAptitude: (aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new
+									withoutHandle;
+									stencil: [ | aMenuItems |
+										aMenuItems := BrMenuItems new.
+										aMenuItems
+											addItemLabel: 'Import Latest'
+											action: [ self importLatestFromTrello.
+												aContainer parent
+													replaceChild: aContainer
+													with: (GtInspector newOn: self rootCollection latestWeek).
+												aDropdownAptitude hide ].
+										aMenuItems
+											addItemLabel: 'Import Earliest'
+											action: [ self importEarliestFromTrello.
+												aContainer parent
+													replaceChild: aContainer
+													with: (GtInspector newOn: self rootCollection latestWeek).
+												aDropdownAptitude hide ].
+										aMenuItems
+											addItemLabel: 'Import All'
+											action: [ self importAllFromTrello.
+												aContainer parent
+													replaceChild: aContainer
+													with: (GtInspector newOn: self rootCollection latestWeek).
+												aDropdownAptitude hide ].
+										aMenuItems
+											addItemLabel: 'List Pending Days'
+											action: [ aBrButton phlow spawnObject: self unimportedDaysCalendar.
+												aDropdownAptitude hide ].
+										aMenuItems ]).
+					aDropdownAptitude show ] ]
 ]
 
 { #category : #inspecting }
