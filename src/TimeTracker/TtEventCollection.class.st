@@ -1567,7 +1567,7 @@ TtEventCollection >> unimportedDaysCalendar [
 				collect: [ :aMonth | 
 					| calendar daysWithData |
 					calendar := MyGtCalendarElement new
-							highlightToday: false;
+							highlightToday: (aMonth key includes: Date today);
 							date: aMonth value last start asDate.
 					daysWithData := aMonth value.
 					calendar
