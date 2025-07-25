@@ -1592,8 +1592,8 @@ TtEventCollection >> unimportedDaysCalendar [
 																aBlClickEvent consumed: true.
 																self importFromTrello: found value.
 																element phlow
-																	spawnObject: (self rootCollection weekFromDate: found value) ]) ] ] ]
-								asBlTask.
+																	spawnObject: (self rootCollection weekFromDate: found value) ]) ]
+										ifNone: [  ] ] ] asBlTask.
 					calendar asScalableElement margin: (BlInsets all: 10) ]).
 	^ grid
 ]
