@@ -875,12 +875,25 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 { #category : #inspecting }
 TtEventCollection >> gtInspectActionFor: anAction [
 	<gtAction>
-	^ anAction button
+	^ anAction dropdown
 		icon: BrGlamorousVectorIcons inspect;
 		label: 'ALL TIME';
 		tooltip: 'View ALL historical data';
 		priority: 1;
-		action: [ :aButton | aButton phlow spawnObject: self rootCollection ]
+		content: [ :aButton | 
+			BrGlamorousSimpleContextMenuContent new
+				items: {'ALL TIME'
+							-> [ :e | 
+								e phlow spawnObject: self rootCollection.
+								e fireEvent: BrDropdownHideWish new ].
+						'EXCLUDE CURRENT TIME'
+							-> [ :e | 
+								| min max |
+								min := self items min: #start.
+								max := self items max: #end.
+								e phlow
+									spawnObject: (self rootCollection select: [ :each | each end < min or: [ each start > max ] ]).
+								e fireEvent: BrDropdownHideWish new ]} ]
 ]
 
 { #category : #views }
