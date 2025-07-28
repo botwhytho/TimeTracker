@@ -38,9 +38,7 @@ TtRootCategory >> gtHierarchyFor: aView [
 
 { #category : #search }
 TtRootCategory >> gtSpotterForCategoryFor: aSearch [
-	"Be able to search category hierarchiex"
-
-	
+	self flag: #TODO	"Be able to search category hierarchiex"
 ]
 
 { #category : #accessing }
