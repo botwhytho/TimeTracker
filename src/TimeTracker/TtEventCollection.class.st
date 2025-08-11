@@ -1401,14 +1401,27 @@ TtEventCollection >> latestWeek [
 
 { #category : #import }
 TtEventCollection >> listUnimportedDays [
-	| response daysToImport existingDays |
+	| response daysToImport existingDays timezoneRuns timezoneShiftedDays |
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
 	existingDays := (self rootCollection
 			collect: [ :each | each start asDate ]
-			as: Set) asArray sorted: #yourself descending.
-	daysToImport := ((response keys reject: [ :each | each = Date today ])
-			difference: existingDays) asArray sorted: #yourself ascending.
+			as: Set) asArray sorted: #yourself ascending.
+	timezoneRuns := (existingDays groupByRuns: #offset)
+			collect: [ :each | 
+				{each first.
+					each last} ].
+	timezoneShiftedDays := (response keys reject: [ :each | each = Date today ])
+			collect: [ :aDate | 
+				| offset |
+				offset := timezoneRuns
+						detect: [ :aRun | aDate >= aRun first and: [ aDate <= aRun second ] ]
+						ifNone: [ aDate < timezoneRuns first first
+								ifTrue: [ timezoneRuns first ]
+								ifFalse: [ timezoneRuns last ] ].
+				aDate translateTo: offset first offset ].
+	daysToImport := (timezoneShiftedDays difference: existingDays) asArray
+			sorted: #yourself ascending.
 	^ daysToImport
 ]
 
