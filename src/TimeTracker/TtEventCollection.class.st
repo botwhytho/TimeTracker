@@ -1510,8 +1510,9 @@ TtEventCollection >> printOn: aStream [
 					someDates min yyyymmdd , '-' , (someDates min weekday first: 3)
 						, (someDates min = someDates max
 								ifTrue: [ '' ]
-								ifFalse: [ ' - ' , someDates max yyyymmdd , '-' , (someDates max weekday first: 3) ]) ]);
-		nextPutAll: ' [';
+								ifFalse: [ ' - ' , someDates max yyyymmdd , '-' , (someDates max weekday first: 3) ])
+						, ' [' , someDates size asString
+						, (someDates size = 1 ifTrue: [ ' day, ' ] ifFalse: [ ' days, ' ]) ]);
 		nextPutAll: self size asString , ' items';
 		nextPutAll: '])'
 ]
@@ -1579,48 +1580,49 @@ TtEventCollection >> toggleUntracked [
 TtEventCollection >> unimportedDaysCalendar [
 	| grid days months |
 	days := self listUnimportedDays.
-	months := days groupedBy: [ :each | each start asMonth ].
-	grid := BrHorizontalGrid new
-			matchParent;
-			columnCount: 3.
-	months keys min index % 3
-		in: [ :anIndex | 
-			anIndex ~= 1
-				ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
-						timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
-	grid
-		addChildren: ((months associations sorted: #key ascending)
-				collect: [ :aMonth | 
-					| calendar daysWithData |
-					calendar := MyGtCalendarElement new
-							highlightToday: (aMonth key includes: Date today);
-							date: aMonth value last start asDate.
-					daysWithData := aMonth value.
-					calendar
-						enqueueTask: [ calendar dayElements
-								do: [ :aContainer | 
-									daysWithData
-										detect: [ :aDay | aDay dayOfMonth asString = aContainer children first label asString ]
-										ifFound: [ :found | 
-											| element |
-											element := BlElement new.
-											aContainer
-												addChild: (element
-														id: #categoryElement;
-														zIndex: 1000;
-														constraintsDo: [ :c | 
-															c ignoreByLayout.
-															c vertical exact: aContainer children first height * 0.95.
-															c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
-														background: (Color orange alpha: 0.25);
-														when: BlClickEvent
-															do: [ :aBlClickEvent | 
-																aBlClickEvent consumed: true.
-																self importFromTrello: found value.
-																element phlow
-																	spawnObject: (self rootCollection weekFromDate: found value) ]) ]
-										ifNone: [  ] ] ] asBlTask.
-					calendar asScalableElement margin: (BlInsets all: 10) ]).
+	days size > 0
+		ifTrue: [ months := days groupedBy: [ :each | each start asMonth ].
+			grid := BrHorizontalGrid new
+					matchParent;
+					columnCount: 3.
+			months keys min index % 3
+				in: [ :anIndex | 
+					anIndex ~= 1
+						ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
+								timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
+			grid
+				addChildren: ((months associations sorted: #key ascending)
+						collect: [ :aMonth | 
+							| calendar daysWithData |
+							calendar := MyGtCalendarElement new
+									highlightToday: (aMonth key includes: Date today);
+									date: aMonth value last start asDate.
+							daysWithData := aMonth value.
+							calendar
+								enqueueTask: [ calendar dayElements
+										do: [ :aContainer | 
+											daysWithData
+												detect: [ :aDay | aDay dayOfMonth asString = aContainer children first label asString ]
+												ifFound: [ :found | 
+													| element |
+													element := BlElement new.
+													aContainer
+														addChild: (element
+																id: #categoryElement;
+																zIndex: 1000;
+																constraintsDo: [ :c | 
+																	c ignoreByLayout.
+																	c vertical exact: aContainer children first height * 0.95.
+																	c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
+																background: (Color orange alpha: 0.25);
+																when: BlClickEvent
+																	do: [ :aBlClickEvent | 
+																		aBlClickEvent consumed: true.
+																		self importFromTrello: found value.
+																		element phlow
+																			spawnObject: (self rootCollection weekFromDate: found value) ]) ]
+												ifNone: [  ] ] ] asBlTask.
+							calendar asScalableElement margin: (BlInsets all: 10) ]) ].
 	^ grid
 ]
 
