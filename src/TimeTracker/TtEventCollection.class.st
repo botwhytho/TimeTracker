@@ -1337,8 +1337,10 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	existingDays := (self rootCollection
 			collect: [ :each | each start asDate ]
 			as: Set) asArray sorted: #yourself descending.
+	self flag: #TODO.	"Take a look at `TtEventCollection>>#listUnimportedDays`, deals with time-zone shifting, can be an issue at the cusp of a daylight savings time change or when importing earliest data if it is historical and in different time zone"
 	daysToImport := aNumberOrDate class = Date
-			ifTrue: [ ((response keys select: [ :each | each = aNumberOrDate ]) difference: existingDays) asArray ]
+			ifTrue: [ ((response keys select: [ :each | each = aNumberOrDate ])
+					difference: existingDays) asArray ]
 			ifFalse: [ ((response keys reject: [ :each | each = Date today ])
 					difference: existingDays) asArray
 					sorted: (#yourself
@@ -1351,7 +1353,7 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	(daysToImport
 		first: (([ aNumberOrDate abs ] on: MessageNotUnderstood do: [ 1 ])
 				min: daysToImport size))
-		do: [ :day |
+		do: [ :day | 
 			TtTrelloParser new
 				add: (response associationAt: day)
 				toCollection: self rootCollection ]
