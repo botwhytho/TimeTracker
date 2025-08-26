@@ -370,7 +370,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 						aButton := BrButton new.
 						aButton
 							aptitude: BrGlamorousButtonWithIconAndLabelAptitude
-									+ (BrWithExplicitDropdownAptitude new withoutHandle;
+									+ (BrWithExplicitDropdownAptitude new
+											withoutHandle;
 											stencil: [ BrMenuExplicit new
 													stencil: [ :anExplicitMenu | 
 														BrFrame new
@@ -445,7 +446,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
 						scrollToIndex: (indexInTree - 3 - entriesByDay size max: 1);
-						selectOne: indexInTree - entriesByDay size + 1 ]
+						selectOne: indexInTree ]
 				ifNone: [  ].
 			element ]
 ]
