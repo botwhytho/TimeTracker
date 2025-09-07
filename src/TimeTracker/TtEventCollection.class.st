@@ -588,7 +588,7 @@ TtEventCollection >> groupedBy: aBlock [
 	because we want the keys to be groups, not simple collections"
 
 	| result |
-	result := Dictionary new.
+	result := OrderedDictionary new.
 	self
 		do: [ :each | 
 			| key collection |
@@ -811,6 +811,40 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 			text: [ :each | each value items average roundTo: 1 minute ];
 		column: 'Total Time' text: [ :each | each value items sum roundTo: 1 minute ];
 		send: [ :each | each value size = 1 ifTrue: [ each value first ] ifFalse: [ each value ] ]
+]
+
+{ #category : #views }
+TtEventCollection >> gtIdealTimeUsageFor: aView [
+	<gtView>
+	| daysWithData ideals |
+	ideals := self
+			groupedBy: [ :aTrackedTime | 
+				self ideals
+					detect: [ :anIdeal | aTrackedTime category categoryLineage includes: anIdeal category ]
+					ifNone: [ 'Time Without Ideals' ] ].
+	ideals size < 2 ifTrue: [ ^ aView empty ].
+	daysWithData := self groupedByDay keys size.
+	self flag: #TODO.	"Need to take into account when NO time has been logged to a category for which an ideal exists"
+	self flag: #TODO.	"Need to account for when time spend is more and you are 'ahead of schedule'"
+	^ aView columnedList
+		title: 'Ideals';
+		priority: 0.5;
+		items: [ ideals associations reject: [ :each | each key isNil ] ];
+		column: 'Ideal Time Usage' text: [ :each | each key asString ];
+		column: 'Progress'
+			text: [ :each | 
+				| progressPercent dailyCatchupAmount |
+				each key isString
+					ifTrue: [ 'Click to View' ]
+					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
+								asFloat / each key minValue.
+						dailyCatchupAmount := daysWithData days
+								* ((1 - progressPercent) * each key minValue)
+								/ (each key timePeriod asDays - daysWithData).
+						'You are tracking to ' , (progressPercent * 100 roundTo: 0.01) asString
+							, '% of your goal. ' , (dailyCatchupAmount asHours roundTo: 0.1) asString
+							, ' hours of daily catch-up needed' ] ];
+		send: #value
 ]
 
 { #category : #import }
@@ -1317,6 +1351,11 @@ TtEventCollection >> hourlyTicksElement [
 							margin: (BlInsets top: 13);
 							constraintsDo: [ :c | c frame horizontal alignCenterAt: (eachTick - theTicks first) / aLength ] ]).
 	^ aContainer
+]
+
+{ #category : #accessing }
+TtEventCollection >> ideals [
+	^ self select: #isIdealTimeUsage
 ]
 
 { #category : #import }

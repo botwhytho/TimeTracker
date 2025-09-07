@@ -260,6 +260,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													aDropdown hide.
+													self flag: #TODO. "Explore using `GtPhlowElementContext>>#fireToolUpdateWish` in code. Simpler and updates other views as well."
 													(aCollection
 														perform: viewElement id asSymbol
 														withArguments: {GtPhlowEmptyView new.

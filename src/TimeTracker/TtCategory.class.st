@@ -58,6 +58,18 @@ TtCategory >> = anObject [
 ]
 
 { #category : #accessing }
+TtCategory >> categoryLineage [
+	| category lineage |
+	category := self.
+	lineage := OrderedCollection new.
+	lineage add: category.
+	[ category parentCategory ]
+		whileNotNil: [ category := category parentCategory.
+			lineage add: category ].
+	^ lineage allButLast
+]
+
+{ #category : #accessing }
 TtCategory >> children [
 	^ children ifNil: [ children := SortedCollection new ]
 ]

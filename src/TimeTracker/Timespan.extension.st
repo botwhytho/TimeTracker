@@ -1,6 +1,11 @@
 Extension { #name : #Timespan }
 
 { #category : #'*TimeTracker' }
+Timespan >> isIdealTimeUsage [
+	^ false
+]
+
+{ #category : #'*TimeTracker' }
 Timespan >> isNote [
 	^ false
 ]
