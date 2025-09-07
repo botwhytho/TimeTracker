@@ -816,20 +816,21 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageFor: aView [
 	<gtView>
-	| daysWithData ideals |
-	ideals := self
+	| daysWithData groupedByIdeals ideals |
+	ideals := self ideals.
+	groupedByIdeals := self
 			groupedBy: [ :aTrackedTime | 
-				self ideals
+				ideals
 					detect: [ :anIdeal | aTrackedTime category categoryLineage includes: anIdeal category ]
 					ifNone: [ 'Time Without Ideals' ] ].
-	ideals size < 2 ifTrue: [ ^ aView empty ].
+	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
 	daysWithData := self groupedByDay keys size.
 	self flag: #TODO.	"Need to take into account when NO time has been logged to a category for which an ideal exists"
 	self flag: #TODO.	"Need to account for when time spend is more and you are 'ahead of schedule'"
 	^ aView columnedList
 		title: 'Ideals';
 		priority: 0.5;
-		items: [ ideals associations reject: [ :each | each key isNil ] ];
+		items: [ groupedByIdeals associations reject: [ :each | each key isNil ] ];
 		column: 'Ideal Time Usage' text: [ :each | each key asString ];
 		column: 'Progress'
 			text: [ :each | 
