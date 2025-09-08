@@ -818,10 +818,13 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 	<gtView>
 	| daysWithData groupedByIdeals ideals |
 	ideals := self ideals.
-	groupedByIdeals := self
+	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
 				ideals
-					detect: [ :anIdeal | aTrackedTime category categoryLineage includes: anIdeal category ]
+					detect: [ :anIdeal | 
+						anIdeal category
+							ifNil: [ anIdeal computation value: aTrackedTime ]
+							ifNotNil: [ :notNil | aTrackedTime category categoryLineage includes: notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
 	daysWithData := self groupedByDay keys size.
@@ -843,8 +846,12 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData).
 						'You are tracking to ' , (progressPercent * 100 roundTo: 0.01) asString
-							, '% of your goal. ' , (dailyCatchupAmount asHours roundTo: 0.1) asString
-							, ' hours of daily catch-up needed' ] ];
+							, '% of your goal of '
+							, ({each key minValue.
+									each key maxValue} average * 24 roundTo: 0.1) asString , ' hours/day. '
+							, (dailyCatchupAmount asHours roundTo: 0.1) asString
+							, ' hours of daily catch-up needed' ] ]
+			weight: 2;
 		send: #value
 ]
 
