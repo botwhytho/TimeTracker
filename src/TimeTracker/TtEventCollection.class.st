@@ -816,7 +816,7 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageFor: aView [
 	<gtView>
-	| daysWithData groupedByIdeals ideals |
+	| daysWithData groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals.
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
@@ -826,9 +826,17 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | aTrackedTime category categoryLineage includes: notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
+	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
+	idealsWithNoTrackedTime := (ideals items difference: groupedByIdeals keys)
+			collect: [ :each | 
+				each
+					-> ({'items'
+								-> ({{'duration' -> 0 minutes} asDictionary as: NeoJSONObject} as: NeoJSONArray)}
+							asDictionary as: NeoJSONObject) ].
+	groupedByIdeals := (groupedByIdeals associations , idealsWithNoTrackedTime)
+			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
 	daysWithData := self groupedByDay keys size.
-	self flag: #TODO.	"Need to take into account when NO time has been logged to a category for which an ideal exists"
 	self flag: #TODO.	"Need to account for when time spend is more and you are 'ahead of schedule'"
 	^ aView columnedList
 		title: 'Ideals';
@@ -852,7 +860,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 									each key maxValue} average * 24 printShowingDecimalPlaces: 2)
 							, ' hours/day. '
 							, (dailyCatchupAmount asHours printShowingDecimalPlaces: 2)
-							, ' hours of daily catch-up needed' ] ]
+							, ' additional hours of daily catch-up needed' ] ]
 			weight: 2;
 		send: #value
 ]
