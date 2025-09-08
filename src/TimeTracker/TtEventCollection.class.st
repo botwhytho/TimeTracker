@@ -845,11 +845,13 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 						dailyCatchupAmount := daysWithData days
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData).
-						'You are tracking to ' , (progressPercent * 100 roundTo: 0.01) asString
+						'You are tracking to '
+							, (progressPercent * 100 printShowingDecimalPlaces: 2)
 							, '% of your goal of '
 							, ({each key minValue.
-									each key maxValue} average * 24 roundTo: 0.1) asString , ' hours/day. '
-							, (dailyCatchupAmount asHours roundTo: 0.1) asString
+									each key maxValue} average * 24 printShowingDecimalPlaces: 2)
+							, ' hours/day. '
+							, (dailyCatchupAmount asHours printShowingDecimalPlaces: 2)
 							, ' hours of daily catch-up needed' ] ]
 			weight: 2;
 		send: #value

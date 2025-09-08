@@ -96,8 +96,8 @@ TtIdealTimeUsage >> minValue: anObject [
 TtIdealTimeUsage >> printOn: aStream [
 	aStream
 		nextPutAll: (self category ifNil: [ self description ] ifNotNil: [ :notNil | notNil name ])
-				, ' for ' , (self minValue * 100 roundTo: 0.01) asString , '-'
-				, (self maxValue * 100 roundTo: 0.01) asString , '% of your time'
+				, ' for ' , (self minValue * 100 printShowingDecimalPlaces: 2) , '-'
+				, (self maxValue * 100 printShowingDecimalPlaces: 2) , '% of your time'
 ]
 
 { #category : #accessing }
