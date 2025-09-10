@@ -160,6 +160,11 @@ TtCategory >> gtRootActionFor: anAction [
 				spawnObject: (isRoot ifTrue: [ self hierarchy ] ifFalse: [ self rootCategory ]) ]
 ]
 
+{ #category : #testing }
+TtCategory >> hasParentCategoryNamed: aString [
+	^ (self categoryLineage allButFirst collect: #name) includes: aString
+]
+
 { #category : #comparing }
 TtCategory >> hash [
 	^ self class hash hashMultiply bitXor: self name hash
