@@ -879,14 +879,17 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 						groupedByDay := groupedByDay
 								, ((self groupedByDay keys difference: (groupedByDay collect: #key))
 										collect: [ :aDate | aDate -> 0 ]).
-						groupedByDay := groupedByDay sorted: [ :anAssociation | anAssociation key ] ascending.
+						groupedByDay := groupedByDay
+								sorted: [ :anAssociation | anAssociation key ] ascending.
 						barChart := GtPlotterVerticalBarChart new
-								with: ((GtPlotterDataGroup new values: (groupedByDay collect: #value))
+								with: ((GtPlotterDataGroup new
+										values: groupedByDay;
+										labelled: [ :aLabel | (Week nameOfDay: aLabel key dayOfWeek) first: 3 ])
 										background: [ :aColumn | Color transparent ]);
 								barHeightScale: (GtPlotterLinearScale new
 										domainFrom: 0 to: (groupedByDay max: #value) + 2;
 										yourself);
-								yourself.
+								barHeightData: #value yourself.
 						barChart newHorizontalLine dataValue: each key minValue * 24.
 						barChart newHorizontalLine
 							lineStencil: [ BlLineElement new
@@ -924,8 +927,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 												ideal := each key minValue * 24.
 												value < (ideal * (1 - each key leeway))
 													ifTrue: [ color := Color lightRed ].
-												(value >= (ideal * (1 - each key leeway))
-													and: [ value < ideal ])
+												(value >= (ideal * (1 - each key leeway)) and: [ value < ideal ])
 													ifTrue: [ color := Color lightYellow ].
 												value >= ideal ifTrue: [ color := Color lightGreen ].
 												aBar children first background: color ] ]) ]
