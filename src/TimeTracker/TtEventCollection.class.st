@@ -842,7 +842,9 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 		title: 'Ideals';
 		priority: 0.5;
 		items: [ groupedByIdeals associations reject: [ :each | each key isNil ] ];
-		column: 'Ideal Time Usage' text: [ :each | each key asString ];
+		column: 'Ideal Time Usage'
+			text: [ :each | each key asString ]
+			weight: 1.25;
 		column: 'Progress'
 			text: [ :each | 
 				| progressPercent dailyCatchupAmount |
@@ -860,8 +862,16 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 									each key maxValue} average * 24 printShowingDecimalPlaces: 2)
 							, ' hours/day. '
 							, (dailyCatchupAmount asHours printShowingDecimalPlaces: 2)
-							, ' additional hours of daily catch-up needed' ] ]
-			weight: 2;
+							, ' catch-up hours/day' ] ]
+			weight: 1.75;
+		column: 'Graphical Progress'
+			stencil: [ :each | 
+				BlElement new
+					margin: (BlInsets all: 5);
+					border: Color black asBlBorder;
+					constraintsDo: [ :c | 
+						c horizontal matchParent.
+						c vertical exact: 200 ] ];
 		send: #value
 ]
 
