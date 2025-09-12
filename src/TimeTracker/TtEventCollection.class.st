@@ -866,12 +866,73 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 			weight: 1.75;
 		column: 'Graphical Progress'
 			stencil: [ :each | 
-				BlElement new
-					margin: (BlInsets all: 5);
-					border: Color black asBlBorder;
-					constraintsDo: [ :c | 
-						c horizontal matchParent.
-						c vertical exact: 200 ] ];
+				| barChart container dailyCatchupAmount groupedByDay progressPercent |
+				each key isString
+					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
+								asFloat / each key minValue.
+						dailyCatchupAmount := daysWithData days
+								* ((1 - progressPercent) * each key minValue)
+								/ (each key timePeriod asDays - daysWithData).
+						groupedByDay := each value groupedByDay associations.
+						groupedByDay := groupedByDay
+								collect: [ :daysData | daysData value: (daysData value items sum: #duration) asHours ].
+						groupedByDay := groupedByDay
+								, ((self groupedByDay keys difference: (groupedByDay collect: #key))
+										collect: [ :aDate | aDate -> 0 ]).
+						barChart := GtPlotterVerticalBarChart new
+								with: ((GtPlotterDataGroup new values: (groupedByDay collect: #value))
+										background: [ :aColumn | Color transparent ]);
+								barHeightScale: (GtPlotterLinearScale new
+										domainFrom: 0 to: (groupedByDay max: #value) + 2;
+										yourself);
+								yourself.
+						barChart newHorizontalLine dataValue: each key minValue * 24.
+						barChart newHorizontalLine
+							lineStencil: [ BlLineElement new
+									border: (BlBorderBuilder new
+											paint: Color black;
+											dashed;
+											width: 1;
+											build) ];
+							dataValue: each key minValue * 24 * (1 - each key leeway).
+						barChart newHorizontalLine
+							lineStencil: [ BlLineElement new
+									border: (BlBorderBuilder new
+											paint: Color black;
+											dashed;
+											width: 1;
+											build) ];
+							dataValue: each key minValue * 24 * (1 + each key leeway).
+						container := barChart create
+								margin: (BlInsets all: 5);
+								border: Color black asBlBorder;
+								constraintsDo: [ :c | 
+									c horizontal matchParent.
+									c vertical exact: 200 ].
+						container
+							enqueueTask: (BlDelayedTaskAction new
+									delay: 500 milliseconds;
+									action: [ | bars |
+										bars := (container query // GtPlotterVerticalValueBarsElement) result.
+										bars
+											do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ].
+										bars
+											doWithIndex: [ :aBar :i | 
+												| color value |
+												value := (groupedByDay at: i) value.
+												value < (each key minValue * (1 - each key leeway))
+													ifTrue: [ color := Color lightRed ].
+												(value >= ((each key minValue) * (1 - each key leeway))
+													and: [ value < each key minValue ])
+													ifTrue: [ color := Color lightYellow ].
+												value >= each key minValue ifTrue: [ color := Color lightGreen ].
+												aBar children first background: color ] ]) ]
+					ifTrue: [ BlElement new
+							margin: (BlInsets all: 5);
+							border: Color black asBlBorder;
+							constraintsDo: [ :c | 
+								c horizontal matchParent.
+								c vertical exact: 200 ] ] ];
 		send: #value
 ]
 
