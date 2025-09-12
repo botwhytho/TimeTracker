@@ -938,7 +938,6 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 												aBar children first background: color ] ]) ]
 					ifTrue: [ BlElement new
 							margin: (BlInsets all: 5);
-							border: Color black asBlBorder;
 							constraintsDo: [ :c | 
 								c horizontal matchParent.
 								c vertical exact: 200 ] ] ];
