@@ -866,7 +866,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 			weight: 1.75;
 		column: 'Graphical Progress'
 			stencil: [ :each | 
-				| barChart container dailyCatchupAmount groupedByDay progressPercent |
+				| barChart container dailyCatchupAmount groupedByDay  indexOfCurrentDayOfWeek progressPercent |
 				each key isString
 					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
 								asFloat / each key minValue.
@@ -881,10 +881,15 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 										collect: [ :aDate | aDate -> 0 ]).
 						groupedByDay := groupedByDay
 								sorted: [ :anAssociation | anAssociation key ] ascending.
+						groupedByDay := groupedByDay collect: [ :anAssociation | anAssociation key: (Week nameOfDay: anAssociation key dayOfWeek) ].
+						indexOfCurrentDayOfWeek := groupedByDay size.
+						groupedByDay := groupedByDay
+								, ((Week dayNames difference: (groupedByDay collect: #key))
+										collect: [ :aDate | aDate -> ((each key minValue * 24) + dailyCatchupAmount asHours) ]).
 						barChart := GtPlotterVerticalBarChart new
 								with: ((GtPlotterDataGroup new
 										values: groupedByDay;
-										labelled: [ :aLabel | (Week nameOfDay: aLabel key dayOfWeek) first: 3 ])
+										labelled: [ :aLabel |  aLabel key first: 3 ])
 										background: [ :aColumn | Color transparent ]);
 								barHeightScale: (GtPlotterLinearScale new
 										domainFrom: 0 to: (groupedByDay max: #value) + 2;
@@ -920,7 +925,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 										bars := (container query // GtPlotterVerticalValueBarsElement) result.
 										bars
 											do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ].
-										bars
+										(bars first: indexOfCurrentDayOfWeek)
 											doWithIndex: [ :aBar :i | 
 												| color ideal value |
 												value := (groupedByDay at: i) value.
