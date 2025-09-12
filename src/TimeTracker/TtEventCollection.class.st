@@ -879,6 +879,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 						groupedByDay := groupedByDay
 								, ((self groupedByDay keys difference: (groupedByDay collect: #key))
 										collect: [ :aDate | aDate -> 0 ]).
+						groupedByDay := groupedByDay sorted: [ :anAssociation | anAssociation key ] ascending.
 						barChart := GtPlotterVerticalBarChart new
 								with: ((GtPlotterDataGroup new values: (groupedByDay collect: #value))
 										background: [ :aColumn | Color transparent ]);
@@ -918,14 +919,15 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 											do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ].
 										bars
 											doWithIndex: [ :aBar :i | 
-												| color value |
+												| color ideal value |
 												value := (groupedByDay at: i) value.
-												value < (each key minValue * (1 - each key leeway))
+												ideal := each key minValue * 24.
+												value < (ideal * (1 - each key leeway))
 													ifTrue: [ color := Color lightRed ].
-												(value >= ((each key minValue) * (1 - each key leeway))
-													and: [ value < each key minValue ])
+												(value >= (ideal * (1 - each key leeway))
+													and: [ value < ideal ])
 													ifTrue: [ color := Color lightYellow ].
-												value >= each key minValue ifTrue: [ color := Color lightGreen ].
+												value >= ideal ifTrue: [ color := Color lightGreen ].
 												aBar children first background: color ] ]) ]
 					ifTrue: [ BlElement new
 							margin: (BlInsets all: 5);
