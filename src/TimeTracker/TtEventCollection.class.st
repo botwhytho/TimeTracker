@@ -854,7 +854,9 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 								asFloat / each key minValue.
 						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
-								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ Duration zero ].
+								/ (each key timePeriod asDays - daysWithData) ]
+								on: ZeroDivide
+								do: [ Duration zero ].
 						'You are tracking to '
 							, (progressPercent * 100 printShowingDecimalPlaces: 2)
 							, '% of your goal of '
@@ -873,7 +875,10 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
-						groupedByDay := each value groupedByDay associations.
+						self flag: #HACK.
+						groupedByDay := [ each value groupedByDay associations ]
+								on: MessageNotUnderstood
+								do: [ #() ].
 						groupedByDay := groupedByDay
 								collect: [ :daysData | daysData value: (daysData value items sum: #duration) asHours ].
 						groupedByDay := groupedByDay
