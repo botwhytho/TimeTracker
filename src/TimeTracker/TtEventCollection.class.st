@@ -852,9 +852,9 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 					ifTrue: [ 'Click to View' ]
 					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
 								asFloat / each key minValue.
-						dailyCatchupAmount := daysWithData days
+						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
-								/ (each key timePeriod asDays - daysWithData).
+								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ Duration zero ].
 						'You are tracking to '
 							, (progressPercent * 100 printShowingDecimalPlaces: 2)
 							, '% of your goal of '
@@ -866,13 +866,13 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 			weight: 1.75;
 		column: 'Graphical Progress'
 			stencil: [ :each | 
-				| barChart container dailyCatchupAmount groupedByDay  indexOfCurrentDayOfWeek progressPercent |
+				| barChart container dailyCatchupAmount groupedByDay indexOfCurrentDayOfWeek progressPercent |
 				each key isString
 					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
 								asFloat / each key minValue.
-						dailyCatchupAmount := daysWithData days
+						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
-								/ (each key timePeriod asDays - daysWithData).
+								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
 						groupedByDay := each value groupedByDay associations.
 						groupedByDay := groupedByDay
 								collect: [ :daysData | daysData value: (daysData value items sum: #duration) asHours ].
@@ -881,15 +881,16 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 										collect: [ :aDate | aDate -> 0 ]).
 						groupedByDay := groupedByDay
 								sorted: [ :anAssociation | anAssociation key ] ascending.
-						groupedByDay := groupedByDay collect: [ :anAssociation | anAssociation key: (Week nameOfDay: anAssociation key dayOfWeek) ].
+						groupedByDay := groupedByDay
+								collect: [ :anAssociation | anAssociation key: (Week nameOfDay: anAssociation key dayOfWeek) ].
 						indexOfCurrentDayOfWeek := groupedByDay size.
 						groupedByDay := groupedByDay
 								, ((Week dayNames difference: (groupedByDay collect: #key))
-										collect: [ :aDate | aDate -> ((each key minValue * 24) + dailyCatchupAmount asHours) ]).
+										collect: [ :aDate | aDate -> (each key minValue * 24 + dailyCatchupAmount asHours) ]).
 						barChart := GtPlotterVerticalBarChart new
 								with: ((GtPlotterDataGroup new
 										values: groupedByDay;
-										labelled: [ :aLabel |  aLabel key first: 3 ])
+										labelled: [ :aLabel | aLabel key first: 3 ])
 										background: [ :aColumn | Color transparent ]);
 								barHeightScale: (GtPlotterLinearScale new
 										domainFrom: 0 to: (groupedByDay max: #value) + 2;
