@@ -1070,6 +1070,7 @@ TtEventCollection >> gtNotesFor: aView [
 	notes := self noteToTrackedTimeAssociations.
 	notesByPage := (notes groupedBy: [ :each | each key page ]) associations
 			collect: [ :each | each key -> (self withAll: (each value collect: #value) flatten) ].
+	self flag: #BUG.	"When you click on the collection tied to a note, more items appear on the list and the daily bar graph duplicates them"
 	^ aView columnedTree
 		title: 'Notes';
 		priority: 5.5;
