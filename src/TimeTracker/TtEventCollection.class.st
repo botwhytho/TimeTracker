@@ -330,7 +330,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 			ifTrue: [ timeEntries groupedByDay associations sorted: #key ascending ]
 			ifFalse: [ timeEntries groupedByDay associations sorted: #key descending ].
 	timeEntriesAndDays := timeEntries asArray
-			, (self groupedByDay keys
+			, (self timeEntries groupedByDay keys
 					collect: [ :each | Timespan starting: each duration: each asDuration ]).
 	self flag: #EXPENSIVE.	"Should we cache the below calculation?"
 	notes := self rootCollection notes asArray
@@ -437,11 +437,11 @@ TtEventCollection >> buildEntriesByDay: aContext [
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll;
 		asElementDo: [ :element | 
-			self
+			self timeEntries
 				detect: [ :each | each category isNil ]
 				ifFound: [ :aTrackedTime | 
 					| anIndex aBrTree indexInTree |
-					anIndex := self items identityIndexOf: aTrackedTime.
+					anIndex := self timeEntries items identityIndexOf: aTrackedTime.
 					aBrTree := element childAt: 2.
 					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
@@ -613,7 +613,7 @@ TtEventCollection >> groupedBy: aBlock [
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByCategory [
 	| daysWithUntrackedTime grouped |
-	grouped := self
+	grouped := self timeEntries
 			groupedBy: [ :each | 
 				each category
 					ifNil: [ TtCategories uncategorized ]
@@ -621,7 +621,7 @@ TtEventCollection >> groupedByCategory [
 						self groupingLevel isSymbol
 							ifTrue: [ aCategory topMostCategory ]
 							ifFalse: [ aCategory moveUpHierarchy: self groupingLevel ] ] ].
-	daysWithUntrackedTime := self groupedByDay associations
+	daysWithUntrackedTime := self timeEntries groupedByDay associations
 			select: [ :anAssociation | 
 				(anAssociation value
 					groupedBy: [ :each | each value as: each value class superclass ]) keys sum
@@ -631,7 +631,7 @@ TtEventCollection >> groupedByCategory [
 		ifTrue: [ daysWithUntrackedTime
 				ifNotEmpty: [ grouped
 						at: TtCategories untracked
-						put: (self select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ] ].
+						put: (self timeEntries select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ] ].
 	^ grouped
 ]
 
@@ -778,7 +778,7 @@ TtEventCollection >> gtGroupedByDescriptionFor: aView [
 	^ aView columnedList
 		title: 'Grouped By Description';
 		priority: 2;
-		items: [ (self groupedBy: [ :each | each description capitalized ]) associations
+		items: [ (self timeEntries groupedBy: [ :each | each description capitalized ]) associations
 				sorted: [ :each | each value items sum ] descending ];
 		column: 'Activity' text: #key;
 		column: 'Category' text: [ :each | each value first category name ];
@@ -798,7 +798,7 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 	^ aView columnedList
 		title: 'Grouped By Detail';
 		priority: 1;
-		items: [ (self
+		items: [ (self timeEntries
 				groupedBy: [ :each | 
 					{each description capitalized.
 						each details ifNil: [ '' ] ifNotNil: [ :notNil | notNil capitalized ]} ])
@@ -1134,7 +1134,7 @@ TtEventCollection >> gtNotesFor: aView [
 TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 	<gtAdvice>
 	| categorizedWithPlaceholder |
-	categorizedWithPlaceholder := self
+	categorizedWithPlaceholder := self timeEntries
 			select: [ :each | each category ifNil: [ false ] ifNotNil: [ :notNil | notNil isPlaceholder ] ].
 	categorizedWithPlaceholder ifEmpty: [ ^ aGtAdvice none ].
 	^ aGtAdvice item
