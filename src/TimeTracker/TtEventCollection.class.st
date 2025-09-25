@@ -816,7 +816,51 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageFor: aView [
 	<gtView>
-	| daysWithData groupedByIdeals ideals idealsWithNoTrackedTime |
+	| weeks |
+	weeks := self groupedByWeek.
+	weeks keys size > 1
+		ifTrue: [ ^ self gtIdealTimeUsageMultipleWeeks: aView ]
+		ifFalse: [ ^ self gtIdealTimeUsageSingleWeek: aView ]
+]
+
+{ #category : #views }
+TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
+	| weeks |
+	weeks := self groupedByWeek associations groupedBy: [ :each | each key year ].
+	^ aView columnedTree
+		title: 'Ideals';
+		priority: 0.5;
+		items: [ weeks associations ];
+		children: [ :each | each key isInteger ifTrue: [ each value ] ifFalse: [ #() ] ];
+		column: 'Year'
+			text: [ :each | each isInteger ifTrue: [ each asString ] ifFalse: [ '' ] ];
+		column: 'Weeks'
+			stencil: [ :each | 
+				| container element |
+				element := BlElement new
+						layout: (BlGridLayout horizontal columnCount: 5);
+						constraintsDo: [ :c | 
+							c vertical matchParent.
+							c horizontal matchParent ].
+				container := BrFrame new
+						matchParent;
+						addChild: element.
+				each
+					do: [ :aWeek | element addChild: (BlElement new background: Color random) ].
+				container ]
+					
+					
+					"stencil: [ | pane weeks |
+			pane := BrVerticalPane new matchParent.
+			weeks := self groupedByWeek associations groupedBy: [:each | each key year ].
+			weeks keys
+				do: [ :each | pane addChild: (BlTextElement text: each asString asRopedText) ].
+			pane ]"
+]
+
+{ #category : #views }
+TtEventCollection >> gtIdealTimeUsageSingleWeek: aView [
+	| daysWithData groupedByIdeals idealsWithNoTrackedTime ideals |
 	ideals := self ideals.
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
@@ -827,7 +871,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 							ifNotNil: [ :notNil | aTrackedTime category categoryLineage includes: notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
-	idealsWithNoTrackedTime := (ideals items difference: groupedByIdeals keys)
+	idealsWithNoTrackedTime := (ideals difference: groupedByIdeals keys)
 			collect: [ :each | 
 				each
 					-> ({'items'
@@ -1459,7 +1503,7 @@ TtEventCollection >> hourlyTicksElement [
 
 { #category : #accessing }
 TtEventCollection >> ideals [
-	^ self select: #isIdealTimeUsage
+	^ self items select: #isIdealTimeUsage
 ]
 
 { #category : #import }
