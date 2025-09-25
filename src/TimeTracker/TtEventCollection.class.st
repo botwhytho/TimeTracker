@@ -825,8 +825,9 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
-	| weeks |
+	| ideals weeks |
 	weeks := self groupedByWeek associations groupedBy: [ :each | each key year ].
+	ideals := self ideals.
 	^ aView columnedTree
 		title: 'Ideals';
 		priority: 0.5;
@@ -846,17 +847,23 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
 									c horizontal fitContent ].
 
 						each key
-							do: [ :aWeek | 
+							doWithIndex: [ :aWeek :anIndex | 
 								element
-									addChild: (BlElement new
-											size: 50 @ 50;
+									addChild: (BrHorizontalPane new alignCenter
+											size: 100 @ 100;
 											margin: (BlInsets all: 5);
 											border: Color black asBlBorder;
-											background: Color random;
+											addChild: (BlTextElement new
+													zIndex: 100;
+													text: (anIndex asString asRopedText fontSize: 24));
 											when: BlClickEvent
 												do: [ :aClickEvent | 
 													aClickEvent consumed: true.
-													aClickEvent target phlow spawnObject: aWeek value ]) ].
+													aClickEvent target phlow spawnObject: aWeek value ];
+											in: [ :anElement | 
+												(ideals anySatisfy: [ :anIdeal | aWeek key start >= anIdeal start ])
+													ifTrue: [ anElement background: Color lightGreen ].
+												anElement ]) ].
 
 						element ] ]
 			weight: 6;
@@ -867,6 +874,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView [
 	| daysWithData groupedByIdeals idealsWithNoTrackedTime ideals |
 	ideals := self ideals.
+	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
 				ideals
@@ -1508,7 +1516,7 @@ TtEventCollection >> hourlyTicksElement [
 
 { #category : #accessing }
 TtEventCollection >> ideals [
-	^ self items select: #isIdealTimeUsage
+	^ self rootCollection items select: #isIdealTimeUsage
 ]
 
 { #category : #import }
