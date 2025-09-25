@@ -831,31 +831,36 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
 		title: 'Ideals';
 		priority: 0.5;
 		items: [ weeks associations ];
-		children: [ :each | each key isInteger ifTrue: [ each value ] ifFalse: [ #() ] ];
+		children: [ :each | each key isInteger ifTrue: [ {each value -> nil} ] ifFalse: [ #() ] ];
 		column: 'Year'
-			text: [ :each | each isInteger ifTrue: [ each asString ] ifFalse: [ '' ] ];
+			text: [ :each | each key isInteger ifTrue: [ each key asString ] ifFalse: [ '' ] ];
 		column: 'Weeks'
 			stencil: [ :each | 
-				| container element |
-				element := BlElement new
-						layout: (BlGridLayout horizontal columnCount: 5);
-						constraintsDo: [ :c | 
-							c vertical matchParent.
-							c horizontal matchParent ].
-				container := BrFrame new
-						matchParent;
-						addChild: element.
-				each
-					do: [ :aWeek | element addChild: (BlElement new background: Color random) ].
-				container ]
-					
-					
-					"stencil: [ | pane weeks |
-			pane := BrVerticalPane new matchParent.
-			weeks := self groupedByWeek associations groupedBy: [:each | each key year ].
-			weeks keys
-				do: [ :each | pane addChild: (BlTextElement text: each asString asRopedText) ].
-			pane ]"
+				each key isInteger
+					ifTrue: [ BlElement new size: 0 @ 0 ]
+					ifFalse: [ | element |
+						element := BlElement new
+								layout: (BlGridLayout horizontal columnCount: 7);
+								constraintsDo: [ :c | 
+									c vertical fitContent.
+									c horizontal fitContent ].
+
+						each key
+							do: [ :aWeek | 
+								element
+									addChild: (BlElement new
+											size: 50 @ 50;
+											margin: (BlInsets all: 5);
+											border: Color black asBlBorder;
+											background: Color random;
+											when: BlClickEvent
+												do: [ :aClickEvent | 
+													aClickEvent consumed: true.
+													aClickEvent target phlow spawnObject: aWeek value ]) ].
+
+						element ] ]
+			weight: 6;
+		expandAll
 ]
 
 { #category : #views }
