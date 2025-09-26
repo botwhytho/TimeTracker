@@ -825,13 +825,14 @@ TtEventCollection >> gtIdealTimeUsageFor: aView [
 
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
-	| ideals weeks |
-	weeks := self groupedByWeek associations groupedBy: [ :each | each key year ].
+	| ideals groupedByYearAndWeeks |
+	groupedByYearAndWeeks := self groupedByWeek associations
+			groupedBy: [ :each | each key year ].
 	ideals := self ideals.
 	^ aView columnedTree
 		title: 'Ideals';
 		priority: 0.5;
-		items: [ weeks associations ];
+		items: [ groupedByYearAndWeeks associations ];
 		children: [ :each | each key isInteger ifTrue: [ {each value -> nil} ] ifFalse: [ #() ] ];
 		column: 'Year'
 			text: [ :each | each key isInteger ifTrue: [ each key asString ] ifFalse: [ '' ] ];
@@ -839,33 +840,45 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
 			stencil: [ :each | 
 				each key isInteger
 					ifTrue: [ BlElement new size: 0 @ 0 ]
-					ifFalse: [ | element |
-						element := BlElement new
+					ifFalse: [ | container weeks |
+						container := BlElement new
 								layout: (BlGridLayout horizontal columnCount: 7);
 								constraintsDo: [ :c | 
 									c vertical fitContent.
 									c horizontal fitContent ].
-
-						each key
+						weeks := (1 to: 53)
+								collect: [ :anInteger | Week year: each key first key year week: anInteger ].
+						weeks
 							doWithIndex: [ :aWeek :anIndex | 
-								element
+								container
 									addChild: (BrHorizontalPane new alignCenter
 											size: 100 @ 100;
 											margin: (BlInsets all: 5);
-											border: Color black asBlBorder;
-											addChild: (BlTextElement new
-													zIndex: 100;
-													text: (anIndex asString asRopedText fontSize: 24));
-											when: BlClickEvent
-												do: [ :aClickEvent | 
-													aClickEvent consumed: true.
-													aClickEvent target phlow spawnObject: aWeek value ];
 											in: [ :anElement | 
-												(ideals anySatisfy: [ :anIdeal | aWeek key start >= anIdeal start ])
-													ifTrue: [ anElement background: Color lightGreen ].
+												| association |
+												(each key
+													detect: [ :anAssociation | 
+														anAssociation key start asDate yyyymmdd
+															= (aWeek start asDate - 1 day) start asDate yyyymmdd ]
+													ifFound: [ :found | 
+														association := found.
+														true ]
+													ifNone: [ false ])
+													ifTrue: [ anElement
+															border: Color black asBlBorder;
+															addChild: (BlTextElement new
+																	zIndex: 100;
+																	text: (anIndex asString asRopedText fontSize: 24));
+															when: BlClickEvent
+																do: [ :aClickEvent | 
+																	aClickEvent consumed: true.
+																	aClickEvent target phlow spawnObject: association value ].
+														(ideals
+															anySatisfy: [ :anIdeal | aWeek start asDate >= anIdeal start asDate ])
+															ifTrue: [ anElement background: Color lightGreen ] ].
 												anElement ]) ].
 
-						element ] ]
+						container ] ]
 			weight: 6;
 		expandAll
 ]
