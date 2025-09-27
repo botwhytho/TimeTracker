@@ -1031,8 +1031,8 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 				groupByLabelMapping := {'Ideal for Date range' -> nil}
 						, (ideals associations
 								collect: [ :each | 
-									(each key start asDate yyyymmdd , ' - ' , each key end asDate yyyymmdd
-										ifNil: [ '' ]) -> each value ]).
+									(each key start asDate yyyymmdd , ' - ' , (each key duration isZero
+										ifTrue: [ 'Today' ] ifFalse: [ each key end asDate yyyymmdd])) -> each value ]).
 				BrSimpleList new
 					margin: (BlInsets all: 5);
 					items: groupByLabelMapping;
