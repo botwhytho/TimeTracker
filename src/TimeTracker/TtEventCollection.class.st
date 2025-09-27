@@ -886,25 +886,25 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
-	| daysWithData groupedByIdeals idealsWithNoTrackedTime ideals |
+	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
-	ideals := (aContext at: 'ideals')
+	activeIdeals := (aContext at: 'ideals')
 			ifNil: [ ideals associations
 					detect: [ :each | each key includes: self first start ]
 					ifFound: [ :found | found value ]
 					ifNone: [ ideals associations last value ] ]
-			ifNotNil: [ :notNil | notNil value ].
+			ifNotNil: #yourself.
 	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
-				ideals
+				activeIdeals
 					detect: [ :anIdeal | 
 						anIdeal category
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | aTrackedTime category categoryLineage includes: notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
-	idealsWithNoTrackedTime := (ideals difference: groupedByIdeals keys)
+	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
 			collect: [ :each | 
 				each
 					-> ({'items'
@@ -1024,7 +1024,28 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 							constraintsDo: [ :c | 
 								c horizontal matchParent.
 								c vertical exact: 200 ] ] ];
-		send: #value
+		send: #value;
+		actionDropdownButtonLabel: 'Change Ideals'
+			content: [ :aButton :aBrTab | 
+				| groupByLabelMapping |
+				groupByLabelMapping := {'Ideal for Date range' -> nil}
+						, (ideals associations
+								collect: [ :each | 
+									(each key start asDate yyyymmdd , ' - ' , each key end asDate yyyymmdd
+										ifNil: [ '' ]) -> each value ]).
+				BrSimpleList new
+					margin: (BlInsets all: 5);
+					items: groupByLabelMapping;
+					itemStencil: [ BrLabel new hMatchParent
+							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
+					itemDataBinder: [ :aLabel :aViewFilter | 
+						aLabel
+							text: aViewFilter key;
+							when: BlClickEvent
+								do: [ :_ | 
+									aContext at: 'ideals' put: aViewFilter value.
+									aButton fireEvent: BrDropdownHideWish new.
+									aButton phlow fireToolUpdateWish ] ] ]
 ]
 
 { #category : #import }
