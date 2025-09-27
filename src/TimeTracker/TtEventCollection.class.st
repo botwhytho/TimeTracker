@@ -914,7 +914,6 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
 	daysWithData := self groupedByDay keys size.
-	self flag: #TODO.	"Need to account for when time spend is more and you are 'ahead of schedule'"
 	^ aView columnedList
 		title: 'Ideals';
 		priority: 0.5;
