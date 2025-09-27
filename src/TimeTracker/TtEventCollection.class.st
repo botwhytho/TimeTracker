@@ -814,17 +814,17 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 ]
 
 { #category : #views }
-TtEventCollection >> gtIdealTimeUsageFor: aView [
+TtEventCollection >> gtIdealTimeUsageFor: aView context: aContext [
 	<gtView>
 	| weeks |
 	weeks := self groupedByWeek.
 	weeks keys size > 1
-		ifTrue: [ ^ self gtIdealTimeUsageMultipleWeeks: aView ]
-		ifFalse: [ ^ self gtIdealTimeUsageSingleWeek: aView ]
+		ifTrue: [ ^ self gtIdealTimeUsageMultipleWeeks: aView context: aContext ]
+		ifFalse: [ ^ self gtIdealTimeUsageSingleWeek: aView context: aContext ]
 ]
 
 { #category : #views }
-TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
+TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 	| ideals groupedByYearAndWeeks |
 	groupedByYearAndWeeks := self groupedByWeek associations
 			groupedBy: [ :each | each key year ].
@@ -884,9 +884,15 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView [
 ]
 
 { #category : #views }
-TtEventCollection >> gtIdealTimeUsageSingleWeek: aView [
+TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| daysWithData groupedByIdeals idealsWithNoTrackedTime ideals |
-	ideals := self ideals.
+	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
+	ideals := (aContext at: 'ideals')
+			ifNil: [ ideals associations
+					detect: [ :each | each key start asDate yyyymmdd = self first start asDate yyyymmdd ]
+					ifFound: [ :found | found value ]
+					ifNone: [ ideals associations last value ] ]
+			ifNotNil: [ :notNil | notNil value ].
 	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
