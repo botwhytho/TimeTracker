@@ -916,7 +916,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	daysWithData := self groupedByDay keys size.
 	^ aView columnedList
 		title: 'Ideals';
-		priority: 0.5;
+		priority: 0;
 		items: [ groupedByIdeals associations reject: [ :each | each key isNil ] ];
 		column: 'Ideal Time Usage'
 			text: [ :each | each key asString ]
