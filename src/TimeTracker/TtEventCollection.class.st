@@ -889,7 +889,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
 	ideals := (aContext at: 'ideals')
 			ifNil: [ ideals associations
-					detect: [ :each | each key start asDate yyyymmdd = self first start asDate yyyymmdd ]
+					detect: [ :each | each key includes: self first start ]
 					ifFound: [ :found | found value ]
 					ifNone: [ ideals associations last value ] ]
 			ifNotNil: [ :notNil | notNil value ].
