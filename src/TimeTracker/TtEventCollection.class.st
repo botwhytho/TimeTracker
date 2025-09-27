@@ -851,7 +851,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 						weeks
 							doWithIndex: [ :aWeek :anIndex | 
 								container
-									addChild: (BrHorizontalPane new alignCenter
+									addChild: (BrVerticalPane new alignCenter
 											size: 100 @ 100;
 											margin: (BlInsets all: 5);
 											in: [ :anElement | 
@@ -866,9 +866,10 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 													ifNone: [ false ])
 													ifTrue: [ anElement
 															border: Color black asBlBorder;
-															addChild: (BlTextElement new
-																	zIndex: 100;
-																	text: (anIndex asString asRopedText fontSize: 24));
+															addChildren: {BlTextElement new
+																		zIndex: 100;
+																		text: (('Week ' , anIndex asString , ', ' , association key start asDate yyyymmdd)
+																				asRopedText fontSize: 8)};
 															when: BlClickEvent
 																do: [ :aClickEvent | 
 																	aClickEvent consumed: true.
