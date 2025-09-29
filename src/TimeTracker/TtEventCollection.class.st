@@ -901,7 +901,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 					detect: [ :anIdeal | 
 						anIdeal category
 							ifNil: [ anIdeal computation value: aTrackedTime ]
-							ifNotNil: [ :notNil | aTrackedTime category categoryLineage includes: notNil ] ]
+							ifNotNil: [ :notNil | 
+								(aTrackedTime category ifNil: [ TtCategory new ]) categoryLineage
+									includes: notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
 	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
@@ -1030,8 +1032,10 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 				groupByLabelMapping := {'Ideal for Date range' -> nil}
 						, (ideals associations
 								collect: [ :each | 
-									(each key start asDate yyyymmdd , ' - ' , (each key duration isZero
-										ifTrue: [ 'Today' ] ifFalse: [ each key end asDate yyyymmdd])) -> each value ]).
+									(each key start asDate yyyymmdd , ' - '
+										, (each key duration isZero
+												ifTrue: [ 'Today' ]
+												ifFalse: [ each key end asDate yyyymmdd ])) -> each value ]).
 				BrSimpleList new
 					margin: (BlInsets all: 5);
 					items: groupByLabelMapping;
