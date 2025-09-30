@@ -919,7 +919,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	^ aView columnedList
 		title: 'Ideals';
 		priority: 0;
-		items: [ groupedByIdeals associations reject: [ :each | each key isNil ] ];
+		items: [ groupedByIdeals associations ];
 		column: 'Ideal Time Usage'
 			text: [ :each | 
 				each key isString
@@ -932,15 +932,23 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			text: [ :each | 
 				| progressPercent dailyCatchupAmount |
 				each key isString
-					ifTrue: [ | totalHours |
-						self flag: #TODO. "Show how many hours per day went to time with no ideals that should have been otherwise"
+					ifTrue: [ | hoursPerDay percentWithIdeals percentWithoutIdeals roomForImprovement string totalHours |
 						totalHours := (each value
 								groupedBy: [ :aTrackedTime | aTrackedTime as: Timespan ]) keys
 								sum: #duration.
-						'Time without ideals is '
-							, ((totalHours / daysWithData) asHours printShowingDecimalPlaces: 2)
-							, ' hours/day ('
-							, ((totalHours / daysWithData) asHours / 24 * 100) asInteger asString , '%)' ]
+						hoursPerDay := (totalHours / daysWithData) asHours.
+						percentWithoutIdeals := hoursPerDay / 24.
+						string := 'Time without ideals is '
+								, (hoursPerDay printShowingDecimalPlaces: 2) , ' hours/day ('
+								, (percentWithoutIdeals * 100) asInteger asString , '%)'.
+						percentWithIdeals := (groupedByIdeals keys reject: #isString)
+								sum: #minValue.
+						roomForImprovement := percentWithIdeals - (1 - percentWithoutIdeals).
+						roomForImprovement > 0
+							ifTrue: [ string := string , '. '
+										, (roomForImprovement * 24 printShowingDecimalPlaces: 2)
+										, ' hours/day were not used ideally.' ].
+						string ]
 					ifFalse: [ progressPercent := ((each value items sum: #duration)
 								/ daysWithData days) asFloat / each key minValue.
 						dailyCatchupAmount := [ daysWithData days
