@@ -921,15 +921,27 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 		priority: 0;
 		items: [ groupedByIdeals associations reject: [ :each | each key isNil ] ];
 		column: 'Ideal Time Usage'
-			text: [ :each | each key asString ]
-			weight: 1.25;
+			text: [ :each | 
+				each key isString
+					ifTrue: [ each key ]
+					ifFalse: [ each key category
+							ifNil: [ each key description ]
+							ifNotNil: [ :notNil | notNil name ] ] ]
+			weight: 0.75;
 		column: 'Progress'
 			text: [ :each | 
 				| progressPercent dailyCatchupAmount |
 				each key isString
-					ifTrue: [ 'Click to View' ]
-					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
-								asFloat / each key minValue.
+					ifTrue: [ | totalHours |
+						totalHours := (each value
+								groupedBy: [ :aTrackedTime | aTrackedTime as: Timespan ]) keys
+								sum: #duration.
+						'Time without ideals is '
+							, ((totalHours / daysWithData) asHours printShowingDecimalPlaces: 2)
+							, ' hours/day ('
+							, ((totalHours / daysWithData) asHours / 24 * 100) asInteger asString , '%)' ]
+					ifFalse: [ progressPercent := ((each value items sum: #duration)
+								/ daysWithData days) asFloat / each key minValue.
 						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData) ]
@@ -1020,11 +1032,18 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 													ifTrue: [ color := Color lightYellow ].
 												value >= ideal ifTrue: [ color := Color lightGreen ].
 												aBar children first background: color ] ]) ]
-					ifTrue: [ BlElement new
+					ifTrue: [ BrVerticalPane new
+							alignCenter;
 							margin: (BlInsets all: 5);
 							constraintsDo: [ :c | 
 								c horizontal matchParent.
-								c vertical exact: 200 ] ] ];
+								c vertical exact: 200 ];
+							addChild: (BrButton new
+									aptitude: BrGlamorousButtonWithLabelAptitude;
+									label: 'Click To View Time Without Ideals';
+									action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+										aBlClickEvent consumed: true.
+										aBrButton phlow spawnObject: each value ]) ] ];
 		send: #value;
 		actionDropdownButtonLabel: 'Change Ideals'
 			content: [ :aButton :aBrTab | 
