@@ -933,6 +933,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 				| progressPercent dailyCatchupAmount |
 				each key isString
 					ifTrue: [ | totalHours |
+						self flag: #TODO. "Show how many hours per day went to time with no ideals that should have been otherwise"
 						totalHours := (each value
 								groupedBy: [ :aTrackedTime | aTrackedTime as: Timespan ]) keys
 								sum: #duration.
