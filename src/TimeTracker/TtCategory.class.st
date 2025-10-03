@@ -161,6 +161,11 @@ TtCategory >> gtRootActionFor: anAction [
 ]
 
 { #category : #testing }
+TtCategory >> hasCategoryOrParentCategoryNamed: aString [
+	^ self name = aString or: [ self hasParentCategoryNamed: aString ]
+]
+
+{ #category : #testing }
 TtCategory >> hasParentCategoryNamed: aString [
 	^ (self categoryLineage allButFirst collect: #name) includes: aString
 ]
