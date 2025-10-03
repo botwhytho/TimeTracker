@@ -1149,17 +1149,26 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		priority: 1;
 		content: [ :aButton | 
 			BrGlamorousSimpleContextMenuContent new
-				items: {'ALL TIME'
+				items: {'ALL IN CURRENT TIME RANGE'
 							-> [ :e | 
-								e phlow spawnObject: self rootCollection.
+								| min max |
+								min := self items min: #start.
+								max := self items max: #end.
+								e phlow
+									spawnObject: (self rootCollection
+											select: [ :each | each start >= min and: [ each end <= max ] ]).
 								e fireEvent: BrDropdownHideWish new ].
-						'EXCLUDE CURRENT TIME'
+						'ALL EXCLUDING CURRENT TIME RANGE'
 							-> [ :e | 
 								| min max |
 								min := self items min: #start.
 								max := self items max: #end.
 								e phlow
 									spawnObject: (self rootCollection select: [ :each | each end < min or: [ each start > max ] ]).
+								e fireEvent: BrDropdownHideWish new ].
+						'ALL TIME'
+							-> [ :e | 
+								e phlow spawnObject: self rootCollection.
 								e fireEvent: BrDropdownHideWish new ]} ]
 ]
 
