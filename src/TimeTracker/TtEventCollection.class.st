@@ -203,10 +203,23 @@ TtEventCollection >> buildBars: data [
 										, ((helper sum roundUpTo: 1 minute) asHours round: 1) asString
 										, ' total' ]));
 				when: BlClickEvent
-					do: [ :anEvent | 
-						anEvent consumed: true.
-						anEvent currentTarget phlow
-							spawnObject: aGtPlotterContext originalValue collection ];
+					do: [ :aBlClickEvent | 
+						aBlClickEvent consumed: true.
+						aBlClickEvent modifiers = BlKeyModifiers alt
+							ifTrue: [ | min max |
+								min := self items min: #start.
+								max := self items max: #end.
+								aBlClickEvent target phlow
+									spawnObject: (self rootCollection
+											select: [ :aTrackedTime | 
+												aTrackedTime start >= min
+													and: [ aTrackedTime end <= max
+															and: [ (aTrackedTime category
+																	hasCategoryOrParentCategoryNamed: aGtPlotterContext originalValue category name)
+																	not ] ] ]) ].
+						aBlClickEvent modifiers = BlKeyModifiers new
+							ifTrue: [ aBlClickEvent currentTarget phlow
+									spawnObject: aGtPlotterContext originalValue collection ] ];
 				when: BlDoubleClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
@@ -288,9 +301,21 @@ TtEventCollection >> buildDonut: data [
 					BlElement new
 						id: categoryName;
 						when: BlClickEvent
-							do: [ :e | 
-								e consumed: true.
-								e target phlow spawnObject: each collection ];
+							do: [ :aBlClickEvent | 
+								aBlClickEvent consumed: true.
+								aBlClickEvent modifiers = BlKeyModifiers alt
+									ifTrue: [ | min max |
+										min := self items min: #start.
+										max := self items max: #end.
+										aBlClickEvent target phlow
+											spawnObject: (self rootCollection
+													select: [ :aTrackedTime | 
+														aTrackedTime start >= min
+															and: [ aTrackedTime end <= max
+																	and: [ (aTrackedTime category hasCategoryOrParentCategoryNamed: each category name)
+																			not ] ] ]) ].
+								aBlClickEvent modifiers = BlKeyModifiers new
+									ifTrue: [ aBlClickEvent target phlow spawnObject: each collection ] ];
 						when: BlDoubleClickEvent
 							do: [ :e | 
 								e consumed: true.
