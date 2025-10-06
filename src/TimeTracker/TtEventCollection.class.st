@@ -876,10 +876,10 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 						weeks
 							doWithIndex: [ :aWeek :anIndex | 
 								container
-									addChild: (BrVerticalPane new alignCenter
+									addChild: (BrVerticalPane new alignTopCenter
 											size: 100 @ 100;
 											margin: (BlInsets all: 5);
-											in: [ :anElement | 
+											in: [ :aVerticalPane | 
 												| association |
 												(each key
 													detect: [ :anAssociation | 
@@ -889,20 +889,34 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 														association := found.
 														true ]
 													ifNone: [ false ])
-													ifTrue: [ anElement
+													ifTrue: [ | idealsModifiedInThisWeek |
+														idealsModifiedInThisWeek := ideals
+																anySatisfy: [ :anIdeal | 
+																	(aWeek start asDate - 1 day) start asDate yyyymmdd
+																		= anIdeal start asDate yyyymmdd ].
+														aVerticalPane
 															border: Color black asBlBorder;
 															addChildren: {BlTextElement new
+																		margin: (BlInsets all: 5);
 																		zIndex: 100;
-																		text: (('Week ' , anIndex asString , ', ' , association key start asDate yyyymmdd)
-																				asRopedText fontSize: 8)};
+																		text: (((idealsModifiedInThisWeek ifTrue: [ '*' ] ifFalse: [ '' ]) , 'Week '
+																				, anIndex asString) asRopedText fontSize: 16).
+																	BlTextElement new
+																		margin: (BlInsets all: 5);
+																		zIndex: 100;
+																		text: (association key start asDate yyyymmdd asRopedText fontSize: 12).
+																	BlTextElement new
+																		margin: (BlInsets all: 5);
+																		zIndex: 100;
+																		text: (self weeklyIdealGrade: association value) asRopedText};
 															when: BlClickEvent
 																do: [ :aClickEvent | 
 																	aClickEvent consumed: true.
 																	aClickEvent target phlow spawnObject: association value ].
 														(ideals
-															anySatisfy: [ :anIdeal | aWeek start asDate >= anIdeal start asDate ])
-															ifTrue: [ anElement background: Color lightGreen ] ].
-												anElement ]) ].
+															anySatisfy: [ :anIdeal | (aWeek start asDate - 1 day) start asDate >= anIdeal start asDate ])
+															ifTrue: [ aVerticalPane background: Color lightGreen ] ].
+												aVerticalPane ]) ].
 
 						container ] ]
 			weight: 6;
@@ -1963,6 +1977,50 @@ TtEventCollection >> weekFromDate: aDate [
 			collect: [ :aWeek | aWeek translateTo: aDateWithTimezone offset ])
 			detect: [ :aWeek | aWeek includes: aDate ].
 	^ self select: [ :each | thisWeek includes: each ]
+]
+
+{ #category : #views }
+TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
+	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime idealProgress |
+	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
+	^ (self ideals
+		anySatisfy: [ :anIdeal | aTtEventCollection first start asDate >= anIdeal start asDate ])
+		ifTrue: [ activeIdeals := ideals associations
+					detect: [ :each | each key includes: self first start ]
+					ifFound: [ :found | found value ]
+					ifNone: [ ideals associations last value ].
+
+			groupedByIdeals := aTtEventCollection timeEntries
+					groupedBy: [ :aTrackedTime | 
+						activeIdeals
+							detect: [ :anIdeal | 
+								anIdeal category
+									ifNil: [ anIdeal computation value: aTrackedTime ]
+									ifNotNil: [ :notNil | 
+										(aTrackedTime category ifNil: [ TtCategory new ]) categoryLineage
+											includes: notNil ] ]
+							ifNone: [ 'Time Without Ideals' ] ].
+			idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
+					collect: [ :each | 
+						each
+							-> ({'items'
+										-> ({{'duration' -> 0 minutes} asDictionary as: NeoJSONObject} as: NeoJSONArray)}
+									asDictionary as: NeoJSONObject) ].
+			groupedByIdeals := groupedByIdeals associations , idealsWithNoTrackedTime
+					reject: [ :each | each key isString ].
+			daysWithData := aTtEventCollection groupedByDay keys size.
+			idealProgress := groupedByIdeals
+					collect: [ :each | 
+						| progressPercent |
+						progressPercent := (((each value items sum: #duration) / daysWithData days)
+								asFloat / each key minValue) min: 1.
+						{progressPercent >= 1 ifTrue: [ 1 ] ifFalse: [ 0 ].
+							progressPercent} ].
+			(idealProgress collect: #first) sum asString , '/'
+				, groupedByIdeals size asString , ' , '
+				, ((idealProgress collect: #second) sum / groupedByIdeals size * 100
+						printShowingDecimalPlaces: 0) , '%' ]
+		ifFalse: [ '' ]
 ]
 
 { #category : #'instance - creation' }
