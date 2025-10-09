@@ -112,7 +112,7 @@ TtCategory >> gtColorFor: anAction [
 TtCategory >> gtEntriesByDayFor: aView [
 	<gtView>
 	| entries |
-	entries := [ self rootCategory collection
+	entries := [ self rootCategory collection timeEntries
 			select: [ :each | each category = self ] ].
 	self rootCategory
 		in: [ :rootCategory | 
