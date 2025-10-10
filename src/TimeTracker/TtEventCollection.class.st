@@ -941,8 +941,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 						anIdeal category
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | 
-								(aTrackedTime category ifNil: [ TtCategory new ]) categoryLineage
-									includes: notNil ] ]
+								(aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
 	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
