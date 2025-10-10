@@ -161,7 +161,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 			view nodes
 				shape: [ :aCategory | 
 					| pane textElement |
-					textElement := BlTextElement new.
+					textElement := self editableCategoryLabel: aCategory.
 					pane := BrHorizontalPane new.
 					pane
 						border: (BlBorder paint: Color gray width: 1);
@@ -202,7 +202,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																			self calculateHierarchy.
 																			self root collection
 																				ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-																			textElement phlow firstParentWithViewContent phlow syncUpdate ];
+																			textElement phlow fireViewUpdateWish ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
 									icon: BrGlamorousVectorIcons add;
@@ -220,7 +220,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 											self flag: #TODO.	"Figure out logic for when categories are deleted"
 											self root collection
 												ifNil: [ isUsed := false ]
-												ifNotNil: [ :notNil | isUsed := notNil anySatisfy: [ :each | each category = aCategory ] ].
+												ifNotNil: [ :notNil | isUsed := notNil timeEntries anySatisfy: [ :each | each category = aCategory ] ].
 											isUsed
 												ifTrue: [ self inform: 'This category is beind used and can''t be deleted'.
 													anEvent target fireEvent: BrDropdownHideWish new ]
@@ -228,7 +228,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													self calculateHierarchy.
 													self root collection
 														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-													aBrButton phlow firstParentWithViewContent phlow syncUpdate ] ]) ].
+													aBrButton phlow fireViewUpdateWish ] ]) ].
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :arguments | 
@@ -259,12 +259,8 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection class serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
-													aDropdown hide.
-													self flag: #TODO. "Explore using `GtPhlowElementContext>>#fireToolUpdateWish` in code. Simpler and updates other views as well."
-													(aCollection
-														perform: viewElement id asSymbol
-														withArguments: {GtPhlowEmptyView new.
-																GtPhlowContext new}) updateContent: viewElement ]) ] ]
+													aBrButton phlow fireViewUpdateWish.
+													aDropdown hide ]) ] ]
 						ifAbsent: [ pane
 								when: BlClickEvent
 								do: [ :aBlClickEvent | 
@@ -312,6 +308,26 @@ TtCategories >> collection [
 { #category : #accessing }
 TtCategories >> collection: anObject [
 	collection := anObject
+]
+
+{ #category : #view }
+TtCategories >> editableCategoryLabel: aCategory [
+	| label |
+	label := BrEditableLabel new.
+	label
+		aptitude: (BrGlamorousEditableLabelAptitude new
+				glamorousCodeFont;
+				defaultForeground: Color black;
+				fontSize: 14);
+		text: aCategory name;
+		when: BrEditorAcceptWish
+			do: [ :aWish | 
+				| newValue |
+				newValue := aWish text asString.
+				aCategory name: newValue.
+				self collection rootCollection
+					ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ] ].
+	^ label
 ]
 
 { #category : #views }
