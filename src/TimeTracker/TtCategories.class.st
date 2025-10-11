@@ -240,14 +240,12 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :arguments | 
-							| aDropdown |
-							aDropdown := arguments fourth.
 							pane
 								when: BlClickEvent
 								do: [ :aBlClickEvent | 
 									aBlClickEvent consumed: true.
 									pane phlow spawnObject: aCategory.
-									aDropdown hide ].
+									(aContext at: #TtTrackedTime) fourth hide ].
 							(aCategory isKindOf: TtRootCategory)
 								ifFalse: [ pane
 										addChild: (BrButton new
@@ -257,9 +255,9 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												label: 'Use Category';
 												action: [ :aBrButton :aBrButtonModel :anEvent | 
 													| aCollection aTtTrackedTime categorizeButton viewElement |
-													aCollection := arguments first.
-													aTtTrackedTime := arguments second.
-													categorizeButton := arguments third.
+													aCollection := (aContext at: #TtTrackedTime) first.
+													aTtTrackedTime := (aContext at: #TtTrackedTime) second.
+													categorizeButton := (aContext at: #TtTrackedTime) third.
 													viewElement := categorizeButton phlow firstParentWithViewContent
 															phlow firstParentWithViewContent.
 													anEvent consumed: true.
@@ -268,7 +266,8 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													aBrButton phlow fireViewUpdateWish.
-													aDropdown hide ]) ] ]
+													(aContext at: #TtTrackedTime) fourth hide.
+													(aContext at: #TtTrackedTime) first categoryPicker removeFromParent ]) ] ]
 						ifAbsent: [ pane
 								when: BlClickEvent
 								do: [ :aBlClickEvent | 

@@ -8,7 +8,9 @@ Class {
 		'page',
 		'viewFilterContext',
 		'includeUntracked',
-		'groupingLevel'
+		'groupingLevel',
+		'categoryPicker',
+		'categoryContext'
 	],
 	#classInstVars : [
 		'uniqueInstance',
@@ -363,6 +365,17 @@ TtEventCollection >> buildEntriesByDay: aContext [
 				timeEntriesAndDays
 					select: [ :inner | each includes: inner ]
 					thenCollect: [ :inner | inner -> each ] ].
+	self categoryPicker
+		ifNil: [ self
+				categoryContext: (GtPhlowContext new
+						at: #TtTrackedTime put: nil;
+						yourself).
+			self
+				categoryPicker: ((self categories
+						TtCategoriesFor: GtPhlowView empty
+						context: self categoryContext) asElement
+						when: BlElementRemovedFromSceneGraphEvent
+						do: [ :anEvent | anEvent currentTarget removeFromParent ]) ].
 	^ GtPhlowView new columnedTree
 		items: entriesByDay;
 		children: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ #() ] ];
@@ -399,19 +412,17 @@ TtEventCollection >> buildEntriesByDay: aContext [
 											withoutHandle;
 											stencil: [ BrMenuExplicit new
 													stencil: [ :anExplicitMenu | 
+														self categoryContext
+															at: #TtTrackedTime
+															put: {self.
+																	each.
+																	aButton.
+																	anExplicitMenu}.
 														BrFrame new
 															size: ((GtWorld spaceWithId: GtWorld defaultId do: #yourself) extent
 																	in: [ :screenSize | (screenSize x * 0.45) @ screenSize y * 0.9 ]);
 															padding: (BlInsets all: 15);
-															addChild: (self categories
-																	TtCategoriesFor: GtPhlowView empty
-																	context: (GtPhlowContext new
-																			at: #TtTrackedTime
-																				put: {self.
-																						each.
-																						aButton.
-																						anExplicitMenu};
-																			yourself)) asElement ] ]).
+															addChild: self categoryPicker asElement ] ]).
 						each category
 							ifNotNil: [ :notNil | 
 								aButton
@@ -502,6 +513,26 @@ TtEventCollection >> categories [
 { #category : #accessing }
 TtEventCollection >> categories: aTtCategories [
 	categories := aTtCategories
+]
+
+{ #category : #accessing }
+TtEventCollection >> categoryContext [
+	^ categoryContext
+]
+
+{ #category : #accessing }
+TtEventCollection >> categoryContext: anObject [
+	categoryContext := anObject
+]
+
+{ #category : #accessing }
+TtEventCollection >> categoryPicker [
+	^ categoryPicker
+]
+
+{ #category : #accessing }
+TtEventCollection >> categoryPicker: anObject [
+	categoryPicker := anObject
 ]
 
 { #category : #views }
