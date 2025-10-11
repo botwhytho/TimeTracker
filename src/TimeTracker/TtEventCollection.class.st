@@ -1132,8 +1132,8 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 				icon: BrGlamorousVectorIcons inspect;
 				label: 'Import';
-				flag: #CAUTION; "The first 3 options in dropdown update an object inspector in place, implementation could break if Gt internals change"
-				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+				flag: #CAUTION;
+				action: [ :aBrButton "The first 3 options in dropdown update an object inspector in place, implementation could break if Gt internals change" :aBrButtonModel :aBlClickEvent | 
 					| aDropdownAptitude |
 					aBrButton
 						aptitudeDo: [ :anAptitude | 
@@ -1148,24 +1148,40 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 										aMenuItems := BrMenuItems new.
 										aMenuItems
 											addItemLabel: 'Import Latest'
-											action: [ self importLatestFromTrello.
+											action: [ | latestWeek |
+												self importLatestFromTrello.
+												latestWeek := self rootCollection latestWeek.
+												self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
+												latestWeek groupIntoContiguous size > 1
+													ifTrue: [ self
+															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContainer parent
 													replaceChild: aContainer
-													with: (GtInspector newOn: self rootCollection latestWeek).
+													with: (GtInspector newOn: latestWeek).
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import Earliest'
-											action: [ self importEarliestFromTrello.
+											action: [ | latestWeek |
+												self importEarliestFromTrello.
+												latestWeek := self rootCollection latestWeek.
+												latestWeek groupIntoContiguous size > 1
+													ifTrue: [ self
+															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContainer parent
 													replaceChild: aContainer
-													with: (GtInspector newOn: self rootCollection latestWeek).
+													with: (GtInspector newOn: latestWeek).
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import All'
-											action: [ self importAllFromTrello.
+											action: [ | latestWeek |
+												self importAllFromTrello.
+												latestWeek := self rootCollection latestWeek.
+												latestWeek groupIntoContiguous size > 1
+													ifTrue: [ self
+															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContainer parent
 													replaceChild: aContainer
-													with: (GtInspector newOn: self rootCollection latestWeek).
+													with: (GtInspector newOn: latestWeek).
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'List Pending Days'
