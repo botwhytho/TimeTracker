@@ -193,14 +193,21 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																	when: BrEditorAcceptWish
 																		do: [ :aWish | 
 																			aWish currentTarget fireEvent: BrDropdownHideWish new.
-																			aCategory children
-																				add: (TtCategory new
-																						name: aWish text asString;
-																						parentCategory: aCategory).
-																			self calculateHierarchy.
-																			self root collection
-																				ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-																			textElement phlow fireViewUpdateWish ];
+																			self
+																				detect: [ :each | each name = aWish text asString ]
+																				ifFound: [ self
+																						inform: 'A category with that name already Exists' ]
+																				ifNone: [ aCategory children
+																						add: (TtCategory new
+																								name: aWish text asString;
+																								parentCategory: aCategory).
+																					self calculateHierarchy.
+																					self root collection
+																						ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+																					aContext
+																						at: #TtTrackedTime
+																						ifPresent: [ textElement phlow fireViewUpdateWish ]
+																						ifAbsent: [ textElement phlow fireToolUpdateWish ] ] ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
 									icon: BrGlamorousVectorIcons add;
@@ -226,7 +233,10 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													self calculateHierarchy.
 													self root collection
 														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-													aBrButton phlow fireViewUpdateWish ] ]) ].
+													aContext
+														at: #TtTrackedTime
+														ifPresent: [ aBrButton phlow fireViewUpdateWish ]
+														ifAbsent: [ aBrButton phlow fireToolUpdateWish ] ] ]) ].
 					aContext
 						at: #TtTrackedTime
 						ifPresent: [ :arguments | 
