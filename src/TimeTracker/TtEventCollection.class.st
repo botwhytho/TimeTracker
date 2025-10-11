@@ -735,6 +735,7 @@ TtEventCollection >> gtCalendarViewFor: aView [
 	"(self items collectAsSet: #category)"
 
 	<gtView>
+	self flag: #TODO.	"Improve calendar view when sparse"
 	self groupedByCategory keys size > 2 ifTrue: [ ^ aView empty ].
 	^ aView explicit
 		title: 'Calendar View';
@@ -750,7 +751,8 @@ TtEventCollection >> gtCalendarViewFor: aView [
 						ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
 								timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
 			grid
-				addChildren: (((self groupedBy: [ :each | each start asMonth ]) associations sorted: #key ascending)
+				addChildren: (((self groupedBy: [ :each | each start asMonth ]) associations
+						sorted: #key ascending)
 						collect: [ :aMonth | 
 							| calendar byDay |
 							calendar := MyGtCalendarElement new
