@@ -1306,9 +1306,7 @@ TtEventCollection >> gtNotesFor: aView [
 													page: aPage;
 													collection: self rootCollection.
 											self rootCollection add: note ].
-									aDropdownButton
-										enqueueTask: [ (self perform: #gtNotesFor: withArguments: {GtPhlowEmptyView new})
-												updateContent: viewElement ] asBlTask ].
+									aBrButton phlow fireToolUpdateWish ].
 							aDropdownButton fireEvent: BrDropdownHideWish new.
 							aDropdownButton phlow spawnTool: aPage asLepiterPagePhlowTool ] ] ];
 		action: [ :anAction | 
