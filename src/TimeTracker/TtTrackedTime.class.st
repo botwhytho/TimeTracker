@@ -254,8 +254,8 @@ TtTrackedTime >> gtSummary [
 
 { #category : #accessing }
 TtTrackedTime >> isContiguous: aTrackedTime [
-	^ self end rounded = aTrackedTime start
-		or: [ aTrackedTime end rounded = self start ]
+	^ aTrackedTime end rounded = self start
+		or: [ super = aTrackedTime or: [ self end rounded = aTrackedTime start ] ]
 ]
 
 { #category : #accessing }
