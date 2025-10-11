@@ -1393,11 +1393,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		ifTrue: [ self includeUntracked: true ].
 	^ aView explicit
 		title: ((self groupedBy: #asWeek) keys size = 1
-				ifTrue: [ self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
-					self groupIntoContiguous size > 1
-						ifTrue: [ self
-								inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-					'Weekly Summary' ]
+				ifTrue: [ 'Weekly Summary' ]
 				ifFalse: [ 'Summary' ]);
 		priority: 0;
 		stencil: [ | dailySummary data entriesByDay horizontalPane resizer verticalPane |
@@ -1428,8 +1424,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		actionButtonLabel: 'Toggle Untracked'
 			action: [ :aButton :aBrTab | 
 				self toggleUntracked.
-				(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
-					updateContent: aBrTab viewContentElement ];
+				aButton phlow fireViewUpdateWish ];
 		actionDropdownButtonLabel: groupingLevelLabel value
 			content: [ :aButton :aBrTab | 
 				BrSimpleList new
@@ -1445,8 +1440,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 									aButton fireEvent: BrDropdownHideWish new.
 									self groupingLevel: aViewFilter value.
 									aButton label: groupingLevelLabel value.
-									(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
-										updateContent: aBrTab viewContentElement ] ] ];
+									aButton phlow fireViewUpdateWish ] ] ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
 				| groupByLabelMapping |
@@ -1466,8 +1460,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 								do: [ :_ | 
 									aButton fireEvent: BrDropdownHideWish new.
 									self viewFilterContext: aViewFilter value.
-									(self gtSummaryFor: GtPhlowEmptyView new context: aContext)
-										updateContent: aBrTab viewContentElement ] ] ]
+									aButton phlow fireViewUpdateWish ] ] ]
 ]
 
 { #category : #inspecting }
