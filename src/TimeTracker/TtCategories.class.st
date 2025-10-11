@@ -322,9 +322,14 @@ TtCategories >> editableCategoryLabel: aCategory [
 			do: [ :aWish | 
 				| newValue |
 				newValue := aWish text asString.
-				aCategory name: newValue.
-				self collection rootCollection
-					ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ] ].
+				newValue ~= aCategory name
+					ifTrue: [ self
+							detect: [ :each | each name = newValue ]
+							ifFound: [ label text: aCategory name.
+								self inform: 'A category with that name already exists' ]
+							ifNone: [ aCategory name: newValue.
+								self collection
+									ifNotNil: [ :notNil | notNil rootCollection class serializeWithLepiter: self root ] ] ] ].
 	^ label
 ]
 
