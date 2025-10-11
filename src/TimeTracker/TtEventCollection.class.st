@@ -1379,7 +1379,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		ifTrue: [ self includeUntracked: true ].
 	^ aView explicit
 		title: ((self groupedBy: #asWeek) keys size = 1
-				ifTrue: [ self flag: #NOTE.	"The below assumes we DO NOT want overlapping times. This assumption may not hold for all users in all use cases"
+				ifTrue: [ self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
 					self groupIntoContiguous size > 1
 						ifTrue: [ self
 								inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
