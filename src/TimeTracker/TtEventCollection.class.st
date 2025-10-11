@@ -532,8 +532,17 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 				addChild: (BrVerticalPane new
 						matchParent;
 						in: [ :aBrVerticalPane | 
-							(aGtPlotterSingleScaleContext originalValue value
-								sorted: [ :each | each key name ] ascending)
+							| concurrentEntries sizeOfOtherEntriesInRootCollection |
+							concurrentEntries := aGtPlotterSingleScaleContext originalValue value asOrderedCollection
+									sorted: [ :each | each key name ] ascending.
+
+							(concurrentEntries size = 1
+								and: [ sizeOfOtherEntriesInRootCollection := ((self rootCollection
+											allEqualTo: concurrentEntries first value) select: #isTimeEntry) size.
+									sizeOfOtherEntriesInRootCollection  > 0 ])
+								ifTrue: [ sizeOfOtherEntriesInRootCollection
+										timesRepeat: [ concurrentEntries add: nil -> nil ] ].
+							concurrentEntries
 								do: [ :aTtTrackedTime | 
 									| element |
 									element := BlElement new
@@ -541,13 +550,14 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 												c vertical matchParent.
 												c horizontal matchParent ];
 											border: (BlBorder paint: Color darkGray width: 0.5);
-											background: aTtTrackedTime key color.
+											background: (aTtTrackedTime key ifNil: [ Color transparent ] ifNotNil: #color).
 									aBrVerticalPane addChild: element ].
 							aBrVerticalPane ]);
 				when: BlClickEvent
 					do: [ :anEvent | 
 						| newCollection someTrackedTimes |
 						someTrackedTimes := aGtPlotterSingleScaleContext originalValue value value.
+						self flag: #TODO.	"Pass other context like in select: or use proper pager contexts and remove from over there"
 						newCollection := self class new
 								categories: someTrackedTimes first value collection categories;
 								page: someTrackedTimes first value collection page;
@@ -596,11 +606,13 @@ TtEventCollection >> groupedAndSortedByDuration [
 					category: anAssociation key;
 					collection: anAssociation value;
 					sum: (anAssociation value
-							collect: [ :each | each duration / (groupedByTimespan at: each asTimespan) size ])
+							collect: [ :each | each duration / ((self rootCollection allEqualTo: each) size + 1) ])
 							sum ].
 	summedGroupings
 		detect: [ :each | each category = TtCategories untracked ]
-		ifFound: [ :found | found sum: self timeEntries groupedByDay keys size days - groupedByTimespan keys sum ]
+		ifFound: [ :found | 
+			found
+				sum: self timeEntries groupedByDay keys size days - groupedByTimespan keys sum ]
 		ifNone: [  ].
 	^ summedGroupings sorted: #sum descending
 ]
