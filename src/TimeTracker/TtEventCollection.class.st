@@ -454,10 +454,8 @@ TtEventCollection >> buildEntriesByDay: aContext [
 								viewElement := aBrButton phlow firstParentWithViewContent phlow
 										firstParentWithViewContent.
 								each value do: [ :aTrackedTime | aTrackedTime delete ].
-								(self
-									perform: viewElement id asSymbol
-									withArguments: {GtPhlowEmptyView new.
-											GtPhlowContext new}) updateContent: viewElement ] ]
+								each value do: [ :aTrackedTime | self items remove: aTrackedTime ].
+								aBrButton phlow fireToolUpdateWish ] ]
 					ifFalse: [ BlElement new size: 1 @ 1 ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
 		expandAll;
