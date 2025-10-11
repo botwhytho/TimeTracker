@@ -158,29 +158,25 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 		aptitude: BrGlamorousCheckboxAptitude;
 		checked: (self perform: aSelector);
 		whenCheckedDo: [ :anEvent | 
+			| entity |
+			entity := anEvent target phlow firstParentWithViewContent phlow
+					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(true).
 			self collection class serializeWithLepiter: self.
-			self collection viewFilterContext asLowercase = aSelector asLowercase
-				ifTrue: [ | viewElement |
-					viewElement := anEvent target phlow firstParentWithView phlow
-							firstParentWithView.
-					viewElement id asSymbol = #gtSummaryFor:context:
-						ifTrue: [ (self collection
-								perform: viewElement id asSymbol
-								withArguments: {GtPhlowEmptyView new.
-										GtPhlowContext new}) updateContent: viewElement ] ] ];
+			entity buildContext context navigationContext object viewFilterContext
+				asLowercase = aSelector asLowercase
+				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
+						ifTrue: [ anEvent target phlow fireViewUpdateWish ] ] ];
 		whenUncheckedDo: [ :anEvent | 
+			| entity |
+			entity := anEvent target phlow firstParentWithViewContent phlow
+					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(false).
 			self collection class serializeWithLepiter: self.
-			self collection viewFilterContext asLowercase = aSelector asLowercase
-				ifTrue: [ | viewElement |
-					viewElement := anEvent target phlow firstParentWithView phlow
-							firstParentWithView.
-					viewElement id asSymbol = #gtSummaryFor:context:
-						ifTrue: [ (self collection
-								perform: viewElement id asSymbol
-								withArguments: {GtPhlowEmptyView new.
-										GtPhlowContext new}) updateContent: viewElement ] ] ]
+			entity buildContext context navigationContext object viewFilterContext
+				asLowercase = aSelector asLowercase
+				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
+						ifTrue: [ anEvent target phlow fireViewUpdateWish ] ] ]
 ]
 
 { #category : #action }
