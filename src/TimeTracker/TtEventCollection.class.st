@@ -1215,29 +1215,28 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		priority: 1;
 		content: [ :aButton | 
 			BrGlamorousSimpleContextMenuContent new
-				items: {'ALL IN CURRENT DAY'
+				items: {'ALL IN CURRENT DAYS'
 							-> [ :e | 
-								| today |
-								today := self first start asDate.
+								| days |
+								days := self groupedByDay keys.
 								e phlow
-									spawnObject: (self rootCollection select: [ :each | today includes: each ]).
+									spawnObject: (self rootCollection select: [ :each | days includes: each start asDate ]).
 								e fireEvent: BrDropdownHideWish new ].
-						'ALL IN CURRENT TIME RANGE'
+						'ALL IN CURRENT TIME RANGES'
 							-> [ :e | 
-								| min max |
-								min := self items min: #start.
-								max := self items max: #end.
+								| timeRanges |
+								timeRanges := self groupIntoContiguous collect: #key.
 								e phlow
 									spawnObject: (self rootCollection
-											select: [ :each | each start >= min and: [ each end <= max ] ]).
+											select: [ :each | timeRanges anySatisfy: [ :aTimespan | aTimespan includes: each ] ]).
 								e fireEvent: BrDropdownHideWish new ].
-						'ALL EXCLUDING CURRENT TIME RANGE'
+						'ALL EXCLUDING CURRENT TIME RANGES'
 							-> [ :e | 
-								| min max |
-								min := self items min: #start.
-								max := self items max: #end.
+								| timeRanges |
+								timeRanges := self groupIntoContiguous collect: #key.
 								e phlow
-									spawnObject: (self rootCollection select: [ :each | each end < min or: [ each start > max ] ]).
+									spawnObject: (self rootCollection
+											select: [ :each | timeRanges noneSatisfy: [ :aTimespan | aTimespan includes: each ] ]).
 								e fireEvent: BrDropdownHideWish new ].
 						'ALL TIME'
 							-> [ :e | 
