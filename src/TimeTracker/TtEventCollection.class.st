@@ -1203,7 +1203,14 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		priority: 1;
 		content: [ :aButton | 
 			BrGlamorousSimpleContextMenuContent new
-				items: {'ALL IN CURRENT TIME RANGE'
+				items: {'ALL IN CURRENT DAY'
+							-> [ :e | 
+								| today |
+								today := self first start asDate.
+								e phlow
+									spawnObject: (self rootCollection select: [ :each | today includes: each ]).
+								e fireEvent: BrDropdownHideWish new ].
+						'ALL IN CURRENT TIME RANGE'
 							-> [ :e | 
 								| min max |
 								min := self items min: #start.
