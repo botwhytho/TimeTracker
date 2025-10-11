@@ -1537,7 +1537,7 @@ TtEventCollection >> gtWeekFor: anAction [
 											| daysWithData |
 											daysWithData := self rootCollection groupedByDay keys.
 											element := MyGtCalendarElement
-													forDate: daysWithData max
+													forDate: self groupedByDay keys max
 													asElementDo: [ :calendarElement | 
 														| daysInMonth |
 														daysInMonth := daysWithData
@@ -1562,12 +1562,12 @@ TtEventCollection >> gtWeekFor: anAction [
 																	ifNotNil: [ | sortedDates |
 																		sortedDates := {firstDate.
 																				anEvent date} sorted: #yourself ascending.
+																		self flag: #TODO.	"Need to deal with daylight savings time"
 																		aBrButton phlow
-																			flag: #TODO;
 																			spawnObject: (self rootCollection
 																					select: [ :each | 
 																						each start asDate >= sortedDates first
-																							and: [ each start asDate <= sortedDates second ] ]).	"Need to deal with daylight savings time"
+																							and: [ each start asDate <= sortedDates second ] ]).
 																		firstDate := nil.
 																		anExplicitMenu hide ].
 																anEvent consumed: true ] ] ] ]).
