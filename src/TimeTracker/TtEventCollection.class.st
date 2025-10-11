@@ -210,7 +210,7 @@ TtEventCollection >> buildBars: data [
 								min := self items min: #start.
 								max := self items max: #end.
 								aBlClickEvent target phlow
-									spawnObject: (self rootCollection
+									spawnObject: (self timeEntries
 											select: [ :aTrackedTime | 
 												aTrackedTime start >= min
 													and: [ aTrackedTime end <= max
@@ -308,7 +308,7 @@ TtEventCollection >> buildDonut: data [
 										min := self items min: #start.
 										max := self items max: #end.
 										aBlClickEvent target phlow
-											spawnObject: (self rootCollection
+											spawnObject: (self timeEntries
 													select: [ :aTrackedTime | 
 														aTrackedTime start >= min
 															and: [ aTrackedTime end <= max
