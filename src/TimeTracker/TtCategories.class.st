@@ -123,9 +123,6 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 				priority: 10;
 				stencil: [ | buttonAction |
 					buttonAction := [ :aBrButton :aBrButtonModel :anEvent | 
-						| aChild aBRFrame |
-						aBRFrame := aBrButton phlow firstParentWithViewContent phlow element.
-						aChild := aBRFrame childAt: 1.
 						anEvent consumed: true.
 						(aBrButton label asString includesSubstring: 'Template')
 							ifTrue: [ | aCollection |
@@ -139,21 +136,22 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 							ifFalse: [ self initialize ].
 						self collection
 							ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
-						aBRFrame
-							replaceChild: aChild
-							with: (self TtCategoriesFor: GtPhlowView empty context: aContext) asElement ].
-					BrFrame new
-						id: #categoriesFrame;
+						aBrButton phlow fireToolUpdateWish ].
+					BrHorizontalPane new
 						matchParent;
-						addChild: (BrHorizontalPane new matchParent
-								addChildren: {BrButton new
-											aptitude: BrGlamorousButtonWithLabelAptitude;
-											label: 'Create Empty Category Hierarchy';
-											action: buttonAction.
-										BrButton new
-											aptitude: BrGlamorousButtonWithLabelAptitude;
-											label: 'Create Category Hierarchy from Template';
-											action: buttonAction}) ] ].
+						alignCenter;
+						addChildren: {BrButton new
+									beLargeSize;
+									margin: (BlInsets all: 25);
+									aptitude: BrGlamorousButtonWithLabelAptitude;
+									label: 'Create Empty Category Hierarchy';
+									action: buttonAction.
+								BrButton new
+									beLargeSize;
+									margin: (BlInsets all: 25);
+									aptitude: BrGlamorousButtonWithLabelAptitude;
+									label: 'Create Category Hierarchy from Template';
+									action: buttonAction} ] ].
 	^ aView mondrian
 		title: 'Categories' translated;
 		priority: 10;
