@@ -846,18 +846,22 @@ TtEventCollection >> gtGroupedByDescriptionFor: aView [
 	^ aView columnedList
 		title: 'Grouped By Description';
 		priority: 2;
-		items: [ (self timeEntries groupedBy: [ :each | each description capitalized ]) associations
-				sorted: [ :each | each value items sum ] descending ];
+		items: [ (self timeEntries groupedBy: [ :each | each description capitalized ])
+				associations
+				sorted: [ :each | each value items sum: self partialDurationWhenMultiTasking ]
+						descending ];
 		column: 'Activity' text: #key;
 		column: 'Category' text: [ :each | each value first category name ];
 		column: 'Ocurrences' text: [ :each | each value size ];
 		column: 'Average Time'
-			text: [ :each | each value items average roundTo: 1 minute ];
+			text: [ :each | 
+				(each value items sum: self partialDurationWhenMultiTasking)
+					/ each value items size roundTo: 1 minute ];
 		column: 'Total Time'
 			text: [ :each | 
-				(each value items sum roundTo: 1 minute)
+				((each value items sum: self partialDurationWhenMultiTasking) roundTo: 1 minute)
 					in: [ :aDuration | aDuration asString , ' (' , (aDuration asHours round: 1) asString , ' hours)' ] ];
-		send: [ :each | each value size = 1 ifTrue: [ each value first ] ifFalse: [ each value ] ]
+		send: #value
 ]
 
 { #category : #views }
@@ -870,18 +874,22 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 				groupedBy: [ :each | 
 					{each description capitalized.
 						each details ifNil: [ '' ] ifNotNil: [ :notNil | notNil capitalized ]} ])
-				associations sorted: [ :each | each value items sum ] descending ];
+				associations
+				sorted: [ :each | each value items sum: self partialDurationWhenMultiTasking ]
+						descending ];
 		column: 'Activity' text: [ :each | each key first ];
 		column: 'Details' text: [ :each | each key second ];
 		column: 'Category' text: [ :each | each value first category name ];
 		column: 'Ocurrences' text: [ :each | each value size ];
 		column: 'Average Time'
-			text: [ :each | each value items average roundTo: 1 minute ];
+			text: [ :each | 
+				(each value items sum: self partialDurationWhenMultiTasking)
+					/ each value items size roundTo: 1 minute ];
 		column: 'Total Time'
 			text: [ :each | 
-				(each value items sum roundTo: 1 minute)
+				((each value items sum: self partialDurationWhenMultiTasking) roundTo: 1 minute)
 					in: [ :aDuration | aDuration asString , ' (' , (aDuration asHours round: 1) asString , ' hours)' ] ];
-		send: [ :each | each value size = 1 ifTrue: [ each value first ] ifFalse: [ each value ] ]
+		send: #value
 ]
 
 { #category : #views }
@@ -1878,6 +1886,14 @@ TtEventCollection >> page [
 { #category : #accessing }
 TtEventCollection >> page: aLepiterPage [
 	page := aLepiterPage
+]
+
+{ #category : #views }
+TtEventCollection >> partialDurationWhenMultiTasking [
+	^ [ :aTrackedTime | 
+	| concurrentTrackedTime |
+	concurrentTrackedTime := self rootCollection allEqualTo: aTrackedTime.
+	aTrackedTime duration / (concurrentTrackedTime size + 1) ]
 ]
 
 { #category : #accessing }
