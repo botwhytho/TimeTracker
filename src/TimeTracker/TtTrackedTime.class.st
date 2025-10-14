@@ -166,7 +166,7 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
-						ifTrue: [ anEvent target phlow fireViewUpdateWish ] ] ];
+						ifTrue: [ anEvent target phlow firstParentWithViewContent phlow fireViewSyncUpdateWish ] ] ];
 		whenUncheckedDo: [ :anEvent | 
 			| entity |
 			entity := anEvent target phlow firstParentWithViewContent phlow
@@ -176,7 +176,7 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
-						ifTrue: [ anEvent target phlow fireViewUpdateWish ] ] ]
+						ifTrue: [ anEvent target phlow firstParentWithViewContent phlow fireViewSyncUpdateWish ] ] ]
 ]
 
 { #category : #action }

@@ -206,7 +206,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																						ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
 																					aContext
 																						at: #TtTrackedTime
-																						ifPresent: [ textElement phlow fireViewUpdateWish ]
+																						ifPresent: [ textElement phlow fireViewSyncUpdateWish ]
 																						ifAbsent: [ textElement phlow fireToolUpdateWish ] ] ];
 																	when: BrEditorCancelWish
 																		do: [ :aWish | aWish currentTarget fireEvent: BrDropdownHideWish new ]) ]);
@@ -235,7 +235,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
 													aContext
 														at: #TtTrackedTime
-														ifPresent: [ aBrButton phlow fireViewUpdateWish ]
+														ifPresent: [ aBrButton phlow fireViewSyncUpdateWish ]
 														ifAbsent: [ aBrButton phlow fireToolUpdateWish ] ] ]) ].
 					aContext
 						at: #TtTrackedTime
@@ -258,14 +258,13 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection := (aContext at: #TtTrackedTime) first.
 													aTtTrackedTime := (aContext at: #TtTrackedTime) second.
 													categorizeButton := (aContext at: #TtTrackedTime) third.
-													viewElement := categorizeButton phlow firstParentWithViewContent
-															phlow firstParentWithViewContent.
+													viewElement := categorizeButton phlow firstParentWithViewContent.
 													anEvent consumed: true.
 													aTtTrackedTime category: aCategory.
 													aCollection class serializeWithLepiter: aTtTrackedTime.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
-													aBrButton phlow fireViewUpdateWish.
+													viewElement phlow fireViewSyncUpdateWish.
 													(aContext at: #TtTrackedTime) fourth hide.
 													(aContext at: #TtTrackedTime) first categoryPicker removeFromParent ]) ] ]
 						ifAbsent: [ pane
