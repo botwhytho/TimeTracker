@@ -173,7 +173,9 @@ TtEventCollection >> asAsyncStream [
 
 { #category : #accessing }
 TtEventCollection >> buildBars: data [
-	| aBarWidthScale barChart container maxLines theData totalTime |
+	| aBarWidthScale barChart categoriesToFilter categoriesToFilterOut container maxLines theData totalTime |
+	categoriesToFilter := OrderedCollection new.
+	categoriesToFilterOut := OrderedCollection new.
 	theData := GtPlotterDataGroup new values: data.
 	totalTime := (data sum: #sum) asHours.
 	theData := theData
@@ -208,20 +210,36 @@ TtEventCollection >> buildBars: data [
 					do: [ :aBlClickEvent | 
 						aBlClickEvent consumed: true.
 						aBlClickEvent modifiers = BlKeyModifiers alt
-							ifTrue: [ | min max |
-								min := self items min: #start.
-								max := self items max: #end.
-								aBlClickEvent target phlow
+							ifTrue: [ aBlClickEvent target phlow
 									spawnObject: (self timeEntries
 											select: [ :aTrackedTime | 
-												aTrackedTime start >= min
-													and: [ aTrackedTime end <= max
-															and: [ (aTrackedTime category
-																	hasCategoryOrParentCategoryNamed: aGtPlotterContext originalValue category name)
-																	not ] ] ]) ].
+												(aTrackedTime category
+													hasCategoryOrParentCategoryNamed: aGtPlotterContext originalValue category name)
+													not ]) ].
+						aBlClickEvent modifiers isShift
+							ifTrue: [ aBlClickEvent modifiers isAlt
+									ifTrue: [ categoriesToFilterOut add: aGtPlotterContext originalValue category ]
+									ifFalse: [ categoriesToFilter add: aGtPlotterContext originalValue category ] ].
 						aBlClickEvent modifiers = BlKeyModifiers new
-							ifTrue: [ aBlClickEvent currentTarget phlow
-									spawnObject: aGtPlotterContext originalValue collection ] ];
+							ifTrue: [ categoriesToFilter isEmpty & categoriesToFilterOut isEmpty
+									ifTrue: [ aBlClickEvent currentTarget phlow
+											spawnObject: aGtPlotterContext originalValue collection ]
+									ifFalse: [ categoriesToFilter
+											ifNotEmpty: [ categoriesToFilter add: aGtPlotterContext originalValue category.
+												aBlClickEvent target phlow
+													spawnObject: (self timeEntries
+															select: [ :aTrackedTime | 
+																categoriesToFilter
+																	anySatisfy: [ :aCategory | aTrackedTime category hasCategoryOrParentCategoryNamed: aCategory name ] ]) ]
+											ifEmpty: [ categoriesToFilterOut
+													add: aGtPlotterContext originalValue category.
+												aBlClickEvent target phlow
+													spawnObject: (self timeEntries
+															reject: [ :aTrackedTime | 
+																categoriesToFilterOut
+																	anySatisfy: [ :aCategory | aTrackedTime category hasCategoryOrParentCategoryNamed: aCategory name ] ]) ].
+										categoriesToFilter removeAll.
+										categoriesToFilterOut removeAll ] ] ];
 				when: BlDoubleClickEvent
 					do: [ :anEvent | 
 						anEvent consumed: true.
