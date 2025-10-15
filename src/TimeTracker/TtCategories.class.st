@@ -337,7 +337,13 @@ TtCategories >> editableCategoryLabel: aCategory [
 								self inform: 'A category with that name already exists' ]
 							ifNone: [ aCategory name: newValue.
 								self collection
-									ifNotNil: [ :notNil | notNil rootCollection class serializeWithLepiter: self root ] ] ] ].
+									ifNotNil: [ :notNil | 
+										| rootCollection |
+										rootCollection := notNil rootCollection.
+										rootCollection class serializeWithLepiter: self root.
+										(rootCollection timeEntries
+											select: [ :aTrackedTime | aTrackedTime category = aCategory ])
+											do: [ :aTrackedTime | rootCollection class serializeWithLepiter: aTrackedTime ] ] ] ] ].
 	^ label
 ]
 
