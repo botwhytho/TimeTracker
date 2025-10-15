@@ -290,7 +290,9 @@ TtEventCollection >> buildDailySummary: data [
 
 { #category : #'building ui' }
 TtEventCollection >> buildDonut: data [
-	| element |
+	| element categoriesToFilter categoriesToFilterOut |
+	categoriesToFilter := OrderedCollection new.
+	categoriesToFilterOut := OrderedCollection new.
 	element := BlElement new.
 	^ element
 		id: #buildDonut:;
@@ -306,18 +308,31 @@ TtEventCollection >> buildDonut: data [
 							do: [ :aBlClickEvent | 
 								aBlClickEvent consumed: true.
 								aBlClickEvent modifiers = BlKeyModifiers alt
-									ifTrue: [ | min max |
-										min := self items min: #start.
-										max := self items max: #end.
-										aBlClickEvent target phlow
+									ifTrue: [ aBlClickEvent target phlow
 											spawnObject: (self timeEntries
-													select: [ :aTrackedTime | 
-														aTrackedTime start >= min
-															and: [ aTrackedTime end <= max
-																	and: [ (aTrackedTime category hasCategoryOrParentCategoryNamed: each category name)
-																			not ] ] ]) ].
+													select: [ :aTrackedTime | (aTrackedTime category hasCategoryOrParentCategoryNamed: each category name) not ]) ].
+								aBlClickEvent modifiers isShift
+									ifTrue: [ aBlClickEvent modifiers isAlt
+											ifTrue: [ categoriesToFilterOut add: each category ]
+											ifFalse: [ categoriesToFilter add: each category ] ].
 								aBlClickEvent modifiers = BlKeyModifiers new
-									ifTrue: [ aBlClickEvent target phlow spawnObject: each collection ] ];
+									ifTrue: [ categoriesToFilter isEmpty & categoriesToFilterOut isEmpty
+											ifTrue: [ aBlClickEvent target phlow spawnObject: each collection ]
+											ifFalse: [ categoriesToFilter
+													ifNotEmpty: [ categoriesToFilter add: each category.
+														aBlClickEvent target phlow
+															spawnObject: (self timeEntries
+																	select: [ :aTrackedTime | 
+																		categoriesToFilter
+																			anySatisfy: [ :aCategory | aTrackedTime category hasCategoryOrParentCategoryNamed: aCategory name ] ]) ]
+													ifEmpty: [ categoriesToFilterOut add: each category.
+														aBlClickEvent target phlow
+															spawnObject: (self timeEntries
+																	reject: [ :aTrackedTime | 
+																		categoriesToFilterOut
+																			anySatisfy: [ :aCategory | aTrackedTime category hasCategoryOrParentCategoryNamed: aCategory name ] ]) ].
+												categoriesToFilter removeAll.
+												categoriesToFilterOut removeAll ] ] ];
 						when: BlDoubleClickEvent
 							do: [ :e | 
 								e consumed: true.
