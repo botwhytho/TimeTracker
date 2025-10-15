@@ -669,9 +669,7 @@ TtEventCollection >> groupedAndSortedByDuration [
 				TtCategorizedEventsHelper new
 					category: anAssociation key;
 					collection: anAssociation value;
-					sum: (anAssociation value
-							collect: [ :each | each duration / ((self rootCollection allEqualTo: each) size + 1) ])
-							sum ].
+					sum: (anAssociation value items sum: self partialDurationWhenMultiTasking) ].
 	summedGroupings
 		detect: [ :each | each category = TtCategories untracked ]
 		ifFound: [ :found | 
