@@ -1059,9 +1059,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 				| progressPercent dailyCatchupAmount |
 				each key isString
 					ifTrue: [ | hoursPerDay percentWithIdeals percentWithoutIdeals roomForImprovement string totalHours |
-						totalHours := (each value
-								groupedBy: [ :aTrackedTime | aTrackedTime as: Timespan ]) keys
-								sum: #duration.
+						totalHours := each value items sum: self partialDurationWhenMultiTasking.
 						hoursPerDay := (totalHours / daysWithData) asHours.
 						percentWithoutIdeals := hoursPerDay / 24.
 						string := 'Time without ideals is '
@@ -1075,8 +1073,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 										, (roomForImprovement * 24 printShowingDecimalPlaces: 2)
 										, ' hours/day were not used ideally.' ].
 						string ]
-					ifFalse: [ progressPercent := ((each value items sum: #duration)
-								/ daysWithData days) asFloat / each key minValue.
+					ifFalse: [ progressPercent := ((each value items
+								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
+								/ each key minValue.
 						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData) ]
@@ -1095,8 +1094,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			stencil: [ :each | 
 				| barChart container dailyCatchupAmount groupedByDay indexOfCurrentDayOfWeek progressPercent |
 				each key isString
-					ifFalse: [ progressPercent := ((each value items sum: #duration) / daysWithData days)
-								asFloat / each key minValue.
+					ifFalse: [ progressPercent := ((each value items
+								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
+								/ each key minValue.
 						dailyCatchupAmount := [ daysWithData days
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
@@ -1105,7 +1105,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 								on: MessageNotUnderstood
 								do: [ #() ].
 						groupedByDay := groupedByDay
-								collect: [ :daysData | daysData value: (daysData value items sum: #duration) asHours ].
+								collect: [ :daysData | 
+									daysData
+										value: (daysData value items sum: self partialDurationWhenMultiTasking) asHours ].
 						groupedByDay := groupedByDay
 								, ((self groupedByDay keys difference: (groupedByDay collect: #key))
 										collect: [ :aDate | aDate -> 0 ]).
@@ -2128,8 +2130,9 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 			idealProgress := groupedByIdeals
 					collect: [ :each | 
 						| progressPercent |
-						progressPercent := (((each value items sum: #duration) / daysWithData days)
-								asFloat / each key minValue) min: 1.
+						progressPercent := ((each value items
+								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
+								/ each key minValue min: 1.
 						{progressPercent >= 1 ifTrue: [ 1 ] ifFalse: [ 0 ].
 							progressPercent} ].
 			(idealProgress collect: #first) sum asString , '/'
