@@ -1218,8 +1218,6 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	^ anAction explicit
 		priority: 0.5;
 		stencil: [ :aBrTab | 
-			| aContainer |
-			aContainer := aBrTab phlow firstParentWithViewContent parent parent.
 			BrButton new
 				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 				icon: BrGlamorousVectorIcons inspect;
@@ -1247,9 +1245,11 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 												latestWeek groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContainer parent
-													replaceChild: aContainer
-													with: (GtInspector newOn: latestWeek).
+												aContext navigationContext object
+													in: [ :aTtEventCollection | 
+														aTtEventCollection class = TtEventCollection
+															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import Earliest'
@@ -1259,9 +1259,11 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 												latestWeek groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContainer parent
-													replaceChild: aContainer
-													with: (GtInspector newOn: latestWeek).
+												aContext navigationContext object
+													in: [ :aTtEventCollection | 
+														aTtEventCollection class = TtEventCollection
+															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import All'
@@ -1271,9 +1273,11 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 												latestWeek groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContainer parent
-													replaceChild: aContainer
-													with: (GtInspector newOn: latestWeek).
+												aContext navigationContext object
+													in: [ :aTtEventCollection | 
+														aTtEventCollection class = TtEventCollection
+															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'List Pending Days'
