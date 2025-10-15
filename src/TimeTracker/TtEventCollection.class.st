@@ -943,7 +943,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 	ideals := self ideals.
 	^ aView columnedTree
 		title: 'Ideals';
-		priority: 0.5;
+		priority: 0;
 		items: [ groupedByYearAndWeeks associations ];
 		children: [ :each | each key isInteger ifTrue: [ {each value -> nil} ] ifFalse: [ #() ] ];
 		column: 'Year'
@@ -1012,7 +1012,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 
 { #category : #views }
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
-	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime |
+	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
 	activeIdeals := (aContext at: 'ideals')
 			ifNil: [ ideals associations
@@ -1027,8 +1027,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 					detect: [ :anIdeal | 
 						anIdeal category
 							ifNil: [ anIdeal computation value: aTrackedTime ]
-							ifNotNil: [ :notNil | 
-								(aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
+							ifNotNil: [ :notNil | (aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
 	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
 	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
@@ -1041,9 +1040,13 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
 	daysWithData := self groupedByDay keys size.
+	dynamicPriority := (aContext navigationContext withAllNavigationContexts second
+			gtOverview allSatisfy: [ :each | each value isNil ])
+			ifTrue: [ -5 ]
+			ifFalse: [ 0 ].
 	^ aView columnedList
 		title: 'Ideals';
-		priority: 0;
+		priority: dynamicPriority;
 		items: [ groupedByIdeals associations ];
 		column: 'Ideal Time Usage'
 			text: [ :each | 
@@ -1488,7 +1491,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 		title: ((self groupedBy: #asWeek) keys size = 1
 				ifTrue: [ 'Weekly Summary' ]
 				ifFalse: [ 'Summary' ]);
-		priority: 0;
+		priority: -1;
 		stencil: [ | dailySummary data entriesByDay horizontalPane resizer verticalPane |
 			data := self calculateAnglesForDonut.
 			horizontalPane := BrHorizontalPane new
