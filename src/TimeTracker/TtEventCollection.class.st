@@ -195,7 +195,7 @@ TtEventCollection >> buildBars: data [
 			BlElement new
 				id: categoryName;
 				border: (BlBorder paint: Color lightGray width: 1);
-				aptitude: (BrGlamorousWithLabelTooltipAptitude new
+				aptitude: (BrGlamorousWithExplicitTooltipAptitude new
 						text: (aGtPlotterContext originalValue
 								in: [ :helper | 
 									(helper sum / self groupedByDay keys size roundUpTo: 1 minute) asString
