@@ -1136,7 +1136,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 											dashed;
 											width: 1;
 											build) ];
-							dataValue: each key minValue * 24 * (1 - each key leeway).
+							dataValue: (each key minValue - each key leeway) * 24.
 						barChart newHorizontalLine
 							lineStencil: [ BlLineElement new
 									border: (BlBorderBuilder new
@@ -1144,7 +1144,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 											dashed;
 											width: 1;
 											build) ];
-							dataValue: each key minValue * 24 * (1 + each key leeway).
+							dataValue: (each key minValue + each key leeway) * 24.
 						container := barChart create
 								margin: (BlInsets all: 5);
 								border: Color black asBlBorder;
@@ -1163,9 +1163,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 												| color ideal value |
 												value := (groupedByDay at: i) value.
 												ideal := each key minValue * 24.
-												value < (ideal * (1 - each key leeway))
+												value < (ideal - (each key leeway * 24))
 													ifTrue: [ color := Color lightRed ].
-												(value >= (ideal * (1 - each key leeway)) and: [ value < ideal ])
+												(value >= (ideal - (each key leeway * 24)) and: [ value < ideal ])
 													ifTrue: [ color := Color lightYellow ].
 												value >= ideal ifTrue: [ color := Color lightGreen ].
 												aBar children first background: color ] ]) ]
