@@ -61,6 +61,11 @@ TtTrackedTime class >> snippetClass [
 	^ TtTrackedTimeSnippet
 ]
 
+{ #category : #arithmetic }
+TtTrackedTime >> / aNumber [
+	^ self duration asHours / aNumber
+]
+
 { #category : #comparing }
 TtTrackedTime >> <= other [
 	self flag: #DEPRECATE.	"This looks redundant with superclass chain definitions. Test and remove"
@@ -287,6 +292,11 @@ TtTrackedTime >> labels [
 { #category : #accessing }
 TtTrackedTime >> labels: anObject [
 	labels := anObject
+]
+
+{ #category : #comparing }
+TtTrackedTime >> max: aValue [
+	^ self duration asHours max: aValue
 ]
 
 { #category : #printing }
