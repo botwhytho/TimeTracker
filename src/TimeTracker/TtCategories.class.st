@@ -220,16 +220,19 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 										icon: BrGlamorousVectorIcons remove;
 										label: 'Delete Category';
 										action: [ :aBrButton :aBrButtonModel :anEvent | 
-											| isUsed |
+											| categorizedEntries |
 											anEvent consumed: true.
-											self flag: #TODO.	"Figure out logic for when categories are deleted"
 											self root collection
-												ifNil: [ isUsed := false ]
-												ifNotNil: [ :notNil | isUsed := notNil timeEntries anySatisfy: [ :each | each category = aCategory ] ].
-											isUsed
-												ifTrue: [ self inform: 'This category is beind used and can''t be deleted'.
+												ifNil: [ categorizedEntries := #() ]
+												ifNotNil: [ :notNil | 
+													categorizedEntries := notNil rootCollection timeEntries
+															select: [ :aTrackedTime | aTrackedTime category hasCategoryOrParentCategoryNamed: aCategory name ] ].
+											categorizedEntries
+												ifNotEmpty: [ self
+														inform: 'This category is beind used and can''t be deleted. First re-categorize (or delete) all time entries. You can also rename the current category if that is useful, instead of deleting it'.
+													anEvent target phlow spawnObject: categorizedEntries.
 													anEvent target fireEvent: BrDropdownHideWish new ]
-												ifFalse: [ aCategory parentCategory children remove: aCategory.
+												ifEmpty: [ aCategory parentCategory children remove: aCategory.
 													self calculateHierarchy.
 													self root collection
 														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
