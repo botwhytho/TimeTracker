@@ -1076,11 +1076,10 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 					ifFalse: [ progressPercent := ((each value items
 								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
 								/ each key minValue.
-						dailyCatchupAmount := [ daysWithData days
+						dailyCatchupAmount := daysWithData days
 								* ((1 - progressPercent) * each key minValue)
-								/ (each key timePeriod asDays - daysWithData) ]
-								on: ZeroDivide
-								do: [ Duration zero ].
+								/ (each key timePeriod asDays - daysWithData
+										in: [ :aNumber | aNumber = 0 ifTrue: [ 1 ] ifFalse: [ aNumber ] ]).
 						'You are tracking to '
 							, (progressPercent * 100 printShowingDecimalPlaces: 2)
 							, '% of your goal of '
