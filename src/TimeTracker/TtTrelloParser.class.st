@@ -6,8 +6,9 @@ Class {
 
 { #category : #import }
 TtTrelloParser >> add: anAssociation toCollection: aCollection [
-	| entries |
+	| entries isToday |
 	entries := (anAssociation value at: 'description') lines.
+	isToday := anAssociation key = Date today.
 	entries
 		do: [ :line | 
 			| parsed |
@@ -15,19 +16,25 @@ TtTrelloParser >> add: anAssociation toCollection: aCollection [
 			parsed isArray
 				ifTrue: [ ($; split: parsed second)
 						do: [ :each | 
-							aCollection
-								add: ((self parseTimeSpan: parsed first date: anAssociation key)
-										in: [ :aTrackedTime | 
-											| activity |
-											activity := ($: split: each) collect: #trim.
-											aTrackedTime description: activity first.
-											activity size > 1 ifTrue: [ aTrackedTime details: activity last ].
-											aTrackedTime
-												falseAllBooleans;
-												rawData: line;
-												collection: aCollection;
-												daySerializedFrom: ($/ split: (anAssociation value at: 'trelloUrl')) last.
-											aTrackedTime ]) ] ] ]
+							| aTrackedTime |
+							aTrackedTime := self parseTimeSpan: parsed first date: anAssociation key.
+							self flag: #NOTE.	"If importing today, only import entries that don't exist, otherwise import everything"
+							(isToday not
+								or: [ isToday
+										and: [ aCollection
+												detect: [ :trackedTime | (aTrackedTime as: Timespan) = (trackedTime as: Timespan) ]
+												ifFound: [ false ]
+												ifNone: [ true ] ] ])
+								ifTrue: [ | activity |
+									activity := ($: split: each) collect: #trim.
+									aTrackedTime description: activity first.
+									activity size > 1 ifTrue: [ aTrackedTime details: activity last ].
+									aTrackedTime
+										falseAllBooleans;
+										rawData: line;
+										collection: aCollection;
+										daySerializedFrom: ($/ split: (anAssociation value at: 'trelloUrl')) last.
+									aCollection add: aTrackedTime ] ] ] ]
 ]
 
 { #category : #parsing }

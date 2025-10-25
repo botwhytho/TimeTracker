@@ -1772,15 +1772,13 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	daysToImport := aNumberOrDate class = Date
 			ifTrue: [ ((response keys select: [ :each | each = aNumberOrDate ])
 					difference: existingDays) asArray ]
-			ifFalse: [ ((response keys reject: [ :each | each = Date today ])
-					difference: existingDays) asArray
+			ifFalse: [ (response keys difference: existingDays) asArray
+					, (response keys select: [ :each | each = Date today ]) asArray
 					sorted: (#yourself
 							in: [ :anObject | 
 								aNumberOrDate negative
 									ifTrue: [ anObject perform: #descending ]
-									ifFalse: [ anObject perform: #ascending ] ]) ].	"daysToImport
-		select: [ :each | [ each < existingDays first ] on: SubscriptOutOfBounds do: [ false ] ]
-		thenDo: [ :each | self inform: 'Date: ' , each asString , ' may be a typo as it is historical.' ]."
+									ifFalse: [ anObject perform: #ascending ] ]) ].
 	(daysToImport
 		first: (([ aNumberOrDate abs ] on: MessageNotUnderstood do: [ 1 ])
 				min: daysToImport size))
