@@ -1080,6 +1080,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 								* ((1 - progressPercent) * each key minValue)
 								/ (each key timePeriod asDays - daysWithData
 										in: [ :aNumber | aNumber = 0 ifTrue: [ 1 ] ifFalse: [ aNumber ] ]).
+						self flag: #NOTE.	"The hours 'not used ideally' may be actually higher than calculated below if one goes past goals in some category. It subtracts, for now, from time without ideals that should be spent ideally"
 						'You are tracking to '
 							, (progressPercent * 100 printShowingDecimalPlaces: 2)
 							, '% of your goal of '
