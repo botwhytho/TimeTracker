@@ -1163,7 +1163,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 										bars := (container query // GtPlotterVerticalValueBarsElement) result.
 										bars
 											do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ].
-										(bars first: indexOfCurrentDayOfWeek)
+										(bars first: (indexOfCurrentDayOfWeek min: bars size))
 											doWithIndex: [ :aBar :i | 
 												| color ideal value |
 												value := (groupedByDay at: i) value.
