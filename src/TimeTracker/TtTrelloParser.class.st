@@ -14,18 +14,21 @@ TtTrelloParser >> add: anAssociation toCollection: aCollection [
 			| parsed |
 			parsed := self entry parse: line.
 			parsed isArray
-				ifTrue: [ ($; split: parsed second)
-						do: [ :each | 
-							| aTrackedTime |
-							aTrackedTime := self parseTimeSpan: parsed first date: anAssociation key.
-							self flag: #NOTE.	"If importing today, only import entries that don't exist, otherwise import everything"
-							(isToday not
-								or: [ isToday
-										and: [ aCollection
-												detect: [ :trackedTime | (aTrackedTime as: Timespan) = (trackedTime as: Timespan) ]
-												ifFound: [ false ]
-												ifNone: [ true ] ] ])
-								ifTrue: [ | activity |
+				ifTrue: [ self flag: #NOTE.	"If importing today, only import entries that don't exist, otherwise import everything"
+					(isToday not
+						or: [ isToday
+								and: [ aCollection
+										detect: [ :trackedTime | 
+											((self parseTimeSpan: parsed first date: anAssociation key) as: Timespan)
+												= (trackedTime as: Timespan) ]
+										ifFound: [ false ]
+										ifNone: [ true ] ] ])
+						ifTrue: [ ($; split: parsed second)
+								do: [ :each | 
+									| activity aTrackedTime |
+									aTrackedTime := self
+											parseTimeSpan: parsed first
+											date: anAssociation key.
 									activity := ($: split: each) collect: #trim.
 									aTrackedTime description: activity first.
 									activity size > 1 ifTrue: [ aTrackedTime details: activity last ].
