@@ -294,7 +294,12 @@ TtEventCollection >> buildDailySummary: data [
 					ifNotNil: [ BrButton new
 							aptitude: BrGlamorousButtonWithLabelAptitude;
 							label: each key yyyymmdd , '-' , (each key weekday first: 3);
-							action: [ :anElement | anElement phlow spawnObject: (self withAll: (each value collect: #value)) ] ] ]
+							action: [ :aBrButton :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: (self withAll: (each value collect: #value)) ];
+							actionWithModifiers: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+								aBlClickEvent modifiers = BlKeyModifiers alt
+									ifTrue: [ aBrButton phlow
+											spawnObject: (self
+													reject: [ :aTrackedTime | aTrackedTime start asDate asDateAndTime asUTC = each key asDateAndTime asUTC ]) ] ] ] ]
 			weight: 0.1;
 		column: 'Tracked Time'
 			stencil: [ :each | 
