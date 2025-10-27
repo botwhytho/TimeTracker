@@ -1018,10 +1018,11 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
 	activeIdeals := (aContext at: 'ideals')
-			ifNil: [ ideals associations
+			ifNil: [ self ideals
+					select: [  "ideals associations
 					detect: [ :each | each key includes: self first start ]
 					ifFound: [ :found | found value ]
-					ifNone: [ ideals associations last value ] ]
+					ifNone: [ ideals associations last value ]":each | each duration = Duration zero ] ]
 			ifNotNil: #yourself.
 	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
@@ -1190,6 +1191,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 		actionDropdownButtonLabel: 'Change Ideals'
 			content: [ :aButton :aBrTab | 
 				| groupByLabelMapping |
+				self flag: #NOTE.	"Below displays odd list at the moment as defining ideals as 'latest' or ones with no duration, which may have different start dates. Later will wrap individual ideals in Ideals collection wrapper and use that."
 				groupByLabelMapping := {'Ideal for Date range' -> nil}
 						, (ideals associations
 								collect: [ :each | 
