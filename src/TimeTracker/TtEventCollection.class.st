@@ -1019,10 +1019,10 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
 	activeIdeals := (aContext at: 'ideals')
 			ifNil: [ self ideals
-					select: [  "ideals associations
+					select: [ "ideals associations
 					detect: [ :each | each key includes: self first start ]
 					ifFound: [ :found | found value ]
-					ifNone: [ ideals associations last value ]":each | each duration = Duration zero ] ]
+					ifNone: [ ideals associations last value ]" :each | each duration = Duration zero ] ]
 			ifNotNil: #yourself.
 	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
@@ -1096,97 +1096,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 							, (dailyCatchupAmount asHours printShowingDecimalPlaces: 2)
 							, ' catch-up hours/day' ] ]
 			weight: 1.75;
-		column: 'Graphical Progress'
-			stencil: [ :each | 
-				| barChart container dailyCatchupAmount groupedByDay indexOfCurrentDayOfWeek progressPercent |
-				each key isString
-					ifFalse: [ progressPercent := ((each value items
-								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
-								/ each key minValue.
-						dailyCatchupAmount := [ daysWithData days
-								* ((1 - progressPercent) * each key minValue)
-								/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
-						self flag: #HACK.
-						groupedByDay := [ each value groupedByDay associations ]
-								on: MessageNotUnderstood
-								do: [ #() ].
-						groupedByDay := groupedByDay
-								collect: [ :daysData | 
-									daysData
-										value: (daysData value items sum: self partialDurationWhenMultiTasking) asHours ].
-						groupedByDay := groupedByDay
-								, ((self groupedByDay keys difference: (groupedByDay collect: #key))
-										collect: [ :aDate | aDate -> 0 ]).
-						groupedByDay := groupedByDay
-								sorted: [ :anAssociation | anAssociation key ] ascending.
-						groupedByDay := groupedByDay
-								collect: [ :anAssociation | anAssociation key: (Week nameOfDay: anAssociation key dayOfWeek) ].
-						indexOfCurrentDayOfWeek := groupedByDay size.
-						groupedByDay := groupedByDay
-								, ((Week dayNames difference: (groupedByDay collect: #key))
-										collect: [ :aDate | aDate -> (each key minValue * 24 + dailyCatchupAmount asHours) ]).
-						barChart := GtPlotterVerticalBarChart new
-								with: ((GtPlotterDataGroup new
-										values: groupedByDay;
-										labelled: [ :aLabel | aLabel key first: 3 ])
-										background: [ :aColumn | Color transparent ]);
-								barHeightScale: (GtPlotterLinearScale new
-										domainFrom: 0 to: (groupedByDay max: #value) + 2;
-										yourself);
-								barHeightData: #value yourself.
-						barChart newHorizontalLine dataValue: each key minValue * 24.
-						barChart newHorizontalLine
-							lineStencil: [ BlLineElement new
-									border: (BlBorderBuilder new
-											paint: Color black;
-											dashed;
-											width: 1;
-											build) ];
-							dataValue: (each key minValue - each key leeway) * 24.
-						barChart newHorizontalLine
-							lineStencil: [ BlLineElement new
-									border: (BlBorderBuilder new
-											paint: Color black;
-											dashed;
-											width: 1;
-											build) ];
-							dataValue: (each key minValue + each key leeway) * 24.
-						container := barChart create
-								margin: (BlInsets all: 5);
-								border: Color black asBlBorder;
-								constraintsDo: [ :c | 
-									c horizontal matchParent.
-									c vertical exact: 200 ].
-						container
-							enqueueTask: (BlDelayedTaskAction new
-									delay: 500 milliseconds;
-									action: [ | bars |
-										bars := (container query // GtPlotterVerticalValueBarsElement) result.
-										bars
-											do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ].
-										(bars first: (indexOfCurrentDayOfWeek min: bars size))
-											doWithIndex: [ :aBar :i | 
-												| color ideal value |
-												value := (groupedByDay at: i) value.
-												ideal := each key minValue * 24.
-												value < (ideal - (each key leeway * 24))
-													ifTrue: [ color := Color lightRed ].
-												(value >= (ideal - (each key leeway * 24)) and: [ value < ideal ])
-													ifTrue: [ color := Color lightYellow ].
-												value >= ideal ifTrue: [ color := Color lightGreen ].
-												aBar children first background: color ] ]) ]
-					ifTrue: [ BrVerticalPane new
-							alignCenter;
-							margin: (BlInsets all: 5);
-							constraintsDo: [ :c | 
-								c horizontal matchParent.
-								c vertical exact: 200 ];
-							addChild: (BrButton new
-									aptitude: BrGlamorousButtonWithLabelAptitude;
-									label: 'Click To View Time Without Ideals';
-									action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-										aBlClickEvent consumed: true.
-										aBrButton phlow spawnObject: each value ]) ] ];
+		column: 'Graphical Progress' stencil: self idealsDailyProgressBarChartStencil;
 		send: #value;
 		actionDropdownButtonLabel: 'Change Ideals'
 			content: [ :aButton :aBrTab | 
@@ -1754,6 +1664,113 @@ TtEventCollection >> hourlyTicksElement [
 { #category : #accessing }
 TtEventCollection >> ideals [
 	^ self rootCollection items select: #isIdealTimeUsage
+]
+
+{ #category : #views }
+TtEventCollection >> idealsDailyProgressBarChartStencil [
+	^ [ :each | 
+	| barChart container dailyCatchupAmount daysWithData groupedByDay indexOfCurrentDayOfWeek latestDay progressPercent |
+	daysWithData := self groupedByDay keys size.
+	each key isString
+		ifFalse: [ progressPercent := ((each value items
+					sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
+					/ each key minValue.
+			dailyCatchupAmount := [ daysWithData days
+					* ((1 - progressPercent) * each key minValue)
+					/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
+			self flag: #HACK.
+			groupedByDay := [ each value groupedByDay associations collect: #value ]
+					on: MessageNotUnderstood
+					do: [ #() ].
+			groupedByDay := groupedByDay
+					, ((self groupedByDay keys
+							difference: (groupedByDay
+									collect: [ :aTtEventCollection | aTtEventCollection first start asDate ]))
+							collect: [ :aDate | aDate -> 0 ]).
+			groupedByDay := groupedByDay
+					sorted: [ :aDay | aDay isCollection ifTrue: [ aDay first start asDate ] ifFalse: [ aDay key ] ]
+							ascending.
+			indexOfCurrentDayOfWeek := groupedByDay size.
+			latestDay := groupedByDay last
+					in: [ :aDay | aDay isCollection ifTrue: [ aDay first start asDate ] ifFalse: [ aDay key ] ].
+			groupedByDay := groupedByDay
+					, (((1 to: 7 - latestDay weekdayIndex)
+							collect: [ :aDay | (latestDay + aDay day) asDate ])
+							collect: [ :aDate | aDate -> (each key minValue * 24 + dailyCatchupAmount asHours) ]).
+			barChart := GtPlotterVerticalBarChart new
+					with: ((GtPlotterDataGroup new
+							values: groupedByDay;
+							labelled: [ :aDay | 
+								aDay isCollection
+									ifTrue: [ aDay first start asDate weekday first: 3 ]
+									ifFalse: [ aDay key weekday first: 3 ] ])
+							background: [ :aDay | 
+								aDay isCollection
+									ifTrue: [ | color ideal value |
+										value := (aDay value items sum: self partialDurationWhenMultiTasking)
+												asHours.
+										ideal := each key minValue * 24.
+										value < (ideal - (each key leeway * 24))
+											ifTrue: [ color := Color lightRed ].
+										(value >= (ideal - (each key leeway * 24)) and: [ value < ideal ])
+											ifTrue: [ color := Color lightYellow ].
+										value >= ideal ifTrue: [ color := Color lightGreen ].
+										color ]
+									ifFalse: [ Color transparent ] ]);
+					barHeightScale: (GtPlotterLinearScale new
+							domainFrom: 0
+								to: (groupedByDay
+										max: [ :aDay | 
+											aDay isCollection
+												ifTrue: [ (aDay value items sum: self partialDurationWhenMultiTasking) asHours ]
+												ifFalse: [ aDay value ] ]) + 2;
+							yourself);
+					barHeightData: [ :aDay | 
+						aDay isCollection
+							ifTrue: [ (aDay value items sum: self partialDurationWhenMultiTasking) asHours ]
+							ifFalse: [ aDay value ] ].
+			barChart newHorizontalLine dataValue: each key minValue * 24.
+			barChart newHorizontalLine
+				lineStencil: [ BlLineElement new
+						border: (BlBorderBuilder new
+								paint: Color black;
+								dashed;
+								width: 1;
+								build) ];
+				dataValue: (each key minValue - each key leeway) * 24.
+			barChart newHorizontalLine
+				lineStencil: [ BlLineElement new
+						border: (BlBorderBuilder new
+								paint: Color black;
+								dashed;
+								width: 1;
+								build) ];
+				dataValue: (each key minValue + each key leeway) * 24.
+			container := barChart create
+					margin: (BlInsets all: 5);
+					border: Color black asBlBorder;
+					constraintsDo: [ :c | 
+						c horizontal matchParent.
+						c vertical exact: 200 ].
+			container
+				enqueueTask: (BlDelayedTaskAction new
+						delay: 500 milliseconds;
+						action: [ | bars |
+							bars := (container query // GtPlotterVerticalValueBarsElement) result.
+							bars
+								do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ] ]) ]
+		ifTrue: [ BrVerticalPane new
+				alignCenter;
+				margin: (BlInsets all: 5);
+				constraintsDo: [ :c | 
+					c horizontal matchParent.
+					c vertical exact: 200 ];
+				addChild: (BrButton new
+						aptitude: BrGlamorousButtonWithLabelAptitude;
+						label: 'Click To View Time Without Ideals';
+						action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
+							aBlClickEvent consumed: true.
+							aBrButton phlow spawnObject: each value ]) ] ]
 ]
 
 { #category : #import }
