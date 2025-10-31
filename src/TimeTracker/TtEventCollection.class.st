@@ -1354,7 +1354,7 @@ TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 		action: [ :class | GtPhlowObjectAdviceAction object: categorizedWithPlaceholder ]
 ]
 
-{ #category : #search }
+{ #category : #searching }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
 	self flag: #TODO.	"Need to fix nesting into categories, play with methods like GtSpotterSearch>>#categoryToActOn:from:"

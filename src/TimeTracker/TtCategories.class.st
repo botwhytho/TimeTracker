@@ -387,6 +387,22 @@ TtCategories >> gtItemsByCategoryFor: aView [
 		send: #value
 ]
 
+{ #category : #searching }
+TtCategories >> gtSearchFor: aSearch [
+	<gtSearch>
+	^ aSearch list
+		priority: 1;
+		title: 'Search by Category Name';
+		items: [ self items ];
+		itemName: #name;
+		send: [ :aRawObject :aStep :thisSearch | aRawObject ];
+		sendCategory: [ :aCategory :aStep :thisSearch | 
+			aCategory items contents size = self size
+				ifTrue: [ self ]
+				ifFalse: [ aCategory ] ];
+		filterBySubstring
+]
+
 { #category : #initialization }
 TtCategories >> initialize [
 	super initialize.
