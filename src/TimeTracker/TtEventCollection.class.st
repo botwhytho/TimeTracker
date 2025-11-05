@@ -754,7 +754,7 @@ TtEventCollection >> groupedByCategoryForLineGraph [
 
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByDay [
-	^ self groupedBy: [ :each | each start asDate ]
+	^ self groupedBy: [ :each | each start asDate translateToUTC ]
 ]
 
 { #category : #'accessing - grouping' }
@@ -790,13 +790,18 @@ TtEventCollection >> groupedByIsRecurring [
 ]
 
 { #category : #'accessing - grouping' }
+TtEventCollection >> groupedByMonth [
+	^ self groupedBy: [ :each | each start asMonth translateToUTC ]
+]
+
+{ #category : #'accessing - grouping' }
 TtEventCollection >> groupedByTimespan [
 	^ self groupedBy: #asTimespan
 ]
 
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByWeek [
-	^ self groupedBy: [ :each | each start asWeek ]
+	^ self groupedBy: [ :each | each start asWeek translateToUTC ]
 ]
 
 { #category : #accessing }
@@ -820,7 +825,7 @@ TtEventCollection >> gtCalendarViewFor: aView [
 		title: 'Calendar View';
 		priority: 4;
 		stencil: [ | grid months |
-			months := self groupedBy: [ :each | each start asMonth ].
+			months := self groupedByMonth.
 			grid := BrHorizontalGrid new
 					matchParent;
 					columnCount: 3.
@@ -830,8 +835,7 @@ TtEventCollection >> gtCalendarViewFor: aView [
 						ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
 								timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
 			grid
-				addChildren: (((self groupedBy: [ :each | each start asMonth translateTo: each start asUTC offset ]) associations
-						sorted: #key ascending)
+				addChildren: ((months associations sorted: #key ascending)
 						collect: [ :aMonth | 
 							| calendar byDay |
 							calendar := MyGtCalendarElement new
