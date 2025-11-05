@@ -1791,15 +1791,16 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
-	existingDays := (self rootCollection
-			collect: [ :each | each start asDate ]
-			as: Set) asArray sorted: #yourself descending.
-	self flag: #TODO.	"Take a look at `TtEventCollection>>#listUnimportedDays`, deals with time-zone shifting, can be an issue at the cusp of a daylight savings time change or when importing earliest data if it is historical and in different time zone"
+	existingDays := self rootCollection groupedByDay keys.
 	daysToImport := aNumberOrDate class = Date
-			ifTrue: [ ((response keys select: [ :each | each = aNumberOrDate ])
+			ifTrue: [ ((response keys
+					select: [ :each | each translateToUTC = aNumberOrDate translateToUTC ])
 					difference: existingDays) asArray ]
-			ifFalse: [ (response keys difference: existingDays) asArray
-					, (response keys select: [ :each | each = Date today ]) asArray
+			ifFalse: [ ((response keys collect: #translateToUTC) difference: existingDays)
+					asArray
+					, (response keys
+							select: [ :each | each translateToUTC = Date today translateToUTC ])
+							asArray
 					sorted: (#yourself
 							in: [ :anObject | 
 								aNumberOrDate negative
@@ -1858,27 +1859,11 @@ TtEventCollection >> latestWeek [
 
 { #category : #import }
 TtEventCollection >> listUnimportedDays [
-	| response daysToImport existingDays timezoneRuns timezoneShiftedDays |
+	| response daysToImport |
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
-	existingDays := (self rootCollection
-			collect: [ :each | each start asDate ]
-			as: Set) asArray sorted: #yourself ascending.
-	timezoneRuns := (existingDays groupByRuns: #offset)
-			collect: [ :each | 
-				{each first.
-					each last} ].
-	timezoneShiftedDays := (response keys reject: [ :each | each = Date today ])
-			collect: [ :aDate | 
-				| offset |
-				offset := timezoneRuns
-						detect: [ :aRun | aDate >= aRun first and: [ aDate <= aRun second ] ]
-						ifNone: [ aDate < timezoneRuns first first
-								ifTrue: [ timezoneRuns first ]
-								ifFalse: [ timezoneRuns last ] ].
-				aDate translateTo: offset first offset ].
-	daysToImport := (timezoneShiftedDays difference: existingDays) asArray
-			sorted: #yourself ascending.
+	daysToImport := (response keys collect: #translateToUTC)
+			difference: self rootCollection groupedByDay keys.
 	^ daysToImport
 ]
 
@@ -2108,17 +2093,10 @@ TtEventCollection >> viewFilterContext: anObject [
 
 { #category : #accessing }
 TtEventCollection >> weekFromDate: aDate [
-	| thisWeek aDateWithTimezone |
-	self flag: #TODO. "Below tries to deal with daylight savings time, use time offsets at the time recorded. Should exemplify a week of data on the cusp of the timezone change."
-	aDateWithTimezone := self rootCollection
-			detect: [ :each | 
-				| start |
-				start := each start asDate.
-				start = (aDate translateTo: start offset) ].
-	thisWeek := (aDate asMonth weeks
-			collect: [ :aWeek | aWeek translateTo: aDateWithTimezone offset ])
-			detect: [ :aWeek | aWeek includes: aDate ].
-	^ self select: [ :each | thisWeek includes: each ]
+	| thisWeek |
+	thisWeek := aDate translateToUTC asMonth weeks
+			detect: [ :aWeek | aWeek includes: aDate translateToUTC ].
+	^ self select: [ :each | thisWeek includes: each start translateToUTC ]
 ]
 
 { #category : #views }
