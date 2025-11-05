@@ -1202,7 +1202,8 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'List Pending Days'
-											action: [ aBrButton phlow spawnObject: self unimportedDaysCalendar.
+											action: [ self unimportedDaysCalendar
+													ifNotNil: [ :notNil | aBrButton phlow spawnObject: notNil ].
 												aDropdownAptitude hide ].
 										aMenuItems ]).
 					aDropdownAptitude show ] ]
