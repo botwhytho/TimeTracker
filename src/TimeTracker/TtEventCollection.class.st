@@ -1811,7 +1811,7 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 				min: daysToImport size))
 		do: [ :day | 
 			TtTrelloParser new
-				add: (response associationAt: day)
+				add: (response associations detect: [ :each | each key translateToUTC = day ])
 				toCollection: self rootCollection ]
 ]
 
