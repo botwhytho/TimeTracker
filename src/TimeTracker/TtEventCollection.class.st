@@ -1730,7 +1730,8 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 					barHeightData: [ :aDay | 
 						aDay isCollection
 							ifTrue: [ (aDay value items sum: self partialDurationWhenMultiTasking) asHours ]
-							ifFalse: [ aDay value ] ].
+							ifFalse: [ aDay value ] ];
+					barElement: [ :aGtPlotterContext | BlElement new border: (BlBorder paint: Color black width: 1) ].
 			barChart newHorizontalLine dataValue: each key minValue * 24.
 			barChart newHorizontalLine
 				lineStencil: [ BlLineElement new
@@ -1754,13 +1755,7 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 					constraintsDo: [ :c | 
 						c horizontal matchParent.
 						c vertical exact: 200 ].
-			container
-				enqueueTask: (BlDelayedTaskAction new
-						delay: 500 milliseconds;
-						action: [ | bars |
-							bars := (container query // GtPlotterVerticalValueBarsElement) result.
-							bars
-								do: [ :aBar | aBar children first border: (BlBorder paint: Color black width: 1) ] ]) ]
+			container ]
 		ifTrue: [ BrVerticalPane new
 				alignCenter;
 				margin: (BlInsets all: 5);
