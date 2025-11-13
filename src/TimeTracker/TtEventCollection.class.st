@@ -1689,7 +1689,7 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 			groupedByDay := groupedByDay
 					, ((self groupedByDay keys
 							difference: (groupedByDay
-									collect: [ :aTtEventCollection | aTtEventCollection first start asDate ]))
+									collect: [ :aTtEventCollection | aTtEventCollection first start asDate translateToUTC ]))
 							collect: [ :aDate | aDate -> 0 ]).
 			groupedByDay := groupedByDay
 					sorted: [ :aDay | aDay isCollection ifTrue: [ aDay first start asDate ] ifFalse: [ aDay key ] ]
