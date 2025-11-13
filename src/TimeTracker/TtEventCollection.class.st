@@ -1683,7 +1683,9 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 			dailyCatchupAmount := [ daysWithData days
 					* ((1 - progressPercent) * each key minValue)
 					/ (each key timePeriod asDays - daysWithData) ] on: ZeroDivide do: [ 0 ].
-			groupedByDay := each value groupedByDay associations collect: #value.
+			groupedByDay := [ each value groupedByDay associations collect: #value ]
+					on: MessageNotUnderstood
+					do: [ #() ].
 			groupedByDay := groupedByDay
 					, ((self groupedByDay keys
 							difference: (groupedByDay
