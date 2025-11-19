@@ -132,22 +132,35 @@ TtEventCollection >> allCategorized [
 
 { #category : #filtering }
 TtEventCollection >> allEqualTo: aTtTrackedTime [
-	"Returns all entries happening at the same time. Had to define identityBefore/identityAfter (that use `identityIndexOf:`) for this to work properly as `indexOf:` just compares by `=`"
+	"Returns all entries happening at the same time using binary search"
 
-	| before after previous next sortedCollection |
+	| concurrentEntries previousIndex previousItem nextIndex nextItem index sortedCollection |
 	sortedCollection := self items value.
-	before := OrderedCollection new.
-	after := OrderedCollection new.
-	previous := sortedCollection identityBefore: aTtTrackedTime ifAbsent: [ nil ].
-	next := sortedCollection identityAfter: aTtTrackedTime ifAbsent: [ nil ].
+	concurrentEntries := IdentitySet new.
+	index := sortedCollection
+			findBinaryIndex: [ :randomTrackedTime | 
+				| return |
+				return := randomTrackedTime start > aTtTrackedTime start
+						ifTrue: [ -1 ]
+						ifFalse: [ 1 ].
+				randomTrackedTime = aTtTrackedTime ifTrue: [ return := 0 ].
+				return ]
+			ifNone: [ nil ].
+	index ifNil: [ ^ #() ].
+	previousIndex := index.
+	nextIndex := index.
 
-	[ previous isNotNil and: [ aTtTrackedTime = previous ] ]
-		whileTrue: [ before add: previous.
-			previous := sortedCollection identityBefore: previous ifAbsent: [ nil ] ].
-	[ next isNotNil and: [ aTtTrackedTime = next ] ]
-		whileTrue: [ after add: next.
-			next := sortedCollection identityAfter: next ifAbsent: [ nil ] ].
-	^ before , after
+	[ previousItem := [ sortedCollection at: previousIndex ] on: Error do: [ nil ].
+	previousItem isNotNil
+		and: [ aTtTrackedTime = previousItem and: [ (aTtTrackedTime == previousItem) not ] ] ]
+		whileTrue: [ concurrentEntries add: previousItem.
+			previousIndex := previousIndex - 1 ].
+	[ nextItem := [ sortedCollection at: nextIndex ] on: Error do: [ nil ].
+	nextItem isNotNil
+		and: [ aTtTrackedTime = nextItem and: [ (aTtTrackedTime == nextItem) not ] ] ]
+		whileTrue: [ concurrentEntries add: nextItem.
+			nextIndex := nextIndex + 1 ].
+	^ concurrentEntries asArray
 ]
 
 { #category : #filtering }
@@ -1022,11 +1035,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
 	activeIdeals := (aContext at: 'ideals')
-			ifNil: [ self ideals
-					select: [ "ideals associations
-					detect: [ :each | each key includes: self first start ]
-					ifFound: [ :found | found value ]
-					ifNone: [ ideals associations last value ]" :each | each duration = Duration zero ] ]
+			ifNil: [ self ideals select: [ :each | each duration = Duration zero ] ]
 			ifNotNil: #yourself.
 	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
@@ -1042,8 +1051,9 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			collect: [ :each | 
 				each
 					-> ({'items'
-								-> ({{'duration' -> 0 minutes} asDictionary as: NeoJSONObject} as: NeoJSONArray)}
-							asDictionary as: NeoJSONObject) ].
+								-> ({{'duration' -> 0 minutes.
+											'start' -> DateAndTime epoch} asDictionary as: NeoJSONObject}
+										as: NeoJSONArray)} asDictionary as: NeoJSONObject) ].
 	groupedByIdeals := (groupedByIdeals associations , idealsWithNoTrackedTime)
 			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
@@ -2121,8 +2131,9 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 					collect: [ :each | 
 						each
 							-> ({'items'
-										-> ({{'duration' -> 0 minutes} asDictionary as: NeoJSONObject} as: NeoJSONArray)}
-									asDictionary as: NeoJSONObject) ].
+										-> ({{'duration' -> 0 minutes.
+													'start' -> DateAndTime epoch} asDictionary as: NeoJSONObject}
+												as: NeoJSONArray)} asDictionary as: NeoJSONObject) ].
 			groupedByIdeals := groupedByIdeals associations , idealsWithNoTrackedTime
 					reject: [ :each | each key isString ].
 			daysWithData := aTtEventCollection groupedByDay keys size.
