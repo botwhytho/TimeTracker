@@ -708,14 +708,14 @@ TtEventCollection >> groupedBy: aBlock [
 		do: [ :each | 
 			| key collection |
 			key := aBlock value: each.
-			collection := result at: key ifAbsentPut: [ SortedCollection new ].
+			collection := result at: key ifAbsentPut: [ OrderedCollection new ].
 			collection add: each ].
 
 	result
 		keysAndValuesDo: [ :key :value | 
 			result
 				at: key
-				put: ((self species withAll: value)
+				put: ((self species withAll: (SortedCollection newFromArray: value))
 						page: self page;
 						categories: self categories;
 						viewFilterContext: self viewFilterContext;
