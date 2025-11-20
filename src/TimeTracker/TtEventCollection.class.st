@@ -1037,7 +1037,6 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	activeIdeals := (aContext at: 'ideals')
 			ifNil: [ self ideals select: [ :each | each duration = Duration zero ] ]
 			ifNotNil: #yourself.
-	self flag: #BUG.	"Need to take into account parallel time entries. Not fractionally counting and worse, if two parallel tasks match the ideal, they may be counted as 4 times the duration?"
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
 				activeIdeals
@@ -1046,14 +1045,14 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | (aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
-	self flag: #HACK.	"Using NeoJSONObject's override of DNU for duck typing for when no time has been categorized as the category in an ideal. Clean up with smarter domain objects"
 	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
 			collect: [ :each | 
 				each
-					-> ({'items'
-								-> ({{'duration' -> 0 minutes.
-											'start' -> DateAndTime epoch} asDictionary as: NeoJSONObject}
-										as: NeoJSONArray)} asDictionary as: NeoJSONObject) ].
+					-> ((self reject: [ :_ | true ])
+							add: (TtTrackedTime new
+									start: self first start;
+									description: 'NO TIME TRACKED');
+							yourself) ].
 	groupedByIdeals := (groupedByIdeals associations , idealsWithNoTrackedTime)
 			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
@@ -2130,10 +2129,11 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 			idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
 					collect: [ :each | 
 						each
-							-> ({'items'
-										-> ({{'duration' -> 0 minutes.
-													'start' -> DateAndTime epoch} asDictionary as: NeoJSONObject}
-												as: NeoJSONArray)} asDictionary as: NeoJSONObject) ].
+							-> ((self reject: [ :_ | true ])
+									add: (TtTrackedTime new
+											start: self first start;
+											description: 'NO TIME TRACKED');
+									yourself) ].
 			groupedByIdeals := groupedByIdeals associations , idealsWithNoTrackedTime
 					reject: [ :each | each key isString ].
 			daysWithData := aTtEventCollection groupedByDay keys size.
