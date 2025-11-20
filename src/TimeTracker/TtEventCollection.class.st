@@ -1152,8 +1152,7 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
 				icon: BrGlamorousVectorIcons inspect;
 				label: 'Import';
-				flag: #CAUTION;
-				action: [ :aBrButton "The first 3 options in dropdown update an object inspector in place, implementation could break if Gt internals change" :aBrButtonModel :aBlClickEvent | 
+				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
 					| aDropdownAptitude |
 					aBrButton
 						aptitudeDo: [ :anAptitude | 
@@ -1168,45 +1167,45 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 										aMenuItems := BrMenuItems new.
 										aMenuItems
 											addItemLabel: 'Import Latest'
-											action: [ | latestWeek |
-												self importLatestFromTrello.
-												latestWeek := self rootCollection latestWeek.
+											action: [ | importedDates weekIncludingDate  |
+												importedDates := self importLatestFromTrello.
+												weekIncludingDate := self rootCollection weekFromDate: importedDates first.
 												self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
-												latestWeek groupIntoContiguous size > 1
+												weekIncludingDate groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContext navigationContext object
 													in: [ :aTtEventCollection | 
 														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
 																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import Earliest'
-											action: [ | latestWeek |
-												self importEarliestFromTrello.
-												latestWeek := self rootCollection latestWeek.
-												latestWeek groupIntoContiguous size > 1
+											action: [ | importedDates weekIncludingDate |
+												importedDates := self importEarliestFromTrello.
+												weekIncludingDate := self rootCollection weekFromDate: importedDates first.
+												weekIncludingDate groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContext navigationContext object
 													in: [ :aTtEventCollection | 
 														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
 																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
 											addItemLabel: 'Import All'
-											action: [ | latestWeek |
-												self importAllFromTrello.
-												latestWeek := self rootCollection latestWeek.
-												latestWeek groupIntoContiguous size > 1
+											action: [ | importedDates weekIncludingDate |
+												importedDates := self importAllFromTrello.
+												weekIncludingDate := self rootCollection weekFromDate: importedDates first.
+												weekIncludingDate groupIntoContiguous size > 1
 													ifTrue: [ self
 															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
 												aContext navigationContext object
 													in: [ :aTtEventCollection | 
 														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: latestWeek.
+															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
 																aBrButton phlow fireToolUpdateWish ] ].
 												aDropdownAptitude hide ].
 										aMenuItems
@@ -1214,6 +1213,42 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 											action: [ self unimportedDaysCalendar
 													ifNotNil: [ :notNil | aBrButton phlow spawnObject: notNil ].
 												aDropdownAptitude hide ].
+										aMenuItems
+											addItem: (BrMenuSubmenuItem new
+													label: 'Re-Import Partial Day';
+													submenuItem: (BrMenuExplicitItem new
+															stencil: [ :aBrMenuExplicitItem | 
+																| daysWithData |
+																daysWithData := self rootCollection groupedByDay keys.
+																(MyGtCalendarElement
+																	forDate: self groupedByDay keys max
+																	asElementDo: [ :calendarElement | 
+																		| daysInMonth |
+																		daysInMonth := daysWithData
+																				select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+																				thenCollect: #dayOfMonth.
+																		calendarElement dayElements
+																			associationsDo: [ :anAssociation | 
+																				(daysInMonth includes: anAssociation key)
+																					ifTrue: [ anAssociation value background: Color veryVeryLightGray ] ] ])
+																	when: GtCalendarDateClickedEvent
+																	do: [ :anEvent | 
+																		| weekIncludingDate |
+																		anEvent consumed: true.
+																		self importFromTrello: anEvent date.
+																		weekIncludingDate := self rootCollection
+																				weekFromDate: anEvent date.
+																		aContext navigationContext object
+																			in: [ :aTtEventCollection | 
+																				aTtEventCollection class = TtEventCollection
+																					ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+																						aBrButton phlow fireToolUpdateWish ] ].
+																		aDropdownAptitude hide ] ])).
+										aMenuItems
+											addItem: (BrMenuSubmenuItem new
+													label: 'Test Large Submenu';
+													submenuItem: (BrMenuExplicitItem new
+															stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 500 @ 500 ])).
 										aMenuItems ]).
 					aDropdownAptitude show ] ]
 ]
@@ -1783,25 +1818,27 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 
 { #category : #import }
 TtEventCollection >> importAllFromTrello [
-	self importFromTrello: Float infinity
+	^ self importFromTrello: Float infinity
 ]
 
 { #category : #import }
 TtEventCollection >> importEarliestFromTrello [
-	self importFromTrello: 1
+	^ self importFromTrello: 1
 ]
 
 { #category : #import }
 TtEventCollection >> importFromTrello: aNumberOrDate [
-	| response daysToImport existingDays |
+	| importedDates response daysToImport existingDays isDate |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
+	importedDates := OrderedCollection new.
 	existingDays := self rootCollection groupedByDay keys.
-	daysToImport := aNumberOrDate class = Date
-			ifTrue: [ ((response keys
+	isDate := aNumberOrDate class = Date.
+	daysToImport := isDate
+			ifTrue: [ (response keys
 					select: [ :each | each translateToUTC = aNumberOrDate translateToUTC ])
-					difference: existingDays) asArray ]
+					asArray ]
 			ifFalse: [ ((response keys collect: #translateToUTC) difference: existingDays)
 					asArray
 					, (response keys
@@ -1813,17 +1850,19 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 									ifTrue: [ anObject perform: #descending ]
 									ifFalse: [ anObject perform: #ascending ] ]) ].
 	(daysToImport
-		first: (([ aNumberOrDate abs ] on: MessageNotUnderstood do: [ 1 ])
-				min: daysToImport size))
+		first: ((isDate ifTrue: [ 1 ] ifFalse: [ aNumberOrDate abs ]) min: daysToImport size))
 		do: [ :day | 
+			importedDates add: day.
 			TtTrelloParser new
-				add: (response associations detect: [ :each | each key translateToUTC = day translateToUTC ])
-				toCollection: self rootCollection ]
+				add: (response associations
+						detect: [ :each | each key translateToUTC = day translateToUTC ])
+				toCollection: self rootCollection ].
+	^ importedDates
 ]
 
 { #category : #import }
 TtEventCollection >> importLatestFromTrello [
-	self importFromTrello: -1
+	^ self importFromTrello: -1
 ]
 
 { #category : #accessing }

@@ -6,23 +6,19 @@ Class {
 
 { #category : #import }
 TtTrelloParser >> add: anAssociation toCollection: aCollection [
-	| entries isToday |
+	| entries |
 	entries := (anAssociation value at: 'description') lines.
-	isToday := anAssociation key = Date today.
 	entries
 		do: [ :line | 
 			| parsed |
 			parsed := self entry parse: line.
 			parsed isArray
-				ifTrue: [ self flag: #NOTE.	"If importing today, only import entries that don't exist, otherwise import everything"
-					(isToday not
-						or: [ isToday
-								and: [ aCollection
-										detect: [ :trackedTime | 
-											((self parseTimeSpan: parsed first date: anAssociation key) as: Timespan)
-												= (trackedTime as: Timespan) ]
-										ifFound: [ false ]
-										ifNone: [ true ] ] ])
+				ifTrue: [ (aCollection
+						detect: [ :trackedTime | 
+							((self parseTimeSpan: parsed first date: anAssociation key) as: Timespan)
+								= (trackedTime as: Timespan) ]
+						ifFound: [ false ]
+						ifNone: [ true ])
 						ifTrue: [ ($; split: parsed second)
 								do: [ :each | 
 									| activity aTrackedTime |
