@@ -213,10 +213,9 @@ TtEventCollection >> buildBars: data [
 				aptitude: (BrGlamorousWithExplicitTooltipAptitude new
 						text: (aGtPlotterContext originalValue
 								in: [ :helper | 
-									(helper sum / self groupedByDay keys size roundUpTo: 1 minute) asString
-										, ' avg, '
-										, ((helper sum / (helper collection groupedByDay keys size max: 1)) roundUpTo: 1 minute)
-												asString , '/day, '
+									(helper sum / self datesWithData size roundUpTo: 1 minute) asString , ' avg, '
+										, (helper sum / (helper collection datesWithData size max: 1)
+												roundUpTo: 1 minute) asString , '/day, '
 										, ((helper sum roundUpTo: 1 minute) asHours round: 1) asString
 										, ' total' ]));
 				when: BlClickEvent
@@ -407,9 +406,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 	entriesByDay := timeEntries groupedByWeek size = 1
 			ifTrue: [ timeEntries groupedByDay associations sorted: #key ascending ]
 			ifFalse: [ timeEntries groupedByDay associations sorted: #key descending ].
-	timeEntriesAndDays := timeEntries asArray
-			, (self timeEntries groupedByDay keys
-					collect: [ :each | Timespan starting: each duration: each asDuration ]).
+	timeEntriesAndDays := timeEntries asArray , self timeEntries datesWithData.
 	self flag: #EXPENSIVE.	"Should we cache the below calculation?"
 	notes := self rootCollection notes asArray
 			flatCollect: [ :each | 
@@ -652,6 +649,11 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 ]
 
 { #category : #accessing }
+TtEventCollection >> datesWithData [
+	^ (self items value collectAsSet: [ :each | each start asDate translateToUTC ]) asArray
+]
+
+{ #category : #accessing }
 TtEventCollection >> defaultPage [
 	^ LeDatabasesRegistry defaultLogicalDatabase
 		pageNamed: self class defaultPageName
@@ -692,7 +694,7 @@ TtEventCollection >> groupedAndSortedByDuration [
 		detect: [ :each | each category = TtCategories untracked ]
 		ifFound: [ :found | 
 			found
-				sum: self timeEntries groupedByDay keys size days - groupedByTimespan keys sum ]
+				sum: self timeEntries datesWithData size days - groupedByTimespan keys sum ]
 		ifNone: [  ].
 	^ summedGroupings sorted: #sum descending
 ]
@@ -738,15 +740,15 @@ TtEventCollection >> groupedByCategory [
 							ifFalse: [ aCategory moveUpHierarchy: self groupingLevel ] ] ].
 	daysWithUntrackedTime := self timeEntries groupedByDay associations
 			select: [ :anAssociation | 
-				(anAssociation value
-					groupedBy: [ :each | each value as: each value class superclass ]) keys sum
-					< 1 day ]
+				(anAssociation value items value collectAsSet: [ :each | each as: Timespan ])
+					sum < 1 day ]
 			thenCollect: #key.
 	self includeUntracked
 		ifTrue: [ daysWithUntrackedTime
 				ifNotEmpty: [ grouped
 						at: TtCategories untracked
-						put: (self timeEntries select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ] ].
+						put: (self timeEntries
+								select: [ :each | daysWithUntrackedTime includes: each start asDate ]) ] ].
 	^ grouped
 ]
 
@@ -1056,7 +1058,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	groupedByIdeals := (groupedByIdeals associations , idealsWithNoTrackedTime)
 			asOrderedDictionary.
 	groupedByIdeals size < 2 ifTrue: [ ^ aView empty ].
-	daysWithData := self groupedByDay keys size.
+	daysWithData := self datesWithData size.
 	dynamicPriority := (aContext navigationContext withAllNavigationContexts second
 			gtOverview allSatisfy: [ :each | each value isNil ])
 			ifTrue: [ -5 ]
@@ -1204,7 +1206,7 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 																| daysWithoutData |
 																daysWithoutData := self listUnimportedDays.
 																(MyGtCalendarElement
-																	forDate: self groupedByDay keys max
+																	forDate: self datesWithData max
 																	asElementDo: [ :calendarElement | 
 																		| daysInMonth |
 																		daysInMonth := daysWithoutData
@@ -1233,9 +1235,9 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 													submenuItem: (BrMenuExplicitItem new
 															stencil: [ :aBrMenuExplicitItem | 
 																| daysWithData |
-																daysWithData := self rootCollection groupedByDay keys.
+																daysWithData := self rootCollection datesWithData.
 																(MyGtCalendarElement
-																	forDate: self groupedByDay keys max
+																	forDate: daysWithData max
 																	asElementDo: [ :calendarElement | 
 																		| daysInMonth |
 																		daysInMonth := daysWithData
@@ -1290,9 +1292,9 @@ TtEventCollection >> gtInspectActionFor: anAction [
 				items: {'ALL IN CURRENT DAYS'
 							-> [ :e | 
 								| days |
-								days := self groupedByDay keys.
+								days := self datesWithData.
 								e phlow
-									spawnObject: (self rootCollection select: [ :each | days includes: each start asDate ]).
+									spawnObject: (self rootCollection select: [ :each | days includes: each start asDate translateToUTC ]).
 								e fireEvent: BrDropdownHideWish new ].
 						'ALL IN CURRENT TIME RANGES'
 							-> [ :e | 
@@ -1560,7 +1562,7 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 	isSingleCategory := self groupedByCategory keys size = 2.
 	^ anAction button
 		priority: 0.25;
-		label: (self groupedByDay keys
+		label: (self datesWithData
 				in: [ :days | 
 					| firstDay lastDay trackedDays totalDays |
 					firstDay := days min.
@@ -1572,8 +1574,8 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 							totalTrackedDays := ((aContext navigation previousContext isNil
 									or: [ (aContext navigation previousContext object isKindOf: TtEventCollection) not ])
 									ifTrue: [ self rootCollection ]
-									ifFalse: [ aContext navigation previousContext object ]) groupedByDay
-									keys size.
+									ifFalse: [ aContext navigation previousContext object ]) datesWithData
+									size.
 							trackedDays asString , '/' , totalTrackedDays asString , ' tracked ('
 								, (trackedDays / totalTrackedDays * 100 roundTo: 1) asString , '%)' ]
 						ifFalse: [ trackedDays asString , '/' , totalDays asString , ' tracked ('
@@ -1607,9 +1609,9 @@ TtEventCollection >> gtWeekFor: anAction [
 								stencil: [ BrMenuExplicit new
 										stencil: [ :anExplicitMenu | 
 											| daysWithData |
-											daysWithData := self rootCollection groupedByDay keys.
+											daysWithData := self rootCollection datesWithData.
 											element := MyGtCalendarElement
-													forDate: self groupedByDay keys max
+													forDate: self datesWithData max
 													asElementDo: [ :calendarElement | 
 														| daysInMonth |
 														daysInMonth := daysWithData
@@ -1634,12 +1636,11 @@ TtEventCollection >> gtWeekFor: anAction [
 																	ifNotNil: [ | sortedDates |
 																		sortedDates := {firstDate.
 																				anEvent date} sorted: #yourself ascending.
-																		self flag: #TODO.	"Need to deal with daylight savings time"
 																		aBrButton phlow
 																			spawnObject: (self rootCollection
 																					select: [ :each | 
-																						each start asDate >= sortedDates first
-																							and: [ each start asDate <= sortedDates second ] ]).
+																						each start asDate translateToUTC >= sortedDates first translateToUTC
+																							and: [ each start asDate translateToUTC <= sortedDates second translateToUTC ] ]).
 																		firstDate := nil.
 																		anExplicitMenu hide ].
 																anEvent consumed: true ] ] ] ]).
@@ -1660,14 +1661,14 @@ TtEventCollection >> gtWeekFor: anAction [
 										stencil: [ BrMenuExplicit new
 												stencil: [ :anExplicitMenu | 
 													calendar1 := MyGtCalendarElement
-															forDate: self rootCollection groupedByDay keys max.
+															forDate: self rootCollection datesWithData max.
 													calendar1
 														when: GtCalendarDateClickedEvent
 														do: [ :anEvent | 
 															anEvent consumed: true.
 															week1 := self rootCollection weekFromDate: anEvent date ].
 													calendar2 := MyGtCalendarElement
-															forDate: self rootCollection groupedByDay keys max.
+															forDate: self rootCollection datesWithData max.
 													calendar2
 														when: GtCalendarDateClickedEvent
 														do: [ :anEvent | 
@@ -1743,7 +1744,7 @@ TtEventCollection >> ideals [
 TtEventCollection >> idealsDailyProgressBarChartStencil [
 	^ [ :each | 
 	| barChart container dailyCatchupAmount daysWithData groupedByDay indexOfCurrentDayOfWeek latestDay progressPercent |
-	daysWithData := self groupedByDay keys size.
+	daysWithData := self datesWithData size.
 	each key isString
 		ifFalse: [ progressPercent := ((each value items
 					sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
@@ -1755,7 +1756,7 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 					on: MessageNotUnderstood
 					do: [ #() ].
 			groupedByDay := groupedByDay
-					, ((self groupedByDay keys
+					, ((self datesWithData
 							difference: (groupedByDay
 									collect: [ :aTtEventCollection | aTtEventCollection first start asDate translateToUTC ]))
 							collect: [ :aDate | aDate -> 0 ]).
@@ -1857,7 +1858,7 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
 	importedDates := OrderedCollection new.
-	existingDays := self rootCollection groupedByDay keys.
+	existingDays := self rootCollection datesWithData.
 	isDate := aNumberOrDate class = Date.
 	daysToImport := isDate
 			ifTrue: [ (response keys
@@ -1923,7 +1924,7 @@ TtEventCollection >> labelFormatX [
 
 { #category : #accessing }
 TtEventCollection >> latestWeek [
-	^ self rootCollection weekFromDate: self rootCollection groupedByDay keys max
+	^ self rootCollection weekFromDate: self rootCollection last start asDate
 ]
 
 { #category : #import }
@@ -1932,7 +1933,7 @@ TtEventCollection >> listUnimportedDays [
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
 	self rootCollection loadFromLepiter.
 	daysToImport := (response keys collect: #translateToUTC)
-			difference: self rootCollection groupedByDay keys.
+			difference: self rootCollection datesWithData.
 	^ daysToImport
 ]
 
@@ -2024,7 +2025,7 @@ TtEventCollection >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		nextPut: $(;
-		nextPutAll: (self groupedByDay keys
+		nextPutAll: (self datesWithData
 				in: [ :someDates | 
 					someDates min yyyymmdd , '-' , (someDates min weekday first: 3)
 						, (someDates min = someDates max
@@ -2034,12 +2035,6 @@ TtEventCollection >> printOn: aStream [
 						, (someDates size = 1 ifTrue: [ ' day, ' ] ifFalse: [ ' days, ' ]) ]);
 		nextPutAll: self size asString , ' items';
 		nextPutAll: '])'
-]
-
-{ #category : #accessing }
-TtEventCollection >> recalculateGroupedByDay [
-	groupedByDay := nil.
-	^ self groupedByDay
 ]
 
 { #category : #enumerating }
@@ -2149,7 +2144,7 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 									yourself) ].
 			groupedByIdeals := groupedByIdeals associations , idealsWithNoTrackedTime
 					reject: [ :each | each key isString ].
-			daysWithData := aTtEventCollection groupedByDay keys size.
+			daysWithData := aTtEventCollection datesWithData size.
 			idealProgress := groupedByIdeals
 					collect: [ :each | 
 						| progressPercent |
