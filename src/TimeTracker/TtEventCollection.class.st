@@ -1287,35 +1287,36 @@ TtEventCollection >> gtInspectActionFor: anAction [
 		label: 'ALL TIME';
 		tooltip: 'View ALL historical data';
 		priority: 1;
-		content: [ :aButton | 
-			BrGlamorousSimpleContextMenuContent new
-				items: {'ALL IN CURRENT DAYS'
-							-> [ :e | 
-								| days |
-								days := self datesWithData.
-								e phlow
-									spawnObject: (self rootCollection select: [ :each | days includes: each start asDate translateToUTC ]).
-								e fireEvent: BrDropdownHideWish new ].
-						'ALL IN CURRENT TIME RANGES'
-							-> [ :e | 
-								| timeRanges |
-								timeRanges := self groupIntoContiguous collect: #key.
-								e phlow
-									spawnObject: (self rootCollection
-											select: [ :each | timeRanges anySatisfy: [ :aTimespan | aTimespan includes: each ] ]).
-								e fireEvent: BrDropdownHideWish new ].
-						'ALL EXCLUDING CURRENT TIME RANGES'
-							-> [ :e | 
-								| timeRanges |
-								timeRanges := self groupIntoContiguous collect: #key.
-								e phlow
-									spawnObject: (self rootCollection
-											select: [ :each | timeRanges noneSatisfy: [ :aTimespan | aTimespan includes: each ] ]).
-								e fireEvent: BrDropdownHideWish new ].
-						'ALL TIME'
-							-> [ :e | 
-								e phlow spawnObject: self rootCollection.
-								e fireEvent: BrDropdownHideWish new ]} ]
+		menu: [ :aBrButton :aBrTab | 
+			BrMenuItems new
+				addItemLabel: 'ALL IN CURRENT DAYS'
+					action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+						| days |
+						days := self datesWithData.
+						aBrMenuActionItemElement phlow
+							spawnObject: (self rootCollection
+									select: [ :each | days includes: each start asDate translateToUTC ]).
+						aBrMenuActionItemElement fireEvent: BrDropdownHideWish new ];
+				addItemLabel: 'ALL IN CURRENT TIME RANGES'
+					action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+						| timeRanges |
+						timeRanges := self groupIntoContiguous collect: #key.
+						aBrMenuActionItemElement phlow
+							spawnObject: (self rootCollection
+									select: [ :each | timeRanges anySatisfy: [ :aTimespan | aTimespan includes: each ] ]).
+						aBrMenuActionItemElement fireEvent: BrDropdownHideWish new ];
+				addItemLabel: 'ALL EXCLUDING CURRENT TIME RANGES'
+					action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+						| timeRanges |
+						timeRanges := self groupIntoContiguous collect: #key.
+						aBrMenuActionItemElement phlow
+							spawnObject: (self rootCollection
+									select: [ :each | timeRanges noneSatisfy: [ :aTimespan | aTimespan includes: each ] ]).
+						aBrMenuActionItemElement fireEvent: BrDropdownHideWish new ];
+				addItemLabel: 'ALL TIME'
+					action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+						aBrMenuActionItemElement phlow spawnObject: self rootCollection.
+						aBrMenuActionItemElement fireEvent: BrDropdownHideWish new ] ]
 ]
 
 { #category : #views }
