@@ -1147,136 +1147,113 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 		ifNil: [ false ]
 		ifNotNil: [ :notNil | notNil object isKindOf: TtEventCollection ])
 		ifTrue: [ ^ anAction noAction ].
-	^ anAction explicit
+	^ anAction dropdown
 		priority: 0.5;
-		stencil: [ :aBrTab | 
-			BrButton new
-				aptitude: BrGlamorousButtonWithIconAndLabelAptitude;
-				icon: BrGlamorousVectorIcons inspect;
-				label: 'Import';
-				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-					| aDropdownAptitude |
-					aBrButton
-						aptitudeDo: [ :anAptitude | 
-							anAptitude
-								withAllActorsBreadthFirstDo: [ :eachActor | 
-									BrGlamorousWithExplicitDropdownAptitude = eachActor class
-										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
-					aBrButton
-						addAptitude: (aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new
-									withoutHandle;
-									stencil: [ | aMenuItems |
-										aMenuItems := BrMenuItems new.
-										aMenuItems
-											addItemLabel: 'Import Latest'
-											action: [ | importedDates weekIncludingDate |
-												importedDates := self importLatestFromTrello.
-												weekIncludingDate := self rootCollection
-														weekFromDate: importedDates first.
-												self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
-												weekIncludingDate groupIntoContiguous size > 1
-													ifTrue: [ self
-															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContext navigationContext object
-													in: [ :aTtEventCollection | 
-														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-																aBrButton phlow fireToolUpdateWish ] ].
-												aDropdownAptitude hide ].
-										aMenuItems
-											addItemLabel: 'Import Earliest'
-											action: [ | importedDates weekIncludingDate |
-												importedDates := self importEarliestFromTrello.
-												weekIncludingDate := self rootCollection
-														weekFromDate: importedDates first.
-												weekIncludingDate groupIntoContiguous size > 1
-													ifTrue: [ self
-															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContext navigationContext object
-													in: [ :aTtEventCollection | 
-														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-																aBrButton phlow fireToolUpdateWish ] ].
-												aDropdownAptitude hide ].
-										aMenuItems
-											addItem: (BrMenuSubmenuItem new
-													label: 'List Pending Days';
-													submenuItem: (BrMenuExplicitItem new
-															stencil: [ :aBrMenuExplicitItem | 
-																| daysWithoutData |
-																daysWithoutData := self listUnimportedDays.
-																(MyGtCalendarElement
-																	forDate: self datesWithData max
-																	asElementDo: [ :calendarElement | 
-																		| daysInMonth |
-																		daysInMonth := daysWithoutData
-																				select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
-																				thenCollect: #dayOfMonth.
-																		calendarElement dayElements
-																			associationsDo: [ :anAssociation | 
-																				(daysInMonth includes: anAssociation key)
-																					ifTrue: [ anAssociation value background: Color lightOrange ] ] ])
-																	when: GtCalendarDateClickedEvent
-																	do: [ :anEvent | 
-																		| weekIncludingDate |
-																		anEvent consumed: true.
-																		self importFromTrello: anEvent date.
-																		weekIncludingDate := self rootCollection
-																				weekFromDate: anEvent date.
-																		aContext navigationContext object
-																			in: [ :aTtEventCollection | 
-																				aTtEventCollection class = TtEventCollection
-																					ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-																						aBrButton phlow fireToolUpdateWish ] ].
-																		aDropdownAptitude hide ] ])).
-										aMenuItems
-											addItem: (BrMenuSubmenuItem new
-													label: 'Re-Import Partial Day';
-													submenuItem: (BrMenuExplicitItem new
-															stencil: [ :aBrMenuExplicitItem | 
-																| daysWithData |
-																daysWithData := self rootCollection datesWithData.
-																(MyGtCalendarElement
-																	forDate: daysWithData max
-																	asElementDo: [ :calendarElement | 
-																		| daysInMonth |
-																		daysInMonth := daysWithData
-																				select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
-																				thenCollect: #dayOfMonth.
-																		calendarElement dayElements
-																			associationsDo: [ :anAssociation | 
-																				(daysInMonth includes: anAssociation key)
-																					ifTrue: [ anAssociation value background: Color lightGreen ] ] ])
-																	when: GtCalendarDateClickedEvent
-																	do: [ :anEvent | 
-																		| weekIncludingDate |
-																		anEvent consumed: true.
-																		self importFromTrello: anEvent date.
-																		weekIncludingDate := self rootCollection
-																				weekFromDate: anEvent date.
-																		aContext navigationContext object
-																			in: [ :aTtEventCollection | 
-																				aTtEventCollection class = TtEventCollection
-																					ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-																						aBrButton phlow fireToolUpdateWish ] ].
-																		aDropdownAptitude hide ] ])).
-										aMenuItems
-											addItemLabel: 'Import All'
-											action: [ | importedDates weekIncludingDate |
-												importedDates := self importAllFromTrello.
-												weekIncludingDate := self rootCollection
-														weekFromDate: importedDates first.
-												weekIncludingDate groupIntoContiguous size > 1
-													ifTrue: [ self
-															inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
-												aContext navigationContext object
-													in: [ :aTtEventCollection | 
-														aTtEventCollection class = TtEventCollection
-															ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-																aBrButton phlow fireToolUpdateWish ] ].
-												aDropdownAptitude hide ].
-										aMenuItems ]).
-					aDropdownAptitude show ] ]
+		icon: BrGlamorousVectorIcons inspect;
+		label: 'Import';
+		tooltip: 'Import new data from external sources';
+		menu: [ :aBrButton :aBrTab | 
+			| aMenuItems |
+			aMenuItems := BrMenuItems new.
+			aMenuItems
+				addItemLabel: 'Import Latest'
+				action: [ | importedDates weekIncludingDate |
+					importedDates := self importLatestFromTrello.
+					weekIncludingDate := self rootCollection weekFromDate: importedDates first.
+					self flag: #NOTE.	"The below assumes we DO NOT want overlapping times AND we don't have missing data. Good quick check for data entry errors on my end. This assumption may not hold for all users in all use cases"
+					weekIncludingDate groupIntoContiguous size > 1
+						ifTrue: [ self
+								inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
+					aContext navigationContext object
+						in: [ :aTtEventCollection | 
+							aTtEventCollection class = TtEventCollection
+								ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+									aBrButton phlow fireToolUpdateWish ] ] ].
+			aMenuItems
+				addItemLabel: 'Import Earliest'
+				action: [ | importedDates weekIncludingDate |
+					importedDates := self importEarliestFromTrello.
+					weekIncludingDate := self rootCollection weekFromDate: importedDates first.
+					weekIncludingDate groupIntoContiguous size > 1
+						ifTrue: [ self
+								inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
+					aContext navigationContext object
+						in: [ :aTtEventCollection | 
+							aTtEventCollection class = TtEventCollection
+								ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+									aBrButton phlow fireToolUpdateWish ] ] ].
+			aMenuItems
+				addItem: (BrMenuSubmenuItem new
+						label: 'List Pending Days';
+						submenuItem: (BrMenuExplicitItem new
+								stencil: [ :aBrMenuExplicitItem | 
+									| daysWithoutData |
+									daysWithoutData := self listUnimportedDays.
+									(MyGtCalendarElement
+										forDate: self datesWithData max
+										asElementDo: [ :calendarElement | 
+											| daysInMonth |
+											daysInMonth := daysWithoutData
+													select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+													thenCollect: #dayOfMonth.
+											calendarElement dayElements
+												associationsDo: [ :anAssociation | 
+													(daysInMonth includes: anAssociation key)
+														ifTrue: [ anAssociation value background: Color lightOrange ] ] ])
+										when: GtCalendarDateClickedEvent
+										do: [ :anEvent | 
+											| weekIncludingDate |
+											anEvent consumed: true.
+											self importFromTrello: anEvent date.
+											weekIncludingDate := self rootCollection weekFromDate: anEvent date.
+											aContext navigationContext object
+												in: [ :aTtEventCollection | 
+													aTtEventCollection class = TtEventCollection
+														ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+															aBrButton phlow fireToolUpdateWish ] ] ] ])).
+			aMenuItems
+				addItem: (BrMenuSubmenuItem new
+						label: 'Re-Import Partial Day';
+						submenuItem: (BrMenuExplicitItem new
+								stencil: [ :aBrMenuExplicitItem | 
+									| daysWithData |
+									daysWithData := self rootCollection datesWithData.
+									(MyGtCalendarElement
+										forDate: daysWithData max
+										asElementDo: [ :calendarElement | 
+											| daysInMonth |
+											daysInMonth := daysWithData
+													select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+													thenCollect: #dayOfMonth.
+											calendarElement dayElements
+												associationsDo: [ :anAssociation | 
+													(daysInMonth includes: anAssociation key)
+														ifTrue: [ anAssociation value background: Color lightGreen ] ] ])
+										when: GtCalendarDateClickedEvent
+										do: [ :anEvent | 
+											| weekIncludingDate |
+											anEvent consumed: true.
+											self importFromTrello: anEvent date.
+											weekIncludingDate := self rootCollection weekFromDate: anEvent date.
+											aContext navigationContext object
+												in: [ :aTtEventCollection | 
+													aTtEventCollection class = TtEventCollection
+														ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+															aBrButton phlow fireToolUpdateWish ] ] ] ])).
+			aMenuItems
+				addItemLabel: 'Import All'
+				action: [ | importedDates weekIncludingDate |
+					importedDates := self importAllFromTrello.
+					weekIncludingDate := self rootCollection weekFromDate: importedDates first.
+					weekIncludingDate groupIntoContiguous size > 1
+						ifTrue: [ self
+								inform: 'There are overlapping time entries in collection. Send `groupIntoContiguous` to collection to see the time where the error happens' ].
+					aContext navigationContext object
+						in: [ :aTtEventCollection | 
+							aTtEventCollection class = TtEventCollection
+								ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+									aBrButton phlow fireToolUpdateWish ] ] ].
+			aMenuItems ]
 ]
 
 { #category : #inspecting }
