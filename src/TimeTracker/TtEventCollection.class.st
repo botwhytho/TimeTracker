@@ -1432,7 +1432,6 @@ TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 { #category : #searching }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
-	self flag: #TODO.	"Need to fix nesting into categories, play with methods like GtSpotterSearch>>#categoryToActOn:from:"
 	^ aSearch list
 		priority: 1;
 		title: 'Search by Tracked Time entries';
@@ -1448,14 +1447,13 @@ TtEventCollection >> gtSearchFor: aSearch [
 				viewFilterContext: self viewFilterContext;
 				yourself ];
 		sendCategory: [ :aCategory :aStep :thisSearch | 
-			| context |
-			context := {aCategory.
-					aStep.
-					thisSearch}.
-			(TtEventCollection withAll: aCategory items contents)
-				categories: self categories;
+			TtEventCollection new
 				page: self page;
-				viewFilterContext: self viewFilterContext ];
+				categories: self categories;
+				viewFilterContext: self viewFilterContext;
+				includeUntracked: self includeUntracked;
+				groupingLevel: self groupingLevel;
+				addAll: aCategory items contents ];
 		previewElement: [ :aTrackedTime | (aTrackedTime gtPreviewFor: GtPhlowEmptyView new) asElement ];
 		filterBySubstring;
 		wantsToDisplayOnEmptyQuery: true
