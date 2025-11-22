@@ -184,6 +184,13 @@ TtEventCollection >> asAsyncStream [
 	^ self items asAsyncStream
 ]
 
+{ #category : #views }
+TtEventCollection >> asRopedText [
+	self flag: #HACK.	"This is pretty bad, trying to get dropdown handle label to update with a dynamic value, this may probably break with implementation changes. Look at `GtPhlowDropdownAction>>#newButton` for where this is relevant. Opened upstream ticket https://github.com/feenkcom/gtoolkit/issues/4868. Hoping this is rather temporary"
+
+	^ self groupingLevelLabel
+]
+
 { #category : #accessing }
 TtEventCollection >> buildBars: data [
 	| aBarWidthScale barChart categoriesToFilter categoriesToFilterOut container maxLines theData totalTime |
@@ -829,6 +836,23 @@ TtEventCollection >> groupingLevel: anObject [
 	groupingLevel := anObject
 ]
 
+{ #category : #views }
+TtEventCollection >> groupingLevelLabel [
+	^ 'Grouping ('
+		, (self groupingLevelLabelMapping
+				detect: [ :each | each value = self groupingLevel ]) key , ')'
+]
+
+{ #category : #views }
+TtEventCollection >> groupingLevelLabelMapping [
+	^ {'Original' -> 0.
+		'2nd Level' -> 1.
+		'3rd level' -> 2.
+		'4th Level' -> 3.
+		'5th Level' -> 4.
+		'Top Level' -> #topMostCategory}
+]
+
 { #category : #'as yet unclassified' }
 TtEventCollection >> gtCalendarViewFor: aView [
 	"(self items collectAsSet: #category)"
@@ -1441,15 +1465,8 @@ TtEventCollection >> gtSearchFor: aSearch [
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
 	| groupingLevelLabel groupingLevelLabelMapping |
-	groupingLevelLabelMapping := {'Original' -> 0.
-			'2nd Level' -> 1.
-			'3rd level' -> 2.
-			'4th Level' -> 3.
-			'5th Level' -> 4.
-			'Top Level' -> #topMostCategory}.
-	groupingLevelLabel := [ 'Grouping ('
-			, (groupingLevelLabelMapping detect: [ :each | each value = self groupingLevel ])
-					key , ')' ].
+	groupingLevelLabelMapping := self groupingLevelLabelMapping.
+	groupingLevelLabel := self groupingLevelLabel.
 	aContext navigation previousContext
 		ifNotNil: [ :notNil | 
 			((notNil object isKindOf: TtEventCollection)
@@ -1493,22 +1510,20 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 			action: [ :aButton :aBrTab | 
 				self toggleUntracked.
 				aButton phlow fireViewUpdateWish ];
-		actionDropdownButtonLabel: groupingLevelLabel value
-			content: [ :aButton :aBrTab | 
-				BrSimpleList new
-					margin: (BlInsets all: 5);
-					items: groupingLevelLabelMapping;
-					itemStencil: [ BrLabel new hMatchParent
-							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
-					itemDataBinder: [ :aLabel :aViewFilter | 
-						aLabel
-							text: aViewFilter key;
-							when: BlClickEvent
-								do: [ :_ | 
-									aButton fireEvent: BrDropdownHideWish new.
-									self groupingLevel: aViewFilter value.
-									aButton label: groupingLevelLabel value.
-									aButton phlow fireViewUpdateWish ] ] ];
+		actionDropdownButtonDo: [ :aDropdown | 
+			aDropdown
+				label: self groupingLevelLabel;
+				menu: [ :aBrButton :aBrTab | 
+					| menuItems |
+					menuItems := BrMenuItems new.
+					groupingLevelLabelMapping
+						do: [ :each | 
+							menuItems
+								addItemLabel: each key
+								action: [ self groupingLevel: each value.
+									aBrButton label: self groupingLevelLabel.
+									aBrButton phlow fireViewUpdateWish ] ].
+					menuItems ] ];
 		actionDropdownButtonLabel: 'Group By'
 			content: [ :aButton :aBrTab | 
 				| groupByLabelMapping |
