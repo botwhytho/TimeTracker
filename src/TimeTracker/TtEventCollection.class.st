@@ -1602,66 +1602,48 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 { #category : #accessing }
 TtEventCollection >> gtWeekFor: anAction [
 	<gtAction>
-	^ anAction explicit
+	^ anAction dropdown
 		priority: 1;
-		stencil: [ :aBrTab | 
-			BrButton new
-				aptitude: BrGlamorousButtonWithIconAptitude;
-				icon: [ BrGlamorousVectorIcons timeTrackerCalendar asElement asScalableElement
-						size: 20 @ 20 ] asStencil;
-				label: 'Select Days to Analyze/Compare';
-				action: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-					| aDropdownAptitude firstDate element |
-					aBrButton
-						aptitudeDo: [ :anAptitude | 
-							anAptitude
-								withAllActorsBreadthFirstDo: [ :eachActor | 
-									BrGlamorousWithExplicitDropdownAptitude = eachActor class
-										ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
-					firstDate := nil.
-					aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new.
-					aBrButton
-						addAptitude: (aDropdownAptitude
-								withoutHandle;
-								stencil: [ BrMenuExplicit new
-										stencil: [ :anExplicitMenu | 
-											| daysWithData |
-											daysWithData := self rootCollection datesWithData.
-											element := MyGtCalendarElement
-													forDate: self datesWithData max
-													asElementDo: [ :calendarElement | 
-														| daysInMonth |
-														daysInMonth := daysWithData
-																select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
-																thenCollect: #dayOfMonth.
-														calendarElement dayElements
-															associationsDo: [ :anAssociation | 
-																(daysInMonth includes: anAssociation key)
-																	ifTrue: [ anAssociation value background: Color veryVeryLightGray ] ] ].
-											element
-												when: GtCalendarDateClickedEvent
-													do: [ :anEvent | 
-														anEvent consumed: true.
-														aBrButton phlow
-															spawnObject: (self rootCollection weekFromDate: anEvent date).
-														anExplicitMenu hide ];
-												when: GtCalendarDateClickedWithModifiersEvent
-													do: [ :anEvent | 
-														anEvent modifiers = BlKeyModifiers shift
-															ifTrue: [ firstDate
-																	ifNil: [ firstDate := anEvent date ]
-																	ifNotNil: [ | sortedDates |
-																		sortedDates := {firstDate.
-																				anEvent date} sorted: #yourself ascending.
-																		aBrButton phlow
-																			spawnObject: (self rootCollection
-																					select: [ :each | 
-																						each start asDate translateToUTC >= sortedDates first translateToUTC
-																							and: [ each start asDate translateToUTC <= sortedDates second translateToUTC ] ]).
-																		firstDate := nil.
-																		anExplicitMenu hide ].
-																anEvent consumed: true ] ] ] ]).
-					aDropdownAptitude show ] ]
+		icon: [ BrGlamorousVectorIcons timeTrackerCalendar asElement asScalableElement
+				size: 20 @ 20 ] asStencil;
+		tooltip: 'Select Days to Analyze/Compare';
+		content: [ :anActionElement :aTargetElement :anExplicitMenu | 
+			| daysWithData element firstDate |
+			daysWithData := self rootCollection datesWithData.
+			element := MyGtCalendarElement
+					forDate: self datesWithData max
+					asElementDo: [ :calendarElement | 
+						| daysInMonth |
+						daysInMonth := daysWithData
+								select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+								thenCollect: #dayOfMonth.
+						calendarElement dayElements
+							associationsDo: [ :anAssociation | 
+								(daysInMonth includes: anAssociation key)
+									ifTrue: [ anAssociation value background: Color veryVeryLightGray ] ] ].
+			element
+				when: GtCalendarDateClickedEvent
+					do: [ :anEvent | 
+						anEvent consumed: true.
+						aTargetElement phlow
+							spawnObject: (self rootCollection weekFromDate: anEvent date).
+						anExplicitMenu hide ];
+				when: GtCalendarDateClickedWithModifiersEvent
+					do: [ :anEvent | 
+						anEvent modifiers = BlKeyModifiers shift
+							ifTrue: [ firstDate
+									ifNil: [ firstDate := anEvent date ]
+									ifNotNil: [ | sortedDates |
+										sortedDates := {firstDate.
+												anEvent date} sorted: #yourself ascending.
+										aTargetElement phlow
+											spawnObject: (self rootCollection
+													select: [ :each | 
+														each start asDate translateToUTC >= sortedDates first translateToUTC
+															and: [ each start asDate translateToUTC <= sortedDates second translateToUTC ] ]).
+										firstDate := nil.
+										anExplicitMenu hide ].
+								anEvent consumed: true ] ] ]
 ]
 
 { #category : #accessing }
