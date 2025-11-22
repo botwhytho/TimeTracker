@@ -1205,30 +1205,28 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			weight: 1.75;
 		column: 'Graphical Progress' stencil: self idealsDailyProgressBarChartStencil;
 		send: #value;
-		actionDropdownButtonLabel: 'Change Ideals'
-			content: [ :aButton :aBrTab | 
-				| groupByLabelMapping |
-				self flag: #NOTE.	"Below displays odd list at the moment as defining ideals as 'latest' or ones with no duration, which may have different start dates. Later will wrap individual ideals in Ideals collection wrapper and use that."
-				groupByLabelMapping := {'Ideal for Date range' -> nil}
-						, (ideals associations
-								collect: [ :each | 
-									(each key start asDate yyyymmdd , ' - '
-										, (each key duration isZero
-												ifTrue: [ 'Today' ]
-												ifFalse: [ each key end asDate yyyymmdd ])) -> each value ]).
-				BrSimpleList new
-					margin: (BlInsets all: 5);
-					items: groupByLabelMapping;
-					itemStencil: [ BrLabel new hMatchParent
-							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
-					itemDataBinder: [ :aLabel :aViewFilter | 
-						aLabel
-							text: aViewFilter key;
-							when: BlClickEvent
-								do: [ :_ | 
-									aContext at: 'ideals' put: aViewFilter value.
-									aButton fireEvent: BrDropdownHideWish new.
-									aButton phlow fireToolUpdateWish ] ] ]
+		actionDropdownButtonDo: [ :aDropdown | 
+			aDropdown
+				label: 'Change Ideals';
+				menu: [ :aBrButton :aBrTab | 
+					| groupByLabelMapping menuItems |
+					menuItems := BrMenuItems new.
+					self flag: #NOTE.	"Below displays odd list at the moment as defining ideals as 'latest' or ones with no duration, which may have different start dates. Later will wrap individual ideals in Ideals collection wrapper and use that."
+					groupByLabelMapping := {'Ideal for Date range' -> nil}
+							, (ideals associations
+									collect: [ :each | 
+										(each key start asDate yyyymmdd , ' - '
+											, (each key duration isZero
+													ifTrue: [ 'Today' ]
+													ifFalse: [ each key end asDate yyyymmdd ])) -> each value ]).
+
+					groupByLabelMapping
+						do: [ :each | 
+							menuItems
+								addItemLabel: each key
+								action: [ aContext at: 'ideals' put: each value.
+									aBrButton phlow fireToolUpdateWish ] ].
+					menuItems ] ]
 ]
 
 { #category : #import }
