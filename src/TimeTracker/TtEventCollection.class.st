@@ -901,7 +901,7 @@ TtEventCollection >> groupingLevelAction [
 						action: [ self groupingLevel: each value.
 							aBrButton label: self groupingLevelLabel.
 							aBrButton phlow fireViewUpdateWish ] ].
-			menuItems ]	"groupingLevelLabel" ]
+			menuItems ] ]
 ]
 
 { #category : #views }
@@ -1026,7 +1026,8 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 						descending ];
 		column: 'Activity' text: [ :each | each key first ];
 		column: 'Details' text: [ :each | each key second ];
-		column: 'Category' text: [ :each | each value first category name ];
+		column: 'Category'
+			text: [ :each | each value first category ifNil: [ '' ] ifNotNil: [ :notNil | notNil name ] ];
 		column: 'Ocurrences' text: [ :each | each value size ];
 		column: 'Average Time'
 			text: [ :each | 
