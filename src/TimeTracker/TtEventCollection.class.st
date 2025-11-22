@@ -1642,47 +1642,7 @@ TtEventCollection >> gtWeekFor: anAction [
 																		firstDate := nil.
 																		anExplicitMenu hide ].
 																anEvent consumed: true ] ] ] ]).
-					aDropdownAptitude show ];
-				actionWithModifiers: [ :aBrButton :aBrButtonModel :aBlClickEvent | 
-					| calendar1 calendar2 aDropdownAptitude week1 week2 |
-					aBlClickEvent modifiers = BlKeyModifiers primary
-						ifTrue: [ aBrButton
-								aptitudeDo: [ :anAptitude | 
-									anAptitude
-										withAllActorsBreadthFirstDo: [ :eachActor | 
-											BrGlamorousWithExplicitDropdownAptitude = eachActor class
-												ifTrue: [ aBrButton removeAptitude: eachActor ] ] ].
-							aDropdownAptitude := BrGlamorousWithExplicitDropdownAptitude new.
-							aBrButton
-								addAptitude: (aDropdownAptitude
-										withoutHandle;
-										stencil: [ BrMenuExplicit new
-												stencil: [ :anExplicitMenu | 
-													calendar1 := MyGtCalendarElement
-															forDate: self rootCollection datesWithData max.
-													calendar1
-														when: GtCalendarDateClickedEvent
-														do: [ :anEvent | 
-															anEvent consumed: true.
-															week1 := self rootCollection weekFromDate: anEvent date ].
-													calendar2 := MyGtCalendarElement
-															forDate: self rootCollection datesWithData max.
-													calendar2
-														when: GtCalendarDateClickedEvent
-														do: [ :anEvent | 
-															anEvent consumed: true.
-															week2 := self rootCollection weekFromDate: anEvent date.
-															aBrButton phlow
-																spawnObject: (GtPhlowExplicitTool new
-																		name: 'Compare Weeks';
-																		stencil: [ BrHorizontalPane new matchParent
-																				addChildren: {GtPager createWrappedOn: week1 gtDefaultInspectorTool.
-																						GtPager createWrappedOn: week2 gtDefaultInspectorTool} ]).
-															anExplicitMenu hide ].
-													BrHorizontalPane new fitContent
-														addChildren: {calendar1.
-																calendar2} ] ]).
-							aDropdownAptitude show ] ] ]
+					aDropdownAptitude show ] ]
 ]
 
 { #category : #accessing }
