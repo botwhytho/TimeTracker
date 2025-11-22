@@ -1524,26 +1524,52 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 									aBrButton label: self groupingLevelLabel.
 									aBrButton phlow fireViewUpdateWish ] ].
 					menuItems ] ];
-		actionDropdownButtonLabel: 'Group By'
-			content: [ :aButton :aBrTab | 
-				| groupByLabelMapping |
-				groupByLabelMapping := {'Group by Category' -> #Category.
-						'Group by Recurrence' -> #IsRecurring.
-						'Group by Planned' -> #IsPlanned.
-						'Group by Re-scheduled' -> #FirstTimeScheduled}.
-				BrSimpleList new
-					margin: (BlInsets all: 5);
-					items: groupByLabelMapping;
-					itemStencil: [ BrLabel new hMatchParent
-							aptitude: BrGlamorousLabelAptitude + BrGlamorousListItemAptitude ];
-					itemDataBinder: [ :aLabel :aViewFilter | 
-						aLabel
-							text: aViewFilter key;
-							when: BlClickEvent
-								do: [ :_ | 
-									aButton fireEvent: BrDropdownHideWish new.
-									self viewFilterContext: aViewFilter value.
-									aButton phlow fireViewUpdateWish ] ] ]
+		actionDropdownButtonDo: [ :aDropdown | 
+			aDropdown
+				label: 'Group By';
+				menu: [ :aBrButton :aBrTab | 
+					| groupByLabelMapping menuItems |
+					groupByLabelMapping := {'Group by Category' -> #Category.
+							'Group by Recurrence' -> #IsRecurring.
+							'Group by Planned' -> #IsPlanned.
+							'Group by Re-scheduled' -> #FirstTimeScheduled}.
+					menuItems := BrMenuItems new.
+					groupByLabelMapping
+						do: [ :each | 
+							menuItems
+								addItemLabel: each key
+								action: [ self viewFilterContext: each value.
+									aBrButton phlow fireViewUpdateWish ] ].
+					menuItems
+						addItem: (BrMenuSubmenuItem new
+								label: 'Explicit Item';
+								submenu: (BrMenuExplicit new
+										stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 100 @ 100 ]));
+						addItem: (BrMenuSubmenuItem new
+								label: 'Group By Ad-Hoc Categories';
+								submenu: (BrMenuItems new
+										addItem: (BrMenuActionItem new
+												label: 'Creat New Ad-Hoc Category';
+												group: (BrMenuItemGroupConfiguration new
+														name: 'New';
+														priority: 30);
+												action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+													| playgroundPage playgroundElement |
+													playgroundElement := aContext navigation toolElement
+															playgroundElement.
+													playgroundElement expand.
+													playgroundPage := playgroundElement page.
+													playgroundPage children last
+														addSnippetAfterSelf: (LePharoSnippet code: 'BlBasicExamples new circle').
+													aBrTab
+														enqueueTask: (BlDelayedTaskAction new
+																delay: 250 milliseconds;
+																action: [ playgroundElement pageElement
+																		selectAndScrollToSnippet: playgroundPage children last.
+																	playgroundElement pageElement snippetsViewModel children last
+																		focused: true ]) ]);
+										addItem: (BrMenuActionItem new label: 'Test'))).
+					menuItems ] ]
 ]
 
 { #category : #inspecting }
