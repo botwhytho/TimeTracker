@@ -671,6 +671,56 @@ TtEventCollection >> defaultPage [
 			newPage ]
 ]
 
+{ #category : #views }
+TtEventCollection >> groupByActionWithContext: aContext [
+	^ [ :aDropdown | 
+	aDropdown
+		label: 'Group By';
+		menu: [ :aBrButton :aBrTab | 
+			| groupByLabelMapping menuItems |
+			groupByLabelMapping := {'Group by Category' -> #Category.
+					'Group by Recurrence' -> #IsRecurring.
+					'Group by Planned' -> #IsPlanned.
+					'Group by Re-scheduled' -> #FirstTimeScheduled}.
+			menuItems := BrMenuItems new.
+			groupByLabelMapping
+				do: [ :each | 
+					menuItems
+						addItemLabel: each key
+						action: [ self viewFilterContext: each value.
+							aBrButton phlow fireViewUpdateWish ] ].
+			menuItems
+				addItem: (BrMenuSubmenuItem new
+						label: 'Explicit Item';
+						submenu: (BrMenuExplicit new
+								stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 100 @ 100 ]));
+				addItem: (BrMenuSubmenuItem new
+						label: 'Group By Ad-Hoc Categories';
+						submenu: (BrMenuItems new
+								addItem: (BrMenuActionItem new
+										label: 'Creat New Ad-Hoc Category';
+										group: (BrMenuItemGroupConfiguration new
+												name: 'New';
+												priority: 30);
+										action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+											| playgroundPage playgroundElement |
+											playgroundElement := aContext navigation toolElement
+													playgroundElement.
+											playgroundElement expand.
+											playgroundPage := playgroundElement page.
+											playgroundPage children last
+												addSnippetAfterSelf: (LePharoSnippet code: 'BlBasicExamples new circle').
+											aBrTab
+												enqueueTask: (BlDelayedTaskAction new
+														delay: 250 milliseconds;
+														action: [ playgroundElement pageElement
+																selectAndScrollToSnippet: playgroundPage children last.
+															playgroundElement pageElement snippetsViewModel children last
+																focused: true ]) ]);
+								addItem: (BrMenuActionItem new label: 'Test'))).
+			menuItems ] ]
+]
+
 { #category : #accessing }
 TtEventCollection >> groupIntoContiguous [
 	| contiguousCollections timeEntries |
@@ -834,6 +884,24 @@ TtEventCollection >> groupingLevel [
 { #category : #accessing }
 TtEventCollection >> groupingLevel: anObject [
 	groupingLevel := anObject
+]
+
+{ #category : #views }
+TtEventCollection >> groupingLevelAction [
+	^ [ :aDropdown | 
+	aDropdown
+		label: self;
+		menu: [ :aBrButton :aBrTab | 
+			| menuItems |
+			menuItems := BrMenuItems new.
+			self groupingLevelLabelMapping
+				do: [ :each | 
+					menuItems
+						addItemLabel: each key
+						action: [ self groupingLevel: each value.
+							aBrButton label: self groupingLevelLabel.
+							aBrButton phlow fireViewUpdateWish ] ].
+			menuItems ]	"groupingLevelLabel" ]
 ]
 
 { #category : #views }
@@ -1464,9 +1532,6 @@ TtEventCollection >> gtSearchFor: aSearch [
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
-	| groupingLevelLabel groupingLevelLabelMapping |
-	groupingLevelLabelMapping := self groupingLevelLabelMapping.
-	groupingLevelLabel := self groupingLevelLabel.
 	aContext navigation previousContext
 		ifNotNil: [ :notNil | 
 			((notNil object isKindOf: TtEventCollection)
@@ -1506,70 +1571,9 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 							resizer.
 							entriesByDay}.
 			verticalPane ];
-		actionButtonLabel: 'Toggle Untracked'
-			action: [ :aButton :aBrTab | 
-				self toggleUntracked.
-				aButton phlow fireViewUpdateWish ];
-		actionDropdownButtonDo: [ :aDropdown | 
-			aDropdown
-				label: self groupingLevelLabel;
-				menu: [ :aBrButton :aBrTab | 
-					| menuItems |
-					menuItems := BrMenuItems new.
-					groupingLevelLabelMapping
-						do: [ :each | 
-							menuItems
-								addItemLabel: each key
-								action: [ self groupingLevel: each value.
-									aBrButton label: self groupingLevelLabel.
-									aBrButton phlow fireViewUpdateWish ] ].
-					menuItems ] ];
-		actionDropdownButtonDo: [ :aDropdown | 
-			aDropdown
-				label: 'Group By';
-				menu: [ :aBrButton :aBrTab | 
-					| groupByLabelMapping menuItems |
-					groupByLabelMapping := {'Group by Category' -> #Category.
-							'Group by Recurrence' -> #IsRecurring.
-							'Group by Planned' -> #IsPlanned.
-							'Group by Re-scheduled' -> #FirstTimeScheduled}.
-					menuItems := BrMenuItems new.
-					groupByLabelMapping
-						do: [ :each | 
-							menuItems
-								addItemLabel: each key
-								action: [ self viewFilterContext: each value.
-									aBrButton phlow fireViewUpdateWish ] ].
-					menuItems
-						addItem: (BrMenuSubmenuItem new
-								label: 'Explicit Item';
-								submenu: (BrMenuExplicit new
-										stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 100 @ 100 ]));
-						addItem: (BrMenuSubmenuItem new
-								label: 'Group By Ad-Hoc Categories';
-								submenu: (BrMenuItems new
-										addItem: (BrMenuActionItem new
-												label: 'Creat New Ad-Hoc Category';
-												group: (BrMenuItemGroupConfiguration new
-														name: 'New';
-														priority: 30);
-												action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
-													| playgroundPage playgroundElement |
-													playgroundElement := aContext navigation toolElement
-															playgroundElement.
-													playgroundElement expand.
-													playgroundPage := playgroundElement page.
-													playgroundPage children last
-														addSnippetAfterSelf: (LePharoSnippet code: 'BlBasicExamples new circle').
-													aBrTab
-														enqueueTask: (BlDelayedTaskAction new
-																delay: 250 milliseconds;
-																action: [ playgroundElement pageElement
-																		selectAndScrollToSnippet: playgroundPage children last.
-																	playgroundElement pageElement snippetsViewModel children last
-																		focused: true ]) ]);
-										addItem: (BrMenuActionItem new label: 'Test'))).
-					menuItems ] ]
+		actionButtonDo: self toggleUntrackedAction;
+		actionDropdownButtonDo: self groupingLevelAction;
+		actionDropdownButtonDo: (self groupByActionWithContext: aContext)
 ]
 
 { #category : #inspecting }
@@ -2047,6 +2051,16 @@ TtEventCollection >> timeEntries [
 TtEventCollection >> toggleUntracked [
 	self includeUntracked.
 	includeUntracked := includeUntracked not
+]
+
+{ #category : #views }
+TtEventCollection >> toggleUntrackedAction [
+	^ [ :aButtonAction | 
+	aButtonAction
+		label: 'Toggle Untracked';
+		action: [ :aButton :aBrTab | 
+			self toggleUntracked.
+			aButton phlow fireViewUpdateWish ] ]
 ]
 
 { #category : #accessing }
