@@ -24,11 +24,15 @@ TtAdHocGroupBy >> collection: anObject [
 { #category : #accessing }
 TtAdHocGroupBy >> create [
 	| filtered groupedBy |
-	filtered := self collection select: self filter.
+	filtered := self filter
+			ifNil: [ self collection ]
+			ifNotNil: [ self collection select: self filter ].
 	groupedBy := filtered groupedBy: self groupByComputation.
 	^ (groupedBy associations
-		collect: [ :anAssociation | anAssociation key: (TtPseudoCategory new name: anAssociation key asString) ])
-		asOrderedDictionary
+		collect: [ :anAssociation | 
+			(anAssociation key isKindOf: TtCategory)
+				ifFalse: [ anAssociation key: (TtPseudoCategory new name: anAssociation key asString) ].
+			anAssociation ]) asOrderedDictionary
 ]
 
 { #category : #accessing }

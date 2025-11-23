@@ -690,7 +690,7 @@ TtEventCollection >> groupByActionWithContext: aContext [
 					menuItems
 						addItemLabel: each key
 						action: [ self viewFilterContext: each value.
-							aBrButton phlow fireViewUpdateWish ] ].
+							aBrButton phlow fireToolUpdateWish ] ].
 			menuItems
 				addItem: (BrMenuSubmenuItem new
 						label: 'Explicit Item';
@@ -731,8 +731,12 @@ TtEventCollection >> groupByActionWithContext: aContext [
 					submenuItems
 						addItem: (BrMenuActionItem new
 								label: pseudoCategory name;
-								action: [ self viewFilterContext: pseudoCategory.
-									aBrButton phlow fireViewUpdateWish ]) ].
+								action: [ pseudoCategory filter
+										ifNil: [ self viewFilterContext: pseudoCategory.
+											aBrButton phlow fireToolUpdateWish ]
+										ifNotNil: [ aBrButton phlow
+												spawnObject: ((self timeEntries select: pseudoCategory filter)
+														viewFilterContext: pseudoCategory) ] ]) ].
 			menuItems ] ]
 ]
 
@@ -1550,6 +1554,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 { #category : #views }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
+	| view |
 	aContext navigation previousContext
 		ifNotNil: [ :notNil | 
 			((notNil object isKindOf: TtEventCollection)
@@ -1559,7 +1564,8 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 							self includeUntracked: false ] ] ].
 	self groupedByCategory keys size = (1 + self includeUntracked asBit)
 		ifTrue: [ self includeUntracked: true ].
-	^ aView explicit
+	view := aView explicit.
+	view
 		title: ((self groupedBy: #asWeek) keys size = 1
 				ifTrue: [ 'Weekly Summary' ]
 				ifFalse: [ 'Summary' ]);
@@ -1589,9 +1595,11 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 							resizer.
 							entriesByDay}.
 			verticalPane ];
-		actionButtonDo: self toggleUntrackedAction;
-		actionDropdownButtonDo: self groupingLevelAction;
-		actionDropdownButtonDo: (self groupByActionWithContext: aContext)
+		actionButtonDo: self toggleUntrackedAction.
+	self viewFilterContext = #Category
+		ifTrue: [ view actionDropdownButtonDo: self groupingLevelAction ].
+	view actionDropdownButtonDo: (self groupByActionWithContext: aContext).
+	^ view
 ]
 
 { #category : #inspecting }
@@ -1968,7 +1976,7 @@ TtEventCollection >> newAdHocGroupByTemplate [
 	TtAdHocGroupBy new
 		name: 'Morning vs Afternoon/Night Activities';
 		description: 'Splits time into morning vs afternoon/night';
-		filter: [ :aTrackedTime | true ];
+		"filter: [ :aTrackedTime | true ];" "Comment this line out if you want to filter the data first. If data is filtered, groupedBy data will get spawned in a new pane. When no filter exists the current pane will be updated in place"
 		groupByComputation: [ :aTrackedTime | 
 			aTrackedTime start hours >= 12
 				ifTrue: [ TtPseudoCategory new name: 'Morning' ]
