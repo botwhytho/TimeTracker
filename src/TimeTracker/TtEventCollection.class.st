@@ -674,17 +674,26 @@ TtEventCollection >> defaultPage [
 { #category : #views }
 TtEventCollection >> groupByActionWithContext: aContext [
 	^ [ :aDropdown | 
+	| groupByLabelMapping groupByTooltip |
+	groupByLabelMapping := {'Group by Category' -> #Category.
+			'Group by Recurrence' -> #IsRecurring.
+			'Group by Planned' -> #IsPlanned.
+			'Group by Re-scheduled' -> #FirstTimeScheduled}.
+	groupByTooltip := [ self viewFilterContext isSymbol
+			ifTrue: [ (groupByLabelMapping detect: [ :each | each value = self viewFilterContext ])
+					key ]
+			ifFalse: [ 'Grouped By: ' , self viewFilterContext description ] ].
 	aDropdown
 		label: 'Group By';
+		tooltip: groupByTooltip value;
 		menu: [ :aBrButton :aBrTab | 
-			| groupByLabelMapping menuItems playgroundPage playgroundElement pseudoCategories submenuItems |
-			groupByLabelMapping := {'Group by Category' -> #Category.
-					'Group by Recurrence' -> #IsRecurring.
-					'Group by Planned' -> #IsPlanned.
-					'Group by Re-scheduled' -> #FirstTimeScheduled}.
+			| menuItems playgroundPage playgroundElement pseudoCategories adHocInPlaceGroup adHocFilteredGroup adHocSubmenuItems pragmaSubmenuItems |
 			menuItems := BrMenuItems new.
 			playgroundElement := aContext navigation toolElement playgroundElement.
 			playgroundPage := playgroundElement page.
+			menuItems
+				addItemLabel: 'Inspect current grouped by'
+				action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | aBrMenuActionItemElement phlow spawnObject: self viewFilterContext ].
 			groupByLabelMapping
 				do: [ :each | 
 					menuItems
@@ -693,18 +702,17 @@ TtEventCollection >> groupByActionWithContext: aContext [
 							aBrButton phlow fireToolUpdateWish ] ].
 			menuItems
 				addItem: (BrMenuSubmenuItem new
-						label: 'Explicit Item';
-						submenu: (BrMenuExplicit new
-								stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 100 @ 100 ]));
+						label: 'Group By User Defined (Pragma) Categories';
+						submenu: (pragmaSubmenuItems := BrMenuItems new));
 				addItem: (BrMenuSubmenuItem new
 						label: 'Group By Ad-Hoc Categories';
-						submenu: (submenuItems := BrMenuItems new)).
-			submenuItems
+						submenu: (adHocSubmenuItems := BrMenuItems new)).
+			adHocSubmenuItems
 				addItem: (BrMenuActionItem new
 						label: 'Creat New Ad-Hoc Category';
 						group: (BrMenuItemGroupConfiguration new
 								name: 'New';
-								priority: 30);
+								priority: 0);
 						action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
 							playgroundElement expand.
 							playgroundPage children last
@@ -723,14 +731,23 @@ TtEventCollection >> groupByActionWithContext: aContext [
 						(aSnippet isKindOf: LePharoSnippet)
 							and: [ (aSnippet coder ast wait ast // GtPharoNamedVariableNode
 									select: [ :each | each name value value = 'TtAdHocGroupBy' ])
-									isNotEmpty ] ].	", #(Pragma collector)."
+									isNotEmpty ] ].
+			adHocInPlaceGroup := BrMenuItemGroupConfiguration new
+					name: 'In-Place';
+					priority: 10.
+			adHocFilteredGroup := BrMenuItemGroupConfiguration new
+					name: 'Filtered (Will spawn a new collection)';
+					priority: 20.
 			pseudoCategories
 				do: [ :pseudoCategorySnippet | 
 					| pseudoCategory |
 					pseudoCategory := pseudoCategorySnippet coder doItAll value.
-					submenuItems
+					adHocSubmenuItems
 						addItem: (BrMenuActionItem new
 								label: pseudoCategory name;
+								group: (pseudoCategory filter
+										ifNil: [ adHocInPlaceGroup ]
+										ifNotNil: [ adHocFilteredGroup ]);
 								action: [ pseudoCategory filter
 										ifNil: [ self viewFilterContext: pseudoCategory.
 											aBrButton phlow fireToolUpdateWish ]
