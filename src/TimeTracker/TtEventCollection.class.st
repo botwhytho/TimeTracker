@@ -677,12 +677,14 @@ TtEventCollection >> groupByActionWithContext: aContext [
 	aDropdown
 		label: 'Group By';
 		menu: [ :aBrButton :aBrTab | 
-			| groupByLabelMapping menuItems |
+			| groupByLabelMapping menuItems playgroundPage playgroundElement pseudoCategories submenuItems |
 			groupByLabelMapping := {'Group by Category' -> #Category.
 					'Group by Recurrence' -> #IsRecurring.
 					'Group by Planned' -> #IsPlanned.
 					'Group by Re-scheduled' -> #FirstTimeScheduled}.
 			menuItems := BrMenuItems new.
+			playgroundElement := aContext navigation toolElement playgroundElement.
+			playgroundPage := playgroundElement page.
 			groupByLabelMapping
 				do: [ :each | 
 					menuItems
@@ -696,28 +698,41 @@ TtEventCollection >> groupByActionWithContext: aContext [
 								stencil: [ :aBrMenuExplicitItem | BlBasicExamples new circle size: 100 @ 100 ]));
 				addItem: (BrMenuSubmenuItem new
 						label: 'Group By Ad-Hoc Categories';
-						submenu: (BrMenuItems new
-								addItem: (BrMenuActionItem new
-										label: 'Creat New Ad-Hoc Category';
-										group: (BrMenuItemGroupConfiguration new
-												name: 'New';
-												priority: 30);
-										action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
-											| playgroundPage playgroundElement |
-											playgroundElement := aContext navigation toolElement
-													playgroundElement.
-											playgroundElement expand.
-											playgroundPage := playgroundElement page.
-											playgroundPage children last
-												addSnippetAfterSelf: (LePharoSnippet code: 'BlBasicExamples new circle').
-											aBrTab
-												enqueueTask: (BlDelayedTaskAction new
-														delay: 250 milliseconds;
-														action: [ playgroundElement pageElement
-																selectAndScrollToSnippet: playgroundPage children last.
-															playgroundElement pageElement snippetsViewModel children last
-																focused: true ]) ]);
-								addItem: (BrMenuActionItem new label: 'Test'))).
+						submenu: (submenuItems := BrMenuItems new)).
+			submenuItems
+				addItem: (BrMenuActionItem new
+						label: 'Creat New Ad-Hoc Category';
+						group: (BrMenuItemGroupConfiguration new
+								name: 'New';
+								priority: 30);
+						action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | 
+							playgroundElement expand.
+							playgroundPage children last
+								addSnippetAfterSelf: (LePharoSnippet
+										code: (TtEventCollection >> #newAdHocGroupByTemplate) sourceNode children first
+												sourceCode).
+							aBrTab
+								enqueueTask: (BlDelayedTaskAction new
+										delay: 250 milliseconds;
+										action: [ playgroundElement pageElement
+												selectAndScrollToSnippet: playgroundPage children last.
+											playgroundElement pageElement snippetsViewModel children last
+												focused: true ]) ]).
+			pseudoCategories := playgroundPage
+					allChildrenSnippetsMatching: [ :aSnippet | 
+						(aSnippet isKindOf: LePharoSnippet)
+							and: [ (aSnippet coder ast wait ast // GtPharoNamedVariableNode
+									select: [ :each | each name value value = 'TtAdHocGroupBy' ])
+									isNotEmpty ] ].	", #(Pragma collector)."
+			pseudoCategories
+				do: [ :pseudoCategorySnippet | 
+					| pseudoCategory |
+					pseudoCategory := pseudoCategorySnippet coder doItAll value.
+					submenuItems
+						addItem: (BrMenuActionItem new
+								label: pseudoCategory name;
+								action: [ self viewFilterContext: pseudoCategory.
+									aBrButton phlow fireViewUpdateWish ]) ].
 			menuItems ] ]
 ]
 
@@ -831,7 +846,11 @@ TtEventCollection >> groupedByDay [
 
 { #category : #'accessing - grouping' }
 TtEventCollection >> groupedByFilter [
-	^ self perform: #groupedBy , self viewFilterContext
+	^ self viewFilterContext isSymbol
+		ifTrue: [ self perform: #groupedBy , self viewFilterContext ]
+		ifFalse: [ self viewFilterContext
+				collection: self;
+				create ]
 ]
 
 { #category : #'accessing - grouping' }
@@ -1942,6 +1961,18 @@ TtEventCollection >> loadPage [
 		ifNil: [ [ page := self perform: #customPage ]
 				on: MessageNotUnderstood
 				do: [ page := self defaultPage ] ]
+]
+
+{ #category : #views }
+TtEventCollection >> newAdHocGroupByTemplate [
+	TtAdHocGroupBy new
+		name: 'Morning vs Afternoon/Night Activities';
+		description: 'Splits time into morning vs afternoon/night';
+		filter: [ :aTrackedTime | true ];
+		groupByComputation: [ :aTrackedTime | 
+			aTrackedTime start hours >= 12
+				ifTrue: [ TtPseudoCategory new name: 'Morning' ]
+				ifFalse: [ TtPseudoCategory new name: 'Afternoon/Night' ] ]
 ]
 
 { #category : #filtering }
