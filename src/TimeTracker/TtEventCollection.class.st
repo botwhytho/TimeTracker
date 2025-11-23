@@ -946,16 +946,15 @@ TtEventCollection >> groupingLevelLabelMapping [
 
 { #category : #'as yet unclassified' }
 TtEventCollection >> gtCalendarViewFor: aView [
-	"(self items collectAsSet: #category)"
-
 	<gtView>
-	self flag: #TODO.	"Improve calendar view when sparse"
 	self groupedByCategory keys size > 2 ifTrue: [ ^ aView empty ].
 	^ aView explicit
 		title: 'Calendar View';
 		priority: 4;
-		stencil: [ | grid months |
+		stencil: [ | currentMonth grid months lastMonth |
 			months := self groupedByMonth.
+			currentMonth := months keys first.
+			lastMonth := months keys last.
 			grid := BrHorizontalGrid new
 					matchParent;
 					columnCount: 3.
@@ -964,36 +963,44 @@ TtEventCollection >> gtCalendarViewFor: aView [
 					anIndex ~= 1
 						ifTrue: [ ((2 - (months keys min index % 3) + 2) / 3.0) ceiling
 								timesRepeat: [ grid addChild: (BlElement new size: 0 @ 0) ] ] ].
-			grid
-				addChildren: ((months associations sorted: #key ascending)
-						collect: [ :aMonth | 
-							| calendar byDay |
-							calendar := MyGtCalendarElement new
-									highlightToday: false;
-									date: aMonth value last start asDate.
-							byDay := aMonth value groupedByDay associations.
-							calendar
-								enqueueTask: [ calendar dayElements
-										do: [ :aContainer | 
-											byDay
-												detect: [ :aDay | aDay key dayOfMonth asString = aContainer children first label asString ]
-												ifFound: [ :found | 
-													| element |
-													element := BlElement new.
-													aContainer
-														addChild: (element
-																id: #categoryElement;
-																zIndex: 1000;
-																constraintsDo: [ :c | 
-																	c ignoreByLayout.
-																	c vertical exact: aContainer children first height * 0.95.
-																	c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
-																background: (found value first category color alpha: 0.25);
-																when: BlClickEvent
-																	do: [ :aBlClickEvent | 
-																		aBlClickEvent consumed: true.
-																		element phlow spawnObject: found value ]) ] ] ] asBlTask.
-							calendar asScalableElement margin: (BlInsets all: 10) ]) ]
+			[ currentMonth <= lastMonth ]
+				whileTrue: [ grid
+						addChild: ((months associationAt: currentMonth ifAbsent: [ currentMonth -> #() ])
+								in: [ :anAssociation | 
+									| calendar byDay |
+									calendar := MyGtCalendarElement new
+											highlightToday: false;
+											date: (anAssociation value
+													ifEmpty: [ anAssociation key start asDate ]
+													ifNotEmpty: [ :notEmpty | notEmpty last start asDate ]).
+									byDay := anAssociation value
+											ifEmpty: [ anAssociation value ]
+											ifNotEmpty: [ :notEmpty | anAssociation value groupedByDay associations ].
+									byDay
+										ifNotEmpty: [ calendar
+												enqueueTask: [ calendar dayElements
+														do: [ :aContainer | 
+															byDay
+																detect: [ :aDay | aDay key dayOfMonth asString = aContainer children first label asString ]
+																ifFound: [ :found | 
+																	| element |
+																	element := BlElement new.
+																	aContainer
+																		addChild: (element
+																				id: #categoryElement;
+																				zIndex: 1000;
+																				constraintsDo: [ :c | 
+																					c ignoreByLayout.
+																					c vertical exact: aContainer children first height * 0.95.
+																					c horizontal exact: calendar defaultWidth / 7.0 * 0.95 ];
+																				background: (found value first category color alpha: 0.25);
+																				when: BlClickEvent
+																					do: [ :aBlClickEvent | 
+																						aBlClickEvent consumed: true.
+																						element phlow spawnObject: found value ]) ] ] ] asBlTask ].
+									calendar asScalableElement margin: (BlInsets all: 10) ]).
+					currentMonth := currentMonth next ].
+			grid ]
 ]
 
 { #category : #views }
