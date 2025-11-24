@@ -1104,7 +1104,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 			groupedBy: [ :each | each key year ].
 	ideals := self ideals.
 	^ aView columnedTree
-		title: 'Ideals';
+		title: 'Ideals Progress';
 		priority: 0;
 		items: [ groupedByYearAndWeeks associations ];
 		children: [ :each | each key isInteger ifTrue: [ {each value -> nil} ] ifFalse: [ #() ] ];
@@ -1204,7 +1204,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			ifTrue: [ -5 ]
 			ifFalse: [ 0 ].
 	^ aView columnedList
-		title: 'Ideals';
+		title: 'Ideals Progress';
 		priority: dynamicPriority;
 		items: [ groupedByIdeals associations ];
 		column: 'Ideal Time Usage'
@@ -1275,6 +1275,39 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 								action: [ aContext at: 'ideals' put: each value.
 									aBrButton phlow fireToolUpdateWish ] ].
 					menuItems ] ]
+]
+
+{ #category : #views }
+TtEventCollection >> gtIdealsFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Ideals';
+		priority: 6;
+		items: [ (self ideals groupedBy: [ :each | each as: Timespan ]) associations ];
+		column: 'Name' text: [ :each | each value first asString ];
+		column: 'Dates'
+			text: [ :each | each key start asString , ' - ' , (each key start + each key duration) asString ];
+		column: 'Ideals' text: [ :each | each value size ];
+		contextItemLabel: 'Circle'
+			action: [ :aBrMenuActionItemElement :anAssociation | 
+				aBrMenuActionItemElement phlow
+					spawnObject: BlBasicExamples new circle asScalableElement ];
+		contextItemLabel: 'Red Circle'
+			action: [ :aBrMenuActionItemElement :anAssociation | 
+				aBrMenuActionItemElement phlow
+					spawnObject: (BlBasicExamples new circle asScalableElement background: Color red) ]
+			if: [ :anAssociation | anAssociation value size > 4 ];
+		dynamicContextItems: [ :anAssociation | 
+			| menuItems |
+			menuItems := BrMenuItems new.
+			anAssociation value
+				do: [ :anIdeal | 
+					menuItems
+						addItemLabel: anIdeal asString
+						action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent | aBrMenuActionItemElement phlow spawnObject: anIdeal ] ].
+			BrMenuSubmenuItem new
+				label: 'Test';
+				submenu: menuItems ]
 ]
 
 { #category : #import }
@@ -1750,7 +1783,11 @@ TtEventCollection >> hourlyTicksElement [
 
 { #category : #accessing }
 TtEventCollection >> ideals [
-	^ self rootCollection items select: #isIdealTimeUsage
+	self flag: #TODO.	"Including both classes here temporarily to try and not break existing views in the meantime. This may probably cause issues anyways, FIX once transition is done."
+	^ self rootCollection items
+		select: [ :each | 
+			{TtIdeals.
+				TtIdealTimeUsage} includes: each class ]
 ]
 
 { #category : #views }

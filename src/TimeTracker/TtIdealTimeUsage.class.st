@@ -57,11 +57,6 @@ TtIdealTimeUsage >> hash [
 	^ super hash + category hash + description hash
 ]
 
-{ #category : #testing }
-TtIdealTimeUsage >> isIdealTimeUsage [
-	^ true
-]
-
 { #category : #accessing }
 TtIdealTimeUsage >> leeway [
 	^ leeway
