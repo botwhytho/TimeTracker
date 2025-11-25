@@ -39,7 +39,46 @@ TtIdeals >> gtPreviewFor: aView [
 		title: 'Ideals';
 		priority: 1;
 		items: [ self ideals ];
-		column: 'Name' text: #asString;
+		column: 'Name'
+			text: [ :each | 
+				each description
+					ifNil: [ each category ifNil: [ '' ] ifNotNil: [ :notNil | notNil name ] ] ];
+		column: 'Min Value'
+			text: [ :each | 
+				each minValue isFraction
+					ifTrue: [ each minValue asString ]
+					ifFalse: [ each minValue printShowingDecimalPlaces: 4 ] ];
+		column: 'Min Value'
+			text: [ :each | 
+				each maxValue isFraction
+					ifTrue: [ each maxValue asString ]
+					ifFalse: [ each maxValue printShowingDecimalPlaces: 4 ] ];
+		column: 'Leeway'
+			text: [ :each | 
+				each leeway isFraction
+					ifTrue: [ each leeway asString ]
+					ifFalse: [ each leeway printShowingDecimalPlaces: 4 ] ];
+		column: 'Categories'
+			stencil: [ :each | 
+				| aMenuItems |
+				aMenuItems := BrMenuItems new.
+				self collection categories
+					do: [ :aCategory | aMenuItems addItemLabel: aCategory name action: [  ] ].
+				aMenuItems.
+				BrButton new
+					aptitude: BrGlamorousButtonWithLabelAptitude;
+					label: 'Test';
+					addAptitude: (BrWithExplicitDropdownAptitude
+							handle: [ BrButton new
+									aptitude: BrGlamorousButtonWithLabelAptitude - BrGlamorousButtonExteriorAptitude;
+									label: 'Test' ]
+							menu: (BrMenuSubmenuItem new
+									label: 'test';
+									action: [ :one :two :three :four | self halt ];
+									submenuItem: (BrMenuActionItem new
+											label: 'test2';
+											action: [  ]) ));
+					yourself ];
 		actionDropdownButtonDo: [ :aDropdown | 
 			aDropdown
 				icon: [ BrGlamorousVectorIcons timeTrackerCalendar asElement asScalableElement
