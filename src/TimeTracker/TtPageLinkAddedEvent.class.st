@@ -1,18 +1,19 @@
 Class {
-	#name : #TtPageLinkAddedEvent,
-	#superclass : #BlEvent,
+	#name : 'TtPageLinkAddedEvent',
+	#superclass : 'BlEvent',
 	#instVars : [
 		'page'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPageLinkAddedEvent >> page [
 	^ page
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPageLinkAddedEvent >> page: aLePage [
 	page := aLePage
 ]

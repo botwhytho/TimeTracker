@@ -1,6 +1,6 @@
-Extension { #name : #GtPlotterSingleScaleValueBasedElement }
+Extension { #name : 'GtPlotterSingleScaleValueBasedElement' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 GtPlotterSingleScaleValueBasedElement >> initializeElements [
 	"Overriding this method until https://github.com/feenkcom/gtoolkit/issues/3521 is merged."
 	| theChildren |

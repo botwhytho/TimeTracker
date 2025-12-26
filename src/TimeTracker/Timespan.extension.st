@@ -1,16 +1,16 @@
-Extension { #name : #Timespan }
+Extension { #name : 'Timespan' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 Timespan >> isNote [
 	^ false
 ]
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 Timespan >> isPomodoro [
 	^ false
 ]
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 Timespan >> isTimeEntry [
 	^ false
 ]

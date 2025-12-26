@@ -1,6 +1,6 @@
 Class {
-	#name : #TtCategories,
-	#superclass : #Object,
+	#name : 'TtCategories',
+	#superclass : 'Object',
 	#traits : 'TGtGroupWithItems',
 	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
@@ -11,15 +11,16 @@ Class {
 		'SystemCategories',
 		'TestInstance'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> firstTimeScheduled [
 	^ self systemCategories at: 'First Time Scheduled'
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtCategories class >> fromRoot: aRootCategory [
 	| collection |
 	collection := self new.
@@ -29,7 +30,7 @@ TtCategories class >> fromRoot: aRootCategory [
 	^ collection
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtCategories class >> initialize [
 	super initialize.
 	SystemCategories := Dictionary new.
@@ -68,53 +69,53 @@ TtCategories class >> initialize [
 					colorOverride: BrGlamorousColors failureBackgroundColor)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> oneTime [
 	^ self systemCategories at: 'One Time'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> planned [
 	^ self systemCategories at: 'Planned'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> recurring [
 	^ self systemCategories at: 'Recurring'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> rescheduled [
 	^ self systemCategories at: 'Rescheduled'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> systemCategories [
 	^ SystemCategories
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 TtCategories class >> testInstance [
 	^ TestInstance ifNil: [ TestInstance := self new ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> uncategorized [
 
 	^ self systemCategories at: 'Uncategorized'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> unplanned [
 	^ self systemCategories at: 'Unplanned'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories class >> untracked [
 	^ self systemCategories at: 'Untracked'
 ]
 
-{ #category : #view }
+{ #category : 'view' }
 TtCategories >> TtCategoriesFor: aView context: aContext [
 	<gtView>
 	self
@@ -298,7 +299,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 			view layout horizontalTree ]
 ]
 
-{ #category : #view }
+{ #category : 'view' }
 TtCategories >> calculateHierarchy [
 	self items removeAll.
 	self add: self root.
@@ -309,17 +310,17 @@ TtCategories >> calculateHierarchy [
 			self add: child ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories >> collection: anObject [
 	collection := anObject
 ]
 
-{ #category : #view }
+{ #category : 'view' }
 TtCategories >> editableCategoryLabel: aCategory [
 	| label |
 	label := BrEditableLabel new.
@@ -350,7 +351,7 @@ TtCategories >> editableCategoryLabel: aCategory [
 	^ label
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtCategories >> gtCollectionActionFor: anAction [
 	<gtAction>
 	^ anAction button
@@ -358,7 +359,7 @@ TtCategories >> gtCollectionActionFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | aBrButton phlow spawnObject: self collection ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtCategories >> gtItemsByCategoryFor: aView [
 	<gtView>
 	| itemsByCategory emptyCategories |
@@ -387,7 +388,7 @@ TtCategories >> gtItemsByCategoryFor: aView [
 		send: #value
 ]
 
-{ #category : #searching }
+{ #category : 'searching' }
 TtCategories >> gtSearchFor: aSearch [
 	<gtSearch>
 	^ aSearch list
@@ -403,7 +404,7 @@ TtCategories >> gtSearchFor: aSearch [
 		filterBySubstring
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtCategories >> initialize [
 	super initialize.
 	self
@@ -414,17 +415,17 @@ TtCategories >> initialize [
 	self add: self root
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories >> root [
 	^ root
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories >> root: anObject [
 	root := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategories >> sampleCategories [
 	"Some nested categories"
 

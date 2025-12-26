@@ -1,23 +1,24 @@
 Class {
-	#name : #TtPlaceholderCategory,
-	#superclass : #TtCategory,
+	#name : 'TtPlaceholderCategory',
+	#superclass : 'TtCategory',
 	#classInstVars : [
 		'categories'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPlaceholderCategory class >> categories [
 	^ categories ifNil: [ categories := Dictionary new ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtPlaceholderCategory class >> fromName: categoryName [
 	^ self categories at: categoryName ifAbsentPut: [ self new name: categoryName ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPlaceholderCategory >> isPlaceholder [
 	^ true
 ]

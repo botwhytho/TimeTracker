@@ -1,5 +1,6 @@
 Class {
-	#name : #TtPseudoCategory,
-	#superclass : #TtCategory,
-	#category : #TimeTracker
+	#name : 'TtPseudoCategory',
+	#superclass : 'TtCategory',
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }

@@ -1,40 +1,41 @@
 Class {
-	#name : #TtNoteSnippet,
-	#superclass : #LeUnknownSnippet,
+	#name : 'TtNoteSnippet',
+	#superclass : 'LeUnknownSnippet',
 	#instVars : [
 		'domainObject'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtNoteSnippet class >> deserializerClass [
 	^ NoteSnippetDeserializer
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtNoteSnippet class >> initialize [
 	super initialize.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNoteSnippet class >> leJsonV4Name [
 
 	^ 'noteSnippet'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNoteSnippet >> domainObject [
 	^ domainObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNoteSnippet >> domainObject: aTtNote [
 	domainObject := aTtNote
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 TtNoteSnippet >> gtInspectNoteFor: anAction [
 	<gtAction>
 	self domainObject ifNil: [ ^ anAction noAction ].
@@ -44,7 +45,7 @@ TtNoteSnippet >> gtInspectNoteFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self domainObject ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtNoteSnippet >> gtPageFor: aView [
 	<gtView>
 	(self domainObject isNil and: [ self domainObject page isNil ])

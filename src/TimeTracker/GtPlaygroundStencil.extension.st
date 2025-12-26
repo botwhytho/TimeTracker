@@ -1,6 +1,6 @@
-Extension { #name : #GtPlaygroundStencil }
+Extension { #name : 'GtPlaygroundStencil' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 GtPlaygroundStencil >> createWithoutPager [
 	^ LePlayground newDefaultPage
 ]

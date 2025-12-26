@@ -1,6 +1,6 @@
-Extension { #name : #CollectionValueHolder }
+Extension { #name : 'CollectionValueHolder' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 CollectionValueHolder >> asAsyncStream [
 	^ self value asAsyncStream
 ]

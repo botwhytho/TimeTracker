@@ -1,1 +1,1 @@
-Package { #name : #TimeTracker }
+Package { #name : 'TimeTracker' }

@@ -1,10 +1,12 @@
 Class {
-	#name : #GtSpotterReturnAllItemsFilter,
-	#superclass : #GtSpotterSubstringFilter,
-	#category : #'TimeTracker-Filters'
+	#name : 'GtSpotterReturnAllItemsFilter',
+	#superclass : 'GtSpotterSubstringFilter',
+	#category : 'TimeTracker-Filters',
+	#package : 'TimeTracker',
+	#tag : 'Filters'
 }
 
-{ #category : #evaluating }
+{ #category : 'evaluating' }
 GtSpotterReturnAllItemsFilter >> applyInScope: aStream context: aSpotterContext [
 	^ (GtSpotterSubstringFilterStream
 		forStream: aStream

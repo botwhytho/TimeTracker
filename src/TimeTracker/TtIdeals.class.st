@@ -1,6 +1,6 @@
 Class {
-	#name : #TtIdeals,
-	#superclass : #Timespan,
+	#name : 'TtIdeals',
+	#superclass : 'Timespan',
 	#instVars : [
 		'ideals',
 		'description',
@@ -8,30 +8,31 @@ Class {
 		'collection',
 		'needsFlushing'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> collection: anObject [
 	collection := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> description [
 	^ description
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> description: aString [
 	description := aString
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtIdeals >> gtPreviewFor: aView [
 	<gtView>
 	self flag: #TODO.	"Might need to incorporate Maggritte"
@@ -128,33 +129,33 @@ TtIdeals >> gtPreviewFor: aView [
 							action: [ :aBrMenuActionItemElement :aBrButtonModel :aBlClickEvent |  ] ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> ideals [
 	^ ideals
 		ifNil: [ ideals := SortedCollection sortUsing: [ :each | each maxValue ] descending ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> ideals: anObject [
 	ideals := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> needsFlushing [
 	^ needsFlushing ifNil: [ needsFlushing := false ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> needsFlushing: anObject [
 	needsFlushing := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> notes [
 	^ notes ifNil: [ notes := OrderedCollection new ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeals >> notes: anObject [
 	notes := anObject
 ]

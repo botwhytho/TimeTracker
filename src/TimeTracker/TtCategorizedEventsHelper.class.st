@@ -1,6 +1,6 @@
 Class {
-	#name : #TtCategorizedEventsHelper,
-	#superclass : #Object,
+	#name : 'TtCategorizedEventsHelper',
+	#superclass : 'Object',
 	#instVars : [
 		'category',
 		'collection',
@@ -8,40 +8,41 @@ Class {
 		'startAngle',
 		'endAngle'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> category [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> category: anObject [
 	category := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> collection: aTtEventCollection [
 	collection := aTtEventCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> endAngle [
 	^ endAngle
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> endAngle: anObject [
 	endAngle := anObject
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtCategorizedEventsHelper >> printOn: aStream [
 	super printOn: aStream.
 	aStream
@@ -54,22 +55,22 @@ TtCategorizedEventsHelper >> printOn: aStream [
 		nextPut: $)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> startAngle [
 	^ startAngle
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> startAngle: anObject [
 	startAngle := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> sum [
 	^ sum
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategorizedEventsHelper >> sum: anObject [
 	sum := anObject
 ]

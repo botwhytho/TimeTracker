@@ -1,6 +1,6 @@
 Class {
-	#name : #TtIdealTimeUsage,
-	#superclass : #Timespan,
+	#name : 'TtIdealTimeUsage',
+	#superclass : 'Timespan',
 	#instVars : [
 		'category',
 		'leeway',
@@ -11,10 +11,11 @@ Class {
 		'computation',
 		'description'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtIdealTimeUsage >> = comparand [
 	self flag: #NOTE.	"Below asumes that two ideal times on same time span cannot exist on the same category, seems like a mistake that the UI should prevent from doing. If not, need to compare and hash on many other fields"
 	^ super = comparand
@@ -22,72 +23,72 @@ TtIdealTimeUsage >> = comparand [
 				and: [ self description = comparand description ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> category [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> category: anObject [
 	category := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> computation [
 	^ computation
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> computation: anObject [
 	computation := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> description [
 	^ description
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> description: anObject [
 	description := anObject
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtIdealTimeUsage >> hash [
 	^ super hash + category hash + description hash
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> leeway [
 	^ leeway
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> leeway: anObject [
 	leeway := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> maxValue [
 	^ maxValue
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> maxValue: anObject [
 	maxValue := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> minValue [
 	^ minValue
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> minValue: anObject [
 	minValue := anObject
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtIdealTimeUsage >> printOn: aStream [
 	aStream
 		nextPutAll: (self category ifNil: [ self description ] ifNotNil: [ :notNil | notNil name ])
@@ -95,22 +96,22 @@ TtIdealTimeUsage >> printOn: aStream [
 				, (self maxValue * 100 printShowingDecimalPlaces: 2) , '% of your time'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> priority [
 	^ priority
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> priority: anObject [
 	priority := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> timePeriod [
 	^ timePeriod
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdealTimeUsage >> timePeriod: anObject [
 	timePeriod := anObject
 ]

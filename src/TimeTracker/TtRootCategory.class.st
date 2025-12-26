@@ -1,24 +1,25 @@
 Class {
-	#name : #TtRootCategory,
-	#superclass : #TtCategory,
+	#name : 'TtRootCategory',
+	#superclass : 'TtCategory',
 	#instVars : [
 		'collection',
 		'uid'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtRootCategory >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtRootCategory >> collection: aTtEventCollection [
 	collection := aTtEventCollection
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtRootCategory >> gtCollectionActionFor: anAction [
 	<gtAction>
 	^ anAction button
@@ -26,7 +27,7 @@ TtRootCategory >> gtCollectionActionFor: anAction [
 		action: [ :aBrButton :aBrTab :aBrButttonModel :aBlClickEvent | aBrButton phlow spawnObject: self collection ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtRootCategory >> gtHierarchyFor: aView [
 	<gtView>
 	^ aView forward
@@ -36,17 +37,17 @@ TtRootCategory >> gtHierarchyFor: aView [
 		view: #TtCategoriesFor:context:
 ]
 
-{ #category : #search }
+{ #category : 'search' }
 TtRootCategory >> gtSpotterForCategoryFor: aSearch [
 	self flag: #TODO	"Be able to search category hierarchiex"
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtRootCategory >> uid [
 	^ uid
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtRootCategory >> uid: anObject [
 	uid := anObject
 ]

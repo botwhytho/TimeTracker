@@ -1,10 +1,11 @@
 Class {
-	#name : #TtTrelloImporter,
-	#superclass : #Object,
-	#category : #TimeTracker
+	#name : 'TtTrelloImporter',
+	#superclass : 'Object',
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #import }
+{ #category : 'import' }
 TtTrelloImporter class >> fetch [
 	| result |
 	result := NeoJSONReader
@@ -20,7 +21,7 @@ TtTrelloImporter class >> fetch [
 						'trelloUrl' -> (item at: 'shortUrl')} asDictionary ]) asDictionary
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtTrelloImporter >> fetchRaw [
 	| result |
 	result := NeoJSONReader

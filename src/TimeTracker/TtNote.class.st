@@ -1,16 +1,17 @@
 Class {
-	#name : #TtNote,
-	#superclass : #Timespan,
+	#name : 'TtNote',
+	#superclass : 'Timespan',
 	#instVars : [
 		'collection',
 		'page',
 		'database',
 		'uid'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtNote class >> neoJsonMapping: aNeoJSONMapper [
 	| database |
 	aNeoJSONMapper
@@ -47,37 +48,37 @@ TtNote class >> neoJsonMapping: aNeoJSONMapper [
 					encoder: [ :aLePage | [ aLePage uidString ] on: MessageNotUnderstood do: [ nil ] ] ]
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtNote class >> snippetClass [
 	^ TtNoteSnippet
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> asTimespan [
 	^ self as: self value class superclass
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> collection: aTtEventCollection [
 	collection := aTtEventCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> database [
 	^ database
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> database: aLeDatabase [
 	database := aLeDatabase
 ]
 
-{ #category : #deleting }
+{ #category : 'deleting' }
 TtNote >> delete [
 	self collection page
 		ifNotNil: [ :aPage | 
@@ -86,7 +87,7 @@ TtNote >> delete [
 	self rootCollection items remove: self
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtNote >> gtDeleteActionFor: anAction [
 	<gtAction>
 	^ anAction button
@@ -98,7 +99,7 @@ TtNote >> gtDeleteActionFor: anAction [
 			self delete ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtNote >> gtPreviewFor: aView [
 	<gtView>
 	self page ifNil: [ ^ aView empty ].
@@ -108,32 +109,32 @@ TtNote >> gtPreviewFor: aView [
 		view: #gtLiveFor:
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 TtNote >> isNote [
 	^ true
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> page [
 	^ page
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> page: aLePage [
 	page := aLePage
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> rootCollection [
 	^ self collection rootCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> uid [
 	^ uid
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtNote >> uid: anObject [
 	uid := anObject
 ]

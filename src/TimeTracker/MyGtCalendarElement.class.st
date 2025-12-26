@@ -1,6 +1,6 @@
 Class {
-	#name : #MyGtCalendarElement,
-	#superclass : #BrHorizontalGrid,
+	#name : 'MyGtCalendarElement',
+	#superclass : 'BrHorizontalGrid',
 	#instVars : [
 		'date',
 		'currentMonth',
@@ -9,10 +9,12 @@ Class {
 		'highlightToday',
 		'elementComputation'
 	],
-	#category : #'TimeTracker-Calendar'
+	#category : 'TimeTracker-Calendar',
+	#package : 'TimeTracker',
+	#tag : 'Calendar'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 MyGtCalendarElement class >> forDate: aDate [
 	^ self new
 		enableControls;
@@ -20,7 +22,7 @@ MyGtCalendarElement class >> forDate: aDate [
 		yourself
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 MyGtCalendarElement class >> forDate: aDate asElementDo: aValuable [
 	^ self new
 		enableControls;
@@ -29,7 +31,7 @@ MyGtCalendarElement class >> forDate: aDate asElementDo: aValuable [
 		yourself
 ]
 
-{ #category : #'private ui' }
+{ #category : 'private ui' }
 MyGtCalendarElement >> buildDays [
 	| current last |
 	current := currentMonth.
@@ -73,7 +75,7 @@ MyGtCalendarElement >> buildDays [
 			current := current addDays: 1 ]
 ]
 
-{ #category : #'private ui' }
+{ #category : 'private ui' }
 MyGtCalendarElement >> buildHeader [
 	| headerLabelAptitude |
 	self
@@ -147,7 +149,7 @@ MyGtCalendarElement >> buildHeader [
 						text: aDay) ]
 ]
 
-{ #category : #'private ui' }
+{ #category : 'private ui' }
 MyGtCalendarElement >> buildMonth [
 	self removeChildren.
 	self dayElements removeAll.
@@ -156,59 +158,59 @@ MyGtCalendarElement >> buildMonth [
 	self elementComputation ifNotNil: [ :notNil | notNil value: self ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> currentMonth [
 	^ currentMonth
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> date: aDate [
 	date := aDate.
 	currentMonth := Date newDay: date firstDayOfMonth year: date year.
 	self buildMonth
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> dayElements [
 	^ dayElements ifNil: [ dayElements := Dictionary new ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 MyGtCalendarElement >> defaultWidth [
 	^ 150
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 MyGtCalendarElement >> disableControls [
 	controls := false
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> elementComputation [
 	^ elementComputation
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> elementComputation: aValuable [
 	elementComputation := aValuable
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 MyGtCalendarElement >> enableControls [
 	controls := true
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> highlightToday [
 	^ highlightToday
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 MyGtCalendarElement >> highlightToday: aBoolean [
 	highlightToday := aBoolean
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 MyGtCalendarElement >> initialize [
 	super initialize.
 	self columnCount: 7.

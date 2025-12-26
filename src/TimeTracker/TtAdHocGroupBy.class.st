@@ -1,6 +1,6 @@
 Class {
-	#name : #TtAdHocGroupBy,
-	#superclass : #Object,
+	#name : 'TtAdHocGroupBy',
+	#superclass : 'Object',
 	#instVars : [
 		'name',
 		'description',
@@ -8,20 +8,21 @@ Class {
 		'groupByComputation',
 		'collection'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> collection: anObject [
 	collection := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> create [
 	| filtered groupedBy |
 	filtered := self filter
@@ -35,42 +36,42 @@ TtAdHocGroupBy >> create [
 			anAssociation ]) asOrderedDictionary
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> description [
 	^ description
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> description: anObject [
 	description := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> filter [
 	^ filter
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> filter: anObject [
 	filter := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> groupByComputation [
 	^ groupByComputation
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> groupByComputation: anObject [
 	groupByComputation := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> name [
 	^ name
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtAdHocGroupBy >> name: anObject [
 	name := anObject
 ]

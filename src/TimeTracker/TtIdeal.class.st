@@ -1,6 +1,6 @@
 Class {
-	#name : #TtIdeal,
-	#superclass : #Object,
+	#name : 'TtIdeal',
+	#superclass : 'Object',
 	#instVars : [
 		'category',
 		'leeway',
@@ -11,70 +11,71 @@ Class {
 		'computation',
 		'description'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> category [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> category: aTtCategory [
 	category := aTtCategory
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> computation [
 	^ computation
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> computation: aValuable [
 	computation := aValuable
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> description [
 	^ description
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> description: anObject [
 	description := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> leeway [
 	^ leeway
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> leeway: anObject [
 	leeway := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> maxValue [
 	^ maxValue
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> maxValue: anObject [
 	maxValue := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> minValue [
 	^ minValue
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> minValue: anObject [
 	minValue := anObject
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtIdeal >> printOn: aStream [
 	aStream
 		nextPutAll: (self category ifNil: [ self description ] ifNotNil: [ :notNil | notNil name ])
@@ -82,22 +83,22 @@ TtIdeal >> printOn: aStream [
 				, (self maxValue * 100 printShowingDecimalPlaces: 2) , '% of your time'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> priority [
 	^ priority
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> priority: anObject [
 	priority := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> timePeriod [
 	^ timePeriod
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtIdeal >> timePeriod: anObject [
 	timePeriod := anObject
 ]

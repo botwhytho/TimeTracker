@@ -1,6 +1,6 @@
-Extension { #name : #BrGlamorousVectorIcons }
+Extension { #name : 'BrGlamorousVectorIcons' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 BrGlamorousVectorIcons class >> timeTrackerCalendar [
 	"Icons made from svg icons found at https://www.onlinewebfonts.com/icon/572308 and is licensed by CC BY 4.0"
 

@@ -1,6 +1,6 @@
 Class {
-	#name : #TtCategory,
-	#superclass : #Object,
+	#name : 'TtCategory',
+	#superclass : 'Object',
 	#instVars : [
 		'name',
 		'hierarchy',
@@ -9,10 +9,11 @@ Class {
 		'colorOverride',
 		'defaultColor'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtCategory class >> neoJsonMapping: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
@@ -42,22 +43,22 @@ TtCategory class >> neoJsonMapping: aNeoJSONMapper [
 				mapClass: NeoJSONObject ]
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtCategory class >> snippetClass [
 	^ TtCategoriesSnippet
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtCategory >> <= other [
 	^ self name <= other name
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtCategory >> = anObject [
 	^ self species = anObject species and: [ self name = anObject name ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> categoryLineage [
 	| category lineage |
 	category := self.
@@ -69,32 +70,32 @@ TtCategory >> categoryLineage [
 	^ lineage allButLast
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> children [
 	^ children ifNil: [ children := SortedCollection new ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> color [
 	^ self colorOverride ifNil: [ self defaultColor ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> colorOverride [
 	^ colorOverride
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> colorOverride: aColor [
 	colorOverride := aColor
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> defaultColor [
 	^ defaultColor ifNil: [ defaultColor := self stringToColorHash ]
 ]
 
-{ #category : #action }
+{ #category : 'action' }
 TtCategory >> gtColorFor: anAction [
 	<gtAction>
 	| isRoot |
@@ -108,7 +109,7 @@ TtCategory >> gtColorFor: anAction [
 					aButton ] ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtCategory >> gtEntriesByDayFor: aView [
 	<gtView>
 	| entries |
@@ -131,7 +132,7 @@ TtCategory >> gtEntriesByDayFor: aView [
 				aBrButton phlow spawnObject: entries value ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtCategory >> gtParentAndChildrenFor: aView [
 	<gtView>
 	^ aView columnedTree
@@ -148,7 +149,7 @@ TtCategory >> gtParentAndChildrenFor: aView [
 		expandAll
 ]
 
-{ #category : #action }
+{ #category : 'action' }
 TtCategory >> gtRootActionFor: anAction [
 	<gtAction>
 	| isRoot |
@@ -160,37 +161,37 @@ TtCategory >> gtRootActionFor: anAction [
 				spawnObject: (isRoot ifTrue: [ self hierarchy ] ifFalse: [ self rootCategory ]) ]
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 TtCategory >> hasCategoryOrParentCategoryNamed: aString [
 	^ self name = aString or: [ self hasParentCategoryNamed: aString ]
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 TtCategory >> hasParentCategoryNamed: aString [
 	^ (self categoryLineage allButFirst collect: #name) includes: aString
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtCategory >> hash [
 	^ self class hash hashMultiply bitXor: self name hash
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> hierarchy [
 	^ hierarchy ifNil: [ self rootCategory hierarchy ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> hierarchy: aTtCategories [
 	hierarchy := aTtCategories
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> isPlaceholder [
 	^ false
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> moveUpHierarchy: anInteger [
 	| category counter |
 	anInteger < 1 ifTrue: [ ^ self ].
@@ -204,17 +205,17 @@ TtCategory >> moveUpHierarchy: anInteger [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> name [
 	^ name
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> name: aName [
 	name := aName
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtCategory >> parentAndChildren [
 	^ {'Parent Category' -> {self parentCategory -> #()}.
 		'Children Categories'
@@ -223,17 +224,17 @@ TtCategory >> parentAndChildren [
 					ifNotNil: [ children collect: [ :each | each -> #() ] ])}
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> parentCategory [
 	^ parentCategory
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> parentCategory: aTtCategory [
 	parentCategory := aTtCategory
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtCategory >> printOn: aStream [
 	super printOn: aStream.
 	aStream
@@ -242,7 +243,7 @@ TtCategory >> printOn: aStream [
 		nextPut: $)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> rootCategory [
 	| category |
 	category := self.
@@ -250,7 +251,7 @@ TtCategory >> rootCategory [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> stringToColorHash [
 	| angle md5BitDepthMax stringHash |
 	self flag: #TODO.	"Test other algorithms, colors look too alike"
@@ -263,7 +264,7 @@ TtCategory >> stringToColorHash [
 		l: 0.5
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> stringToColorHash2 [
 	| stringHash firstNum secondNum mappedNum hue variation saturation brightness |
 	stringHash := MD5 hashMessage: self name.
@@ -280,7 +281,7 @@ TtCategory >> stringToColorHash2 [
 		v: brightness
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtCategory >> topMostCategory [
 	| category |
 	category := self.

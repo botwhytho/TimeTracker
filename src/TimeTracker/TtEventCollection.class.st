@@ -1,6 +1,6 @@
 Class {
-	#name : #TtEventCollection,
-	#superclass : #Object,
+	#name : 'TtEventCollection',
+	#superclass : 'Object',
 	#traits : 'TGtGroupWithItems + TGtUniqueInstance',
 	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
@@ -16,15 +16,16 @@ Class {
 		'uniqueInstance',
 		'pageRegistry'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection class >> gtPageRegistryFor: aView [
 	<gtClassView>
 	self pageRegistry ifEmpty: [ ^ aView empty ].
@@ -37,17 +38,17 @@ TtEventCollection class >> gtPageRegistryFor: aView [
 		send: [ :each | each value latestWeek ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtEventCollection class >> loadFromLepiter [
 	^ self default loadFromLepiter
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 TtEventCollection class >> newFrom: aCollection [
 	^ self withAll: aCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection class >> pageRegistry [
 	^ pageRegistry
 		ifNil: [ self loadFromLepiter.
@@ -56,17 +57,17 @@ TtEventCollection class >> pageRegistry [
 					yourself ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection class >> pageRegistry: aDictionary [
 	pageRegistry := aDictionary
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection class >> serializeCollection [
 	^ self new serializeCollection
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtEventCollection class >> serializeSnippet: aTextSnippet [
 	^ NeoJSONObject
 		fromString: (String
@@ -77,7 +78,7 @@ TtEventCollection class >> serializeSnippet: aTextSnippet [
 						prettyPrint: true ])
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtEventCollection class >> serializeWithLepiter: anEntity [
 	| anUnknownSnippet aTextSnippet lepiterPage serialized snippetJSON |
 	lepiterPage := anEntity collection page.
@@ -105,13 +106,13 @@ TtEventCollection class >> serializeWithLepiter: anEntity [
 			anEntity uid: anUnknownSnippet uidString ]
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtEventCollection class >> supportedSnippetTypes [
 	^ {TtTrackedTimeSnippet.
 		TtNoteSnippet}
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> TtCategoriesFor: aView context: aContext [
 	<gtView>
 	self categories ifNil: [ ^ aView empty ].
@@ -125,12 +126,12 @@ TtEventCollection >> TtCategoriesFor: aView context: aContext [
 			action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self categories ]
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 TtEventCollection >> allCategorized [
 	^ self select: [ :each | each category isNotNil ]
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 TtEventCollection >> allEqualTo: aTtTrackedTime [
 	"Returns all entries happening at the same time using binary search"
 
@@ -163,7 +164,7 @@ TtEventCollection >> allEqualTo: aTtTrackedTime [
 	^ concurrentEntries asArray
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 TtEventCollection >> allOverlappingWith: aTtTrackedTime [
 	"Returns all entries overlapping with the entry at some point (both shorter and longer timespans)."
 
@@ -174,24 +175,24 @@ TtEventCollection >> allOverlappingWith: aTtTrackedTime [
 				and: [ (aTtTrackedTime includes: each) or: [ each includes: aTtTrackedTime ] ] ]
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 TtEventCollection >> allUncategorized [
 	^ self select: [ :each | each category isNil ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> asAsyncStream [
 	^ self items asAsyncStream
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> asRopedText [
 	self flag: #HACK.	"This is pretty bad, trying to get dropdown handle label to update with a dynamic value, this may probably break with implementation changes. Look at `GtPhlowDropdownAction>>#newButton` for where this is relevant. Opened upstream ticket https://github.com/feenkcom/gtoolkit/issues/4868. Hoping this is rather temporary"
 
 	^ self groupingLevelLabel
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> buildBars: data [
 	| aBarWidthScale barChart categoriesToFilter categoriesToFilterOut container maxLines theData totalTime |
 	categoriesToFilter := OrderedCollection new.
@@ -290,7 +291,7 @@ TtEventCollection >> buildBars: data [
 	^ container
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> buildDailySummary: data [
 	| days flattenedData |
 	flattenedData := (data
@@ -330,7 +331,7 @@ TtEventCollection >> buildDailySummary: data [
 		asElementDo: [ :anElement | anElement id: #buildDailySummary: ]
 ]
 
-{ #category : #'building ui' }
+{ #category : 'building ui' }
 TtEventCollection >> buildDonut: data [
 	| element categoriesToFilter categoriesToFilterOut |
 	categoriesToFilter := OrderedCollection new.
@@ -406,7 +407,7 @@ TtEventCollection >> buildDonut: data [
 							c vertical matchParent ] ])
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> buildEntriesByDay: aContext [
 	| entriesByDay notes timeEntries timeEntriesAndDays |
 	timeEntries := self timeEntries.
@@ -540,7 +541,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 			element ]
 ]
 
-{ #category : #'building ui' }
+{ #category : 'building ui' }
 TtEventCollection >> calculateAnglesForDonut [
 	| sortedCategories totalTime |
 	sortedCategories := self groupedAndSortedByDuration.
@@ -560,37 +561,37 @@ TtEventCollection >> calculateAnglesForDonut [
 	^ sortedCategories
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categories [
 	^ categories
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categories: aTtCategories [
 	categories := aTtCategories
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categoryContext [
 	^ categoryContext
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categoryContext: anObject [
 	categoryContext := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categoryPicker [
 	^ categoryPicker
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> categoryPicker: anObject [
 	categoryPicker := anObject
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> dailyTimePlot: aTTEventCollection [
 	^ GtPlotterHorizontalValueProjectionsElement new
 		padding: (BlInsets
@@ -655,12 +656,12 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 			do: [ :anEvent | anEvent target phlow spawnObject: aTTEventCollection ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> datesWithData [
 	^ (self items value collectAsSet: [ :each | each start asDate translateToUTC ]) asArray
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> defaultPage [
 	^ LeDatabasesRegistry defaultLogicalDatabase
 		pageNamed: self class defaultPageName
@@ -671,7 +672,7 @@ TtEventCollection >> defaultPage [
 			newPage ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> groupByActionWithContext: aContext [
 	^ [ :aDropdown | 
 	| groupByLabelMapping groupByTooltip |
@@ -757,7 +758,7 @@ TtEventCollection >> groupByActionWithContext: aContext [
 			menuItems ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> groupIntoContiguous [
 	| contiguousCollections timeEntries |
 	timeEntries := self timeEntries.
@@ -772,7 +773,7 @@ TtEventCollection >> groupIntoContiguous [
 		collect: [ :each | (Timespan starting: each first start ending: each last end rounded) -> each ]
 ]
 
-{ #category : #acccessing }
+{ #category : 'acccessing' }
 TtEventCollection >> groupedAndSortedByDuration [
 	| groupedActivities groupedByTimespan summedGroupings |
 	groupedByTimespan := self timeEntries groupedByTimespan.
@@ -792,7 +793,7 @@ TtEventCollection >> groupedAndSortedByDuration [
 	^ summedGroupings sorted: #sum descending
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> groupedBy: aBlock [
 	"Override this method here and not reuse the one in collection
 	because we want the keys to be groups, not simple collections"
@@ -820,7 +821,7 @@ TtEventCollection >> groupedBy: aBlock [
 	^ result
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByCategory [
 	| daysWithUntrackedTime grouped |
 	grouped := self timeEntries
@@ -845,7 +846,7 @@ TtEventCollection >> groupedByCategory [
 	^ grouped
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> groupedByCategoryForLineGraph [
 	^ (((self groupedByCategory
 		associationsSelect: [ :each | (#('Uncategorized' 'Untracked') includes: each key name) not ])
@@ -860,12 +861,12 @@ TtEventCollection >> groupedByCategoryForLineGraph [
 		flatten sorted: [ :each | each date ] ascending
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByDay [
 	^ self groupedBy: [ :each | each start asDate translateToUTC ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByFilter [
 	^ self viewFilterContext isSymbol
 		ifTrue: [ self perform: #groupedBy , self viewFilterContext ]
@@ -874,7 +875,7 @@ TtEventCollection >> groupedByFilter [
 				create ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByFirstTimeScheduled [
 	^ self
 		groupedBy: [ :each | 
@@ -883,7 +884,7 @@ TtEventCollection >> groupedByFirstTimeScheduled [
 				ifFalse: [ TtCategories rescheduled ] ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByIsPlanned [
 	^ self
 		groupedBy: [ :each | 
@@ -892,7 +893,7 @@ TtEventCollection >> groupedByIsPlanned [
 				ifFalse: [ TtCategories unplanned ] ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByIsRecurring [
 	^ self
 		groupedBy: [ :each | 
@@ -901,32 +902,32 @@ TtEventCollection >> groupedByIsRecurring [
 				ifFalse: [ TtCategories oneTime ] ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByMonth [
 	^ self groupedBy: [ :each | each start asMonth translateToUTC ]
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByTimespan [
 	^ self groupedBy: #asTimespan
 ]
 
-{ #category : #'accessing - grouping' }
+{ #category : 'accessing - grouping' }
 TtEventCollection >> groupedByWeek [
 	^ self groupedBy: [ :each | each start asWeek translateToUTC ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> groupingLevel [
 	^ groupingLevel ifNil: [ groupingLevel := 0 ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> groupingLevel: anObject [
 	groupingLevel := anObject
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> groupingLevelAction [
 	^ [ :aDropdown | 
 	aDropdown
@@ -944,14 +945,14 @@ TtEventCollection >> groupingLevelAction [
 			menuItems ] ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> groupingLevelLabel [
 	^ 'Grouping ('
 		, (self groupingLevelLabelMapping
 				detect: [ :each | each value = self groupingLevel ]) key , ')'
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> groupingLevelLabelMapping [
 	^ {'Original' -> 0.
 		'2nd Level' -> 1.
@@ -961,7 +962,7 @@ TtEventCollection >> groupingLevelLabelMapping [
 		'Top Level' -> #topMostCategory}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 TtEventCollection >> gtCalendarViewFor: aView [
 	<gtView>
 	self groupedByCategory keys size > 2 ifTrue: [ ^ aView empty ].
@@ -1020,7 +1021,7 @@ TtEventCollection >> gtCalendarViewFor: aView [
 			grid ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 	<gtView>
 	| pomodoros |
@@ -1034,7 +1035,7 @@ TtEventCollection >> gtEntriesByDayFor: aView context: aContext [
 				addChild: (self buildEntriesByDay: aContext) ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtGroupedByDescriptionFor: aView [
 	<gtView>
 	^ aView columnedList
@@ -1058,7 +1059,7 @@ TtEventCollection >> gtGroupedByDescriptionFor: aView [
 		send: #value
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtGroupedByDetailFor: aView [
 	<gtView>
 	^ aView columnedList
@@ -1087,7 +1088,7 @@ TtEventCollection >> gtGroupedByDetailFor: aView [
 		send: #value
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtIdealTimeUsageFor: aView context: aContext [
 	<gtView>
 	| weeks |
@@ -1097,7 +1098,7 @@ TtEventCollection >> gtIdealTimeUsageFor: aView context: aContext [
 		ifFalse: [ ^ self gtIdealTimeUsageSingleWeek: aView context: aContext ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 	| ideals groupedByYearAndWeeks |
 	groupedByYearAndWeeks := self groupedByWeek associations
@@ -1172,7 +1173,7 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 		expandAll
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
@@ -1277,7 +1278,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 					menuItems ] ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtIdealsFor: aView [
 	<gtView>
 	^ aView columnedList
@@ -1310,7 +1311,7 @@ TtEventCollection >> gtIdealsFor: aView [
 				submenu: menuItems ]
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	<gtAction>
 	self flag: #TODO.	"Generalize import through some type of interface"
@@ -1427,7 +1428,7 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 			aMenuItems ]
 ]
 
-{ #category : #inspecting }
+{ #category : 'inspecting' }
 TtEventCollection >> gtInspectActionFor: anAction [
 	<gtAction>
 	^ anAction dropdown
@@ -1467,7 +1468,7 @@ TtEventCollection >> gtInspectActionFor: anAction [
 						aBrMenuActionItemElement fireEvent: BrDropdownHideWish new ] ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtLineGraphFor: aView [
 	<gtView>
 	^ aView explicit
@@ -1496,7 +1497,7 @@ TtEventCollection >> gtLineGraphFor: aView [
 			aChart ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtNotesFor: aView [
 	<gtView>
 	| notes notesByPage |
@@ -1562,7 +1563,7 @@ TtEventCollection >> gtNotesFor: aView [
 		expandAll
 ]
 
-{ #category : #'gt - advice' }
+{ #category : 'gt - advice' }
 TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 	<gtAdvice>
 	| categorizedWithPlaceholder |
@@ -1578,7 +1579,7 @@ TtEventCollection >> gtRecategorizeAdviceFor: aGtAdvice [
 		action: [ :class | GtPhlowObjectAdviceAction object: categorizedWithPlaceholder ]
 ]
 
-{ #category : #searching }
+{ #category : 'searching' }
 TtEventCollection >> gtSearchFor: aSearch [
 	<gtSearch>
 	^ aSearch list
@@ -1608,7 +1609,7 @@ TtEventCollection >> gtSearchFor: aSearch [
 		wantsToDisplayOnEmptyQuery: true
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> gtSummaryFor: aView context: aContext [
 	<gtView>
 	| view |
@@ -1659,7 +1660,7 @@ TtEventCollection >> gtSummaryFor: aView context: aContext [
 	^ view
 ]
 
-{ #category : #inspecting }
+{ #category : 'inspecting' }
 TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 	<gtAction>
 	| isSingleCategory |
@@ -1686,7 +1687,7 @@ TtEventCollection >> gtTrackedDaysFor: anAction context: aContext [
 								, (trackedDays / totalDays * 100 roundTo: 1) asString , '%)' ] ])
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> gtWeekFor: anAction [
 	<gtAction>
 	^ anAction dropdown
@@ -1733,7 +1734,7 @@ TtEventCollection >> gtWeekFor: anAction [
 								anEvent consumed: true ] ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> hourlyTicksElement [
 	| aContainer ticksObject theTicks aLength |
 	ticksObject := GtPlotterNumberTicks
@@ -1781,7 +1782,7 @@ TtEventCollection >> hourlyTicksElement [
 	^ aContainer
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> ideals [
 	self flag: #TODO.	"Including both classes here temporarily to try and not break existing views in the meantime. This may probably cause issues anyways, FIX once transition is done."
 	^ self rootCollection items
@@ -1790,7 +1791,7 @@ TtEventCollection >> ideals [
 				TtIdealTimeUsage} includes: each class ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> idealsDailyProgressBarChartStencil [
 	^ [ :each | 
 	| barChart container dailyCatchupAmount daysWithData groupedByDay indexOfCurrentDayOfWeek latestDay progressPercent |
@@ -1891,17 +1892,17 @@ TtEventCollection >> idealsDailyProgressBarChartStencil [
 							aBrButton phlow spawnObject: each value ]) ] ]
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> importAllFromTrello [
 	^ self importFromTrello: Float infinity
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> importEarliestFromTrello [
 	^ self importFromTrello: 1
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> importFromTrello: aNumberOrDate [
 	| importedDates response daysToImport existingDays isDate |
 	self flag: #TODO.	"This should eventually call a properly configured class that implements a trait that knows how to import data"
@@ -1935,28 +1936,28 @@ TtEventCollection >> importFromTrello: aNumberOrDate [
 	^ importedDates
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> importLatestFromTrello [
 	^ self importFromTrello: -1
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> includeUntracked [
 	^ includeUntracked ifNil: [ includeUntracked := true ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> includeUntracked: aBoolean [
 	includeUntracked := aBoolean
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> items [
 	^ items ifNil: [
 		items := SortedCollection new ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> labelFormatX [
 ^ [ :each | 
 						(self groupedBy: #asWeek) keys size
@@ -1972,12 +1973,12 @@ TtEventCollection >> labelFormatX [
 													, aDate dayOfMonth asString ] ] ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> latestWeek [
 	^ self rootCollection weekFromDate: self rootCollection last start asDate
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> listUnimportedDays [
 	| response daysToImport |
 	[ response := TtTrelloImporter fetch ] on: NameLookupFailure do: [ ^ self ].
@@ -1987,7 +1988,7 @@ TtEventCollection >> listUnimportedDays [
 	^ daysToImport
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> loadCategories [
 	self page children
 		detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
@@ -2004,7 +2005,7 @@ TtEventCollection >> loadCategories [
 		ifNone: [ self categories: (TtCategories basicNew collection: self) ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtEventCollection >> loadFromLepiter [
 	self size = 0
 		ifTrue: [ self loadPage.
@@ -2024,7 +2025,7 @@ TtEventCollection >> loadFromLepiter [
 			self serializeCollection ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> loadPage [
 	^ page
 		ifNil: [ [ page := self perform: #customPage ]
@@ -2032,7 +2033,7 @@ TtEventCollection >> loadPage [
 				do: [ page := self defaultPage ] ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> newAdHocGroupByTemplate [
 	TtAdHocGroupBy new
 		name: 'Morning vs Afternoon/Night Activities';
@@ -2044,7 +2045,7 @@ TtEventCollection >> newAdHocGroupByTemplate [
 				ifFalse: [ TtPseudoCategory new name: 'Afternoon/Night' ] ]
 ]
 
-{ #category : #filtering }
+{ #category : 'filtering' }
 TtEventCollection >> noteToTrackedTimeAssociations [
 	^ self rootCollection notes asArray
 		collect: [ :aTtNote | 
@@ -2054,22 +2055,22 @@ TtEventCollection >> noteToTrackedTimeAssociations [
 		thenSelect: [ :each | each value isNotEmpty ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> notes [
 	^ self select: #isNote
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> page [
 	^ page
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> page: aLepiterPage [
 	page := aLepiterPage
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> partialDurationWhenMultiTasking [
 	^ [ :aTrackedTime | 
 	| concurrentTrackedTime |
@@ -2077,12 +2078,12 @@ TtEventCollection >> partialDurationWhenMultiTasking [
 	aTrackedTime duration / (concurrentTrackedTime size + 1) ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> pomodoros [
 	^ self select: #isPomodoro
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtEventCollection >> printOn: aStream [
 	super printOn: aStream.
 	aStream
@@ -2099,7 +2100,7 @@ TtEventCollection >> printOn: aStream [
 		nextPutAll: '])'
 ]
 
-{ #category : #enumerating }
+{ #category : 'enumerating' }
 TtEventCollection >> reject: aBlock [
 	^ (self species withAll: (self items reject: aBlock))
 		page: self page;
@@ -2109,12 +2110,12 @@ TtEventCollection >> reject: aBlock [
 		groupingLevel: self groupingLevel
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> rootCollection [
 	^ self class pageRegistry at: self page
 ]
 
-{ #category : #enumerating }
+{ #category : 'enumerating' }
 TtEventCollection >> select: aBlock [
 	^ (self species withAll: (self items select: aBlock))
 		page: self page;
@@ -2124,14 +2125,14 @@ TtEventCollection >> select: aBlock [
 		groupingLevel: self groupingLevel
 ]
 
-{ #category : #import }
+{ #category : 'import' }
 TtEventCollection >> serializeCollection [
 	self items isValueHolder
 		ifFalse: [ items := self items asValueHolder.
 			items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> thisWeek [
 	| lastSunday today |
 	today := Date today.
@@ -2141,18 +2142,18 @@ TtEventCollection >> thisWeek [
 	^ self select: [ :each | each start asDate > lastSunday ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> timeEntries [
 	^ self select: #isTimeEntry
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> toggleUntracked [
 	self includeUntracked.
 	includeUntracked := includeUntracked not
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> toggleUntrackedAction [
 	^ [ :aButtonAction | 
 	aButtonAction
@@ -2162,22 +2163,22 @@ TtEventCollection >> toggleUntrackedAction [
 			aButton phlow fireViewUpdateWish ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> valueHolder: anObject [
 	collection := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> viewFilterContext [
 	^ viewFilterContext ifNil: [ viewFilterContext := #Category ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> viewFilterContext: anObject [
 	viewFilterContext := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtEventCollection >> weekFromDate: aDate [
 	| thisWeek |
 	thisWeek := aDate translateToUTC asMonth weeks
@@ -2185,7 +2186,7 @@ TtEventCollection >> weekFromDate: aDate [
 	^ self select: [ :each | thisWeek includes: each start translateToUTC ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime idealProgress |
 	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
@@ -2232,7 +2233,7 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 		ifFalse: [ '' ]
 ]
 
-{ #category : #'instance - creation' }
+{ #category : 'instance - creation' }
 TtEventCollection >> withAll: aCollection [
 	^ self class new
 		page: self page;

@@ -1,16 +1,17 @@
 Class {
-	#name : #TtPageLinks,
-	#superclass : #BrWidgetContainer,
+	#name : 'TtPageLinks',
+	#superclass : 'BrWidgetContainer',
 	#traits : 'TBrLayoutResizable',
 	#classTraits : 'TBrLayoutResizable classTrait',
 	#instVars : [
 		'addPageLinkButton',
 		'pageLinksButton'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtPageLinks >> addPageLinkButton [
 	^ addPageLinkButton
 		ifNil: [ addPageLinkButton := GtSpotterDropdownButtonStencil new
@@ -36,17 +37,17 @@ TtPageLinks >> addPageLinkButton [
 					create ]
 ]
 
-{ #category : #'accessing\t' }
+{ #category : 'accessing\t' }
 TtPageLinks >> collection [
 	^ self viewModel collection
 ]
 
-{ #category : #'accessing\t' }
+{ #category : 'accessing\t' }
 TtPageLinks >> collection: aTtEventCollection [
 	self viewModel collection: aTtEventCollection
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtPageLinks >> initialize [
 	super initialize.
 	self viewModel: TtPageLinksModel new.
@@ -58,17 +59,17 @@ TtPageLinks >> initialize [
 				self pageLinksButton}
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPageLinks >> pageLinks [
 	^ self viewModel pageLinks
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtPageLinks >> pageLinks: aCollection [
 	self viewModel pageLinks: aCollection asIdentitySet
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtPageLinks >> pageLinksButton [
 	^ pageLinksButton
 		ifNil: [ pageLinksButton := BrButton new
@@ -90,12 +91,12 @@ TtPageLinks >> pageLinksButton [
 																aBrButton fireEvent: BrDropdownHideWish new ] ]) ]) ]
 ]
 
-{ #category : #'accessing\t' }
+{ #category : 'accessing\t' }
 TtPageLinks >> timespan [
 	^ self viewModel timespan
 ]
 
-{ #category : #'accessing\t' }
+{ #category : 'accessing\t' }
 TtPageLinks >> timespan: aTimespan [
 	self viewModel timespan: aTimespan
 ]

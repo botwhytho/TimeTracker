@@ -1,13 +1,14 @@
 Class {
-	#name : #TtLepiterPageSearchStart,
-	#superclass : #Object,
+	#name : 'TtLepiterPageSearchStart',
+	#superclass : 'Object',
 	#instVars : [
 		'knowledgeBase'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #spotter }
+{ #category : 'spotter' }
 TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 	<gtSearch>
 	self flag: #BUG. "If we go 'into breadcrumbs' on the search, spawned objects are wrong"
@@ -23,7 +24,7 @@ TtLepiterPageSearchStart >> gtDefaultSearchFor: aSearch [
 		wantsToDisplayOnEmptyQuery: true
 ]
 
-{ #category : #spotter }
+{ #category : 'spotter' }
 TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 	<gtSearch>
 	^ aSearch explicit
@@ -35,7 +36,7 @@ TtLepiterPageSearchStart >> gtSearchPagesByTitleFor: aSearch [
 		wantsToDisplayOnEmptyQuery: false
 ]
 
-{ #category : #spotter }
+{ #category : 'spotter' }
 TtLepiterPageSearchStart >> gtSpotterContainingSubPartsFor: aSearch [
 	<gtSearch>
 	^ aSearch explicit
@@ -55,19 +56,19 @@ TtLepiterPageSearchStart >> gtSpotterContainingSubPartsFor: aSearch [
 		itemName: #spotterItemName
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtLepiterPageSearchStart >> knowledgeBase [
 	self flag: #TODO.	"Enable cross-database search"
 	^ knowledgeBase
 		ifNil: [ LeDatabasesRegistry uniqueInstance currentLoadedDefaultLogicalDatabase ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtLepiterPageSearchStart >> knowledgeBase: anObject [
 	knowledgeBase := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 TtLepiterPageSearchStart >> printOn: aStream [
 	"super printOn: aStream."
 

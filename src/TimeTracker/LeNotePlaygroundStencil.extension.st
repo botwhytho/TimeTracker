@@ -1,6 +1,6 @@
-Extension { #name : #LeNotePlaygroundStencil }
+Extension { #name : 'LeNotePlaygroundStencil' }
 
-{ #category : #'*TimeTracker' }
+{ #category : '*TimeTracker' }
 LeNotePlaygroundStencil >> createWithoutPager [
 	^ LePlayground newDefaultNotePage
 ]

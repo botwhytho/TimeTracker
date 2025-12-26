@@ -1,6 +1,6 @@
 Class {
-	#name : #TtTrackedTime,
-	#superclass : #Timespan,
+	#name : 'TtTrackedTime',
+	#superclass : 'Timespan',
 	#instVars : [
 		'description',
 		'details',
@@ -14,15 +14,16 @@ Class {
 		'firstTimeScheduled',
 		'collection'
 	],
-	#category : #TimeTracker
+	#category : 'TimeTracker',
+	#package : 'TimeTracker'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime class >> dataPageName [
 	^ 'Time Tracker Entries'
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
@@ -56,62 +57,62 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 					writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ]
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 TtTrackedTime class >> snippetClass [
 	^ TtTrackedTimeSnippet
 ]
 
-{ #category : #arithmetic }
+{ #category : 'arithmetic' }
 TtTrackedTime >> / aNumber [
 	^ self duration asHours / aNumber
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtTrackedTime >> <= other [
 	self flag: #DEPRECATE.	"This looks redundant with superclass chain definitions. Test and remove"
 	^ self start <= other start
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> asTimespan [
 	^ self as: self value class superclass
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> category [
 	^ category
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> category: anObject [
 	category := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> collection [
 	^ collection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> collection: aTtEventCollection [
 	collection := aTtEventCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> createCategoriesSnippetInPage: newPage [ 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> daySerializedFrom [
 	^ daySerializedFrom
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> daySerializedFrom: anObject [
 	daySerializedFrom := anObject
 ]
 
-{ #category : #deleting }
+{ #category : 'deleting' }
 TtTrackedTime >> delete [
 	self collection page
 		ifNotNil: [ :aPage | 
@@ -120,44 +121,44 @@ TtTrackedTime >> delete [
 	self rootCollection items remove: self
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> description [
 	^ description
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> description: anObject [
 	description := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> details [
 	^ details
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> details: anObject [
 	details := anObject
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 TtTrackedTime >> falseAllBooleans [
 	isPlanned := false.
 	isRecurring := false.
 	firstTimeScheduled := false
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> firstTimeScheduled [
 	^ firstTimeScheduled
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> firstTimeScheduled: anObject [
 	firstTimeScheduled := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 	^ BrCheckbox new
 		aptitude: BrGlamorousCheckboxAptitude;
@@ -184,7 +185,7 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 						ifTrue: [ anEvent target phlow firstParentWithViewContent phlow fireViewSyncUpdateWish ] ] ]
 ]
 
-{ #category : #action }
+{ #category : 'action' }
 TtTrackedTime >> gtDeleteActionFor: anAction [
 	<gtAction>
 	^ anAction button
@@ -196,7 +197,7 @@ TtTrackedTime >> gtDeleteActionFor: anAction [
 			self delete ]
 ]
 
-{ #category : #action }
+{ #category : 'action' }
 TtTrackedTime >> gtGoToTrelloFor: anAction [
 	<gtAction>
 	self daySerializedFrom ifNil: [ ^ anAction noAction ].
@@ -209,7 +210,7 @@ TtTrackedTime >> gtGoToTrelloFor: anAction [
 			WebBrowser openOn: 'https://trello.com/c/' , self daySerializedFrom ]
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtTrackedTime >> gtPreviewFor: aView [
 	<gtView>
 	^ aView columnedList
@@ -244,7 +245,7 @@ TtTrackedTime >> gtPreviewFor: aView [
 		send: #value
 ]
 
-{ #category : #views }
+{ #category : 'views' }
 TtTrackedTime >> gtSummary [
 	^ {'Start' -> start.
 		'Duration' -> duration.
@@ -253,53 +254,53 @@ TtTrackedTime >> gtSummary [
 		'Category' -> category}
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> isContiguous: aTrackedTime [
 	^ aTrackedTime end rounded = self start
 		or: [ super = aTrackedTime or: [ self end rounded = aTrackedTime start ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> isPlanned [
 	^ isPlanned
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> isPlanned: anObject [
 	isPlanned := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> isRecurring [
 	^ isRecurring
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> isRecurring: anObject [
 	isRecurring := anObject
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 TtTrackedTime >> isTimeEntry [
 	^ true
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> labels [
 	^ labels
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> labels: anObject [
 	labels := anObject
 ]
 
-{ #category : #comparing }
+{ #category : 'comparing' }
 TtTrackedTime >> max: aValue [
 	^ self duration asHours max: aValue
 ]
 
-{ #category : #printing }
+{ #category : 'printing' }
 TtTrackedTime >> printOn: aStream [
 	aStream
 		nextPutAll: 'a TtTrackedTime (Starting at: ';
@@ -309,7 +310,7 @@ TtTrackedTime >> printOn: aStream [
 		nextPut: $)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> printOnDetailed [
 	^ String
 		streamContents: [ :aStream | 
@@ -327,22 +328,22 @@ TtTrackedTime >> printOnDetailed [
 						nextPutAll: (self details ifNil: [ '' ]) ] ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> rawData [
 	^ rawData
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> rawData: anObject [
 	rawData := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> rootCollection [
 	^ self collection rootCollection
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> serializeSnippet: aTextSnippet [
 	^ NeoJSONObject
 		fromString: (String
@@ -353,12 +354,12 @@ TtTrackedTime >> serializeSnippet: aTextSnippet [
 						prettyPrint: true ])
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> uid [
 	^ uid
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 TtTrackedTime >> uid: anObject [
 	uid := anObject
 ]

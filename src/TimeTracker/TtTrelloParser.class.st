@@ -1,10 +1,12 @@
 Class {
-	#name : #TtTrelloParser,
-	#superclass : #Object,
-	#category : #'TimeTracker-TimeTracker'
+	#name : 'TtTrelloParser',
+	#superclass : 'Object',
+	#category : 'TimeTracker-TimeTracker',
+	#package : 'TimeTracker',
+	#tag : 'TimeTracker'
 }
 
-{ #category : #import }
+{ #category : 'import' }
 TtTrelloParser >> add: anAssociation toCollection: aCollection [
 	| entries |
 	entries := (anAssociation value at: 'description') lines.
@@ -36,23 +38,23 @@ TtTrelloParser >> add: anAssociation toCollection: aCollection [
 									aCollection add: aTrackedTime ] ] ] ]
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> entry [
 
 	^ self timeEntry
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> line [
 	^ #newline asPParser negate plus flatten
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> minOrHour [
 	^ (#digit asPParser min: 1 max: 2) flatten
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> parseTimeSpan: anArray date: aDate [
 	^ TtTrackedTime
 		starting:
@@ -63,7 +65,7 @@ TtTrelloParser >> parseTimeSpan: anArray date: aDate [
 				+ (anArray second second asNumber * 60)
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> time [
 	^ (self minOrHour , ':' asPParser optional , self minOrHour optional)
 		==> [ :t | 
@@ -71,7 +73,7 @@ TtTrelloParser >> time [
 			(t third ifNil: [ '0' ])} ]
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> timeEntry [
 	^ (self timeRange , self line)
 		==> [ :te | 
@@ -79,7 +81,7 @@ TtTrelloParser >> timeEntry [
 			te second trim} ]
 ]
 
-{ #category : #parsing }
+{ #category : 'parsing' }
 TtTrelloParser >> timeRange [
 
 	^ ('-' asPParser / '*' asPParser , #space asPParser plus) optional
