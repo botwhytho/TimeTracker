@@ -8,6 +8,7 @@ Class {
 { #category : 'api - accessing menu' }
 TtCategoriesSnippet class >> contextMenuItemSpecification [
 	"<leSnippetSpecification>"
+
 	^ LeContextMenuItemSpecification new
 		snippetClass: self;
 		title: self description
@@ -21,12 +22,10 @@ TtCategoriesSnippet class >> initialize [
 
 { #category : 'lepiter-store' }
 TtCategoriesSnippet class >> leJsonV3Name [
-
 	^ #TtCategoriesSnippet
 ]
 
 { #category : 'lepiter-store' }
 TtCategoriesSnippet class >> leJsonV4Name [
-
 	^ #TtCategoriesSnippet
 ]

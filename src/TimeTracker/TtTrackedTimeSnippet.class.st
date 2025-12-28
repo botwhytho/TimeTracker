@@ -1,16 +1,17 @@
 Class {
 	#name : 'TtTrackedTimeSnippet',
-	#superclass : 'LeUnknownSnippet',
-	#instVars : [
-		'domainObject'
-	],
+	#superclass : 'LeSerializedObjectSnippet',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
 
-{ #category : 'serialization' }
-TtTrackedTimeSnippet class >> deserializerClass [
-	^ TrackedTimeSnippetDeserializer
+{ #category : 'api - accessing menu' }
+TtTrackedTimeSnippet class >> contextMenuItemSpecification [
+	"<leSnippetSpecification>"
+
+	^ LeContextMenuItemSpecification new
+		snippetClass: self;
+		title: self description
 ]
 
 { #category : 'initialization' }
@@ -19,18 +20,12 @@ TtTrackedTimeSnippet class >> initialize [
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 
-{ #category : 'accessing' }
+{ #category : 'lepiter-store' }
+TtTrackedTimeSnippet class >> leJsonV3Name [
+	^ #TtTrackedTimeSnippet
+]
+
+{ #category : 'lepiter-store' }
 TtTrackedTimeSnippet class >> leJsonV4Name [
-
-	^ 'trackedTimeSnippet'
-]
-
-{ #category : 'accessing' }
-TtTrackedTimeSnippet >> domainObject [
-	^ domainObject
-]
-
-{ #category : 'accessing' }
-TtTrackedTimeSnippet >> domainObject: aTtTrackedTime [
-	domainObject := aTtTrackedTime
+	^ #TtTrackedTimeSnippet
 ]
