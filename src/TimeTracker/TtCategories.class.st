@@ -69,6 +69,56 @@ TtCategories class >> initialize [
 					colorOverride: BrGlamorousColors failureBackgroundColor)
 ]
 
+{ #category : 'serialization' }
+TtCategories class >> leJsonV3MappingFor: aNeoJSONMapper [
+	aNeoJSONMapper
+		for: self
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #categories
+				getter: [ :aTtCategories | NeoJSONReader fromString: (NeoJSONWriter toStringPretty: aTtCategories root) ]
+				setter: [ :aDictionary | 
+					TtCategories
+						fromRoot: (NeoJSONReader
+								fromString: (NeoJSONWriter toString: aDictionary)
+								as: TtRootCategory) ] ]
+]
+
+{ #category : 'lepiter-store' }
+TtCategories class >> leJsonV3Name [
+
+ ^ #TtCategories
+]
+
+{ #category : 'serialization' }
+TtCategories class >> leJsonV4MappingFor: aNeoJSONMapper [
+	aNeoJSONMapper
+		for: self
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #categories
+				getter: [ :aTtCategories | NeoJSONReader fromString: (NeoJSONWriter toStringPretty: aTtCategories root) ]
+				setter: [ :aDictionary | 
+					TtCategories
+						fromRoot: (NeoJSONReader
+								fromString: (NeoJSONWriter toString: aDictionary)
+								as: TtRootCategory) ] ]
+]
+
+{ #category : 'lepiter-store' }
+TtCategories class >> leJsonV4Name [
+
+ ^ #TtCategories
+]
+
 { #category : 'accessing' }
 TtCategories class >> oneTime [
 	^ self systemCategories at: 'One Time'
@@ -436,6 +486,7 @@ TtCategories >> sampleCategories [
 			parentCategory: root.
 	node2 := TtCategory new
 			name: 'Food';
+			colorOverride: Color red;
 			parentCategory: root.
 	node3 := TtCategory new
 			name: 'Habits';

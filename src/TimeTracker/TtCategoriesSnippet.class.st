@@ -1,12 +1,17 @@
 Class {
 	#name : 'TtCategoriesSnippet',
-	#superclass : 'LeUnknownSnippet',
-	#instVars : [
-		'domainObject'
-	],
+	#superclass : 'LeSerializedObjectSnippet',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
+
+{ #category : 'api - accessing menu' }
+TtCategoriesSnippet class >> contextMenuItemSpecification [
+	"<leSnippetSpecification>"
+	^ LeContextMenuItemSpecification new
+		snippetClass: self;
+		title: self description
+]
 
 { #category : 'initialization' }
 TtCategoriesSnippet class >> initialize [
@@ -14,18 +19,14 @@ TtCategoriesSnippet class >> initialize [
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 
-{ #category : 'accessing' }
+{ #category : 'lepiter-store' }
+TtCategoriesSnippet class >> leJsonV3Name [
+
+	^ #TtCategoriesSnippet
+]
+
+{ #category : 'lepiter-store' }
 TtCategoriesSnippet class >> leJsonV4Name [
 
-	^ 'categorySnippet'
-]
-
-{ #category : 'accessing' }
-TtCategoriesSnippet >> domainObject [
-	^ domainObject
-]
-
-{ #category : 'accessing' }
-TtCategoriesSnippet >> domainObject: aTtCategories [
-	domainObject := aTtCategories
+	^ #TtCategoriesSnippet
 ]
