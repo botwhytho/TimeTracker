@@ -13,6 +13,7 @@ Class {
 { #category : 'initialization' }
 TtNote2 class >> initialize [
 	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 

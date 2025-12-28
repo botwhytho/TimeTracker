@@ -26,6 +26,7 @@ TtTrackedTime2 class >> dataPageName [
 { #category : 'initialization' }
 TtTrackedTime2 class >> initialize [
 	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 
