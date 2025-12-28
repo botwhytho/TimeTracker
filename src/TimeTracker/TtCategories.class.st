@@ -76,7 +76,7 @@ TtCategories class >> leJsonV3MappingFor: aNeoJSONMapper [
 		do: [ :aMapping | 
 			aMapping
 				mapProperty: #__type
-				getter: [ :object | object class leJsonV4Name ]
+				getter: [ :object | object class leJsonV3Name ]
 				setter: [ :um | self error: 'Objects should not be read here' ].
 			aMapping
 				mapProperty: #categories
