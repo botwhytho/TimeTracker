@@ -70,6 +70,11 @@ TtTrackedTime2 class >> leJsonV4Name [
 	^ #TtTrackedTime
 ]
 
+{ #category : 'serialization' }
+TtTrackedTime2 class >> snippetClass [
+	^ TtTrackedTimeSnippet
+]
+
 { #category : 'arithmetic' }
 TtTrackedTime2 >> / aNumber [
 	^ self duration asHours / aNumber
@@ -352,7 +357,11 @@ TtTrackedTime2 >> rootCollection [
 
 { #category : 'serialization' }
 TtTrackedTime2 >> serialize [
-	self snippet ifNil: [  ] ifNotNil: [ :notNil | notNil serialize ]
+	self snippet
+		ifNil: [ | newSnippet |
+			newSnippet := self class snippetClass new object: self.
+			self rootCollection page ifNotNil: [ :aPage | aPage addSnippet: newSnippet ] ]
+		ifNotNil: [ :notNil | notNil serialize ]
 ]
 
 { #category : 'accessing' }

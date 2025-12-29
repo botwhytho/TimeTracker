@@ -20,6 +20,16 @@ Class {
 	#package : 'TimeTracker'
 }
 
+{ #category : 'initialization' }
+TtEventCollection class >> defaultPage [
+	| newPage |
+	newPage := LePage new.
+	newPage type: (TtTrackedTimePageType title: self defaultPageName page: newPage).
+	LeDatabasesRegistry defaultLogicalDatabase primaryDB addPage: newPage.
+	newPage addFirstSnippet: (LeTextSnippet string: '').
+	^ newPage
+]
+
 { #category : 'accessing' }
 TtEventCollection class >> defaultPageName [
 	^ 'Time Tracker Entries'
@@ -34,13 +44,13 @@ TtEventCollection class >> gtPageRegistryFor: aView [
 		priority: 1;
 		items: [ self pageRegistry associations ];
 		column: 'Database' text: [ :each | each key database databaseName ];
-		column: 'Page' text: [ :each | each key title ] spawn: [:anAssociation :index | anAssociation key] ;
-		send: [ :each | each value latestWeek ]
-]
-
-{ #category : 'initialization' }
-TtEventCollection class >> loadFromLepiter [
-	^ self default loadFromLepiter
+		column: 'Page'
+			text: [ :each | each key title ]
+			spawn: [ :anAssociation :index | anAssociation key ];
+		send: [ :each | 
+			each value
+				loadFromLepiter;
+				latestWeek ]
 ]
 
 { #category : 'instance creation' }
@@ -50,21 +60,22 @@ TtEventCollection class >> newFrom: aCollection [
 
 { #category : 'accessing' }
 TtEventCollection class >> pageRegistry [
+	| pages |
+	pageRegistry ifNil: [ pageRegistry := Dictionary new ].
+	pages := LeDatabasesRegistry defaultLogicalDatabase databases
+			flatCollect: [ :aDatabase | (aDatabase pagesByType at: TtTrackedTimePageType) values ].
+	pages
+		ifEmpty: [ | newPage |
+			newPage := self defaultPage.
+			pageRegistry at: newPage put: (self new page: newPage) ]
+		ifNotEmpty: [ pages
+				do: [ :aPage | pageRegistry at: aPage ifAbsentPut: [ self new page: aPage ] ] ].
 	^ pageRegistry
-		ifNil: [ self loadFromLepiter.
-			pageRegistry := Dictionary new
-					at: self default page put: self default;
-					yourself ]
 ]
 
 { #category : 'accessing' }
 TtEventCollection class >> pageRegistry: aDictionary [
 	pageRegistry := aDictionary
-]
-
-{ #category : 'import' }
-TtEventCollection class >> serializeCollection [
-	^ self new serializeCollection
 ]
 
 { #category : 'serialization' }
@@ -190,6 +201,13 @@ TtEventCollection >> asRopedText [
 	self flag: #HACK.	"This is pretty bad, trying to get dropdown handle label to update with a dynamic value, this may probably break with implementation changes. Look at `GtPhlowDropdownAction>>#newButton` for where this is relevant. Opened upstream ticket https://github.com/feenkcom/gtoolkit/issues/4868. Hoping this is rather temporary"
 
 	^ self groupingLevelLabel
+]
+
+{ #category : 'import' }
+TtEventCollection >> beSerializable [
+	self items isValueHolder
+		ifFalse: [ items := self items asValueHolder.
+			items whenAddedDo: [ :newValue | newValue serialize ] ]
 ]
 
 { #category : 'accessing' }
@@ -659,17 +677,6 @@ TtEventCollection >> dailyTimePlot: aTTEventCollection [
 { #category : 'accessing' }
 TtEventCollection >> datesWithData [
 	^ (self items value collectAsSet: [ :each | each start asDate translateToUTC ]) asArray
-]
-
-{ #category : 'accessing' }
-TtEventCollection >> defaultPage [
-	^ LeDatabasesRegistry defaultLogicalDatabase
-		pageNamed: self class defaultPageName
-		ifAbsent: [ | newPage |
-			newPage := LePage named: self class defaultPageName.
-			LeDatabasesRegistry defaultLogicalDatabase addPage: newPage.
-			newPage addFirstSnippet: (LeTextSnippet string: '').
-			newPage ]
 ]
 
 { #category : 'views' }
@@ -1975,7 +1982,9 @@ TtEventCollection >> labelFormatX [
 
 { #category : 'accessing' }
 TtEventCollection >> latestWeek [
-	^ self rootCollection weekFromDate: self rootCollection last start asDate
+	^ [ self rootCollection weekFromDate: self rootCollection last start asDate ]
+		on: SubscriptOutOfBounds
+		do: [ self rootCollection ]
 ]
 
 { #category : 'import' }
@@ -1992,45 +2001,18 @@ TtEventCollection >> listUnimportedDays [
 TtEventCollection >> loadCategories [
 	self page children
 		detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
-		ifFound: [ :aCategorySnippet | 
-			| someCategories |
-			someCategories := (TtCategories
-					fromRoot: (NeoJSONReader
-							fromString: aCategorySnippet jsonString
-							as: CategorySnippetDeserializer) data) collection: self.
-			someCategories root
-				collection: self;
-				uid: aCategorySnippet uidString.
-			self categories: someCategories ]
+		ifFound: #object
 		ifNone: [ self categories: (TtCategories basicNew collection: self) ]
 ]
 
 { #category : 'initialization' }
 TtEventCollection >> loadFromLepiter [
 	self size = 0
-		ifTrue: [ self loadPage.
-			self loadCategories.
+		ifTrue: [ self loadCategories.
 			self page children asArray
-				select: [ :each | self class supportedSnippetTypes includes: each class ]
-				thenDo: [ :each | 
-					self
-						add: ((NeoJSONReader fromString: each jsonString as: each class deserializerClass)
-								data
-								in: [ :aTimeTrackerObject | 
-									aTimeTrackerObject
-										uid: each uidString;
-										collection: self.
-									each domainObject: aTimeTrackerObject.
-									aTimeTrackerObject ]) ].
-			self serializeCollection ]
-]
-
-{ #category : 'accessing' }
-TtEventCollection >> loadPage [
-	^ page
-		ifNil: [ [ page := self perform: #customPage ]
-				on: MessageNotUnderstood
-				do: [ page := self defaultPage ] ]
+				select: [ :aSnippet | self class supportedSnippetTypes includes: aSnippet class ]
+				thenDo: [ :aSnippet | self add: (aSnippet object collection: self) ].
+			self beSerializable ]
 ]
 
 { #category : 'views' }
@@ -2123,13 +2105,6 @@ TtEventCollection >> select: aBlock [
 		viewFilterContext: self viewFilterContext;
 		includeUntracked: self includeUntracked;
 		groupingLevel: self groupingLevel
-]
-
-{ #category : 'import' }
-TtEventCollection >> serializeCollection [
-	self items isValueHolder
-		ifFalse: [ items := self items asValueHolder.
-			items whenAddedDo: [ :newValue | self class serializeWithLepiter: newValue ] ]
 ]
 
 { #category : 'accessing' }

@@ -77,6 +77,11 @@ TtNote2 class >> leJsonV4Name [
 	^ #TtNote
 ]
 
+{ #category : 'serialization' }
+TtNote2 class >> snippetClass [
+	^ TtNoteSnippet
+]
+
 { #category : 'accessing' }
 TtNote2 >> asTimespan [
 	^ self as: self value class superclass
