@@ -33,6 +33,8 @@ TtCategories class >> fromRoot: aRootCategory [
 { #category : 'initialization' }
 TtCategories class >> initialize [
 	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter.
 	SystemCategories := Dictionary new.
 	SystemCategories
 		at: 'Uncategorized'

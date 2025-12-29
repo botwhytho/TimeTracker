@@ -1999,10 +1999,13 @@ TtEventCollection >> listUnimportedDays [
 
 { #category : 'accessing' }
 TtEventCollection >> loadCategories [
-	self page children
-		detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
-		ifFound: #object
-		ifNone: [ self categories: (TtCategories basicNew collection: self) ]
+	| aCategoryHierarchy |
+	aCategoryHierarchy := self page children
+			detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
+			ifFound: #object
+			ifNone: [ TtCategories basicNew collection: self ].
+	aCategoryHierarchy collection: self.
+	self categories: aCategoryHierarchy
 ]
 
 { #category : 'initialization' }
