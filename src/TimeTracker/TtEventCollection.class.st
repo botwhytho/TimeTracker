@@ -913,7 +913,7 @@ TtEventCollection >> groupedByIsRecurring [
 
 { #category : 'accessing - grouping' }
 TtEventCollection >> groupedByMonth [
-	^ self groupedBy: [ :each | each start asMonth translateToUTC ]
+	^ self timeEntries groupedBy: [ :each | each start asMonth translateToUTC ]
 ]
 
 { #category : 'accessing - grouping' }
@@ -1984,7 +1984,7 @@ TtEventCollection >> labelFormatX [
 
 { #category : 'accessing' }
 TtEventCollection >> latestWeek [
-	^ [ self rootCollection weekFromDate: self rootCollection last start asDate ]
+	^ [ self rootCollection weekFromDate: self rootCollection timeEntries last start asDate ]
 		on: SubscriptOutOfBounds
 		do: [ self rootCollection ]
 ]
@@ -2165,7 +2165,7 @@ TtEventCollection >> weekFromDate: aDate [
 	| thisWeek |
 	thisWeek := aDate translateToUTC asMonth weeks
 			detect: [ :aWeek | aWeek includes: aDate translateToUTC ].
-	^ self select: [ :each | thisWeek includes: each start translateToUTC ]
+	^ self timeEntries select: [ :each | thisWeek includes: each start translateToUTC ]
 ]
 
 { #category : 'views' }
