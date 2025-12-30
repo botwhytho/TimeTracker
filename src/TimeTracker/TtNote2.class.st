@@ -1,8 +1,9 @@
 Class {
 	#name : 'TtNote2',
 	#superclass : 'Timespan',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
-		'collection',
 		'page',
 		'database'
 	],
@@ -83,21 +84,6 @@ TtNote2 class >> snippetClass [
 ]
 
 { #category : 'accessing' }
-TtNote2 >> asTimespan [
-	^ self as: self value class superclass
-]
-
-{ #category : 'accessing' }
-TtNote2 >> collection [
-	^ collection
-]
-
-{ #category : 'accessing' }
-TtNote2 >> collection: aTtEventCollection [
-	collection := aTtEventCollection
-]
-
-{ #category : 'accessing' }
 TtNote2 >> database [
 	^ database
 ]
@@ -105,15 +91,6 @@ TtNote2 >> database [
 { #category : 'accessing' }
 TtNote2 >> database: aLeDatabase [
 	database := aLeDatabase
-]
-
-{ #category : 'deleting' }
-TtNote2 >> delete [
-	self collection page
-		ifNotNil: [ :aPage | 
-			(aPage children detect: [ :aSnippet | aSnippet uidString = self uid ])
-				removeSelf ].
-	self rootCollection items remove: self
 ]
 
 { #category : 'views' }
@@ -151,9 +128,4 @@ TtNote2 >> page [
 { #category : 'accessing' }
 TtNote2 >> page: aLePage [
 	page := aLePage
-]
-
-{ #category : 'accessing' }
-TtNote2 >> rootCollection [
-	^ self collection rootCollection
 ]

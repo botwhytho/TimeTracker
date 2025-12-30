@@ -1,27 +1,22 @@
 Class {
 	#name : 'TtTrackedTime2',
 	#superclass : 'Timespan',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
 		'description',
 		'details',
-		'snippet',
 		'rawData',
 		'daySerializedFrom',
 		'category',
 		'labels',
 		'isPlanned',
 		'isRecurring',
-		'firstTimeScheduled',
-		'collection'
+		'firstTimeScheduled'
 	],
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
-
-{ #category : 'accessing' }
-TtTrackedTime2 class >> dataPageName [
-	^ 'Time Tracker Entries'
-]
 
 { #category : 'initialization' }
 TtTrackedTime2 class >> initialize [
@@ -87,11 +82,6 @@ TtTrackedTime2 >> <= other [
 ]
 
 { #category : 'accessing' }
-TtTrackedTime2 >> asTimespan [
-	^ self as: self value class superclass
-]
-
-{ #category : 'accessing' }
 TtTrackedTime2 >> category [
 	^ category
 ]
@@ -99,16 +89,6 @@ TtTrackedTime2 >> category [
 { #category : 'accessing' }
 TtTrackedTime2 >> category: anObject [
 	category := anObject
-]
-
-{ #category : 'accessing' }
-TtTrackedTime2 >> collection [
-	^ collection
-]
-
-{ #category : 'accessing' }
-TtTrackedTime2 >> collection: aTtEventCollection [
-	collection := aTtEventCollection
 ]
 
 { #category : 'accessing' }
@@ -123,15 +103,6 @@ TtTrackedTime2 >> daySerializedFrom [
 { #category : 'accessing' }
 TtTrackedTime2 >> daySerializedFrom: anObject [
 	daySerializedFrom := anObject
-]
-
-{ #category : 'deleting' }
-TtTrackedTime2 >> delete [
-	self collection page
-		ifNotNil: [ :aPage | 
-			(aPage children detect: [ :aSnippet | aSnippet uidString = self uid ])
-				removeSelf ].
-	self rootCollection items remove: self
 ]
 
 { #category : 'accessing' }
@@ -181,7 +152,7 @@ TtTrackedTime2 >> generateCheckboxForBoolean: aSelector [
 			entity := anEvent target phlow firstParentWithViewContent phlow
 					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(true).
-			self collection class serializeWithLepiter: self.
+			self serialize.
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
@@ -191,7 +162,7 @@ TtTrackedTime2 >> generateCheckboxForBoolean: aSelector [
 			entity := anEvent target phlow firstParentWithViewContent phlow
 					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(false).
-			self collection class serializeWithLepiter: self.
+			self serialize.
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
@@ -348,28 +319,4 @@ TtTrackedTime2 >> rawData [
 { #category : 'accessing' }
 TtTrackedTime2 >> rawData: anObject [
 	rawData := anObject
-]
-
-{ #category : 'accessing' }
-TtTrackedTime2 >> rootCollection [
-	^ self collection rootCollection
-]
-
-{ #category : 'serialization' }
-TtTrackedTime2 >> serialize [
-	self snippet
-		ifNil: [ | newSnippet |
-			newSnippet := self class snippetClass new object: self.
-			self rootCollection page ifNotNil: [ :aPage | aPage addSnippet: newSnippet ] ]
-		ifNotNil: [ :notNil | notNil serialize ]
-]
-
-{ #category : 'accessing' }
-TtTrackedTime2 >> snippet [
-	^ snippet
-]
-
-{ #category : 'accessing' }
-TtTrackedTime2 >> snippet: aSnippet [
-	snippet := aSnippet
 ]

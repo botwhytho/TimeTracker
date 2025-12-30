@@ -187,8 +187,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												categories root collection: aCollection.
 												categories ]) ]
 							ifFalse: [ self initialize ].
-						self collection
-							ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+						self serialize.
 						aBrButton phlow fireToolUpdateWish ].
 					BrHorizontalPane new
 						matchParent;
@@ -255,8 +254,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 																								name: aWish text asString;
 																								parentCategory: aCategory).
 																					self calculateHierarchy.
-																					self root collection
-																						ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+																					self serialize.
 																					aContext
 																						at: #TtTrackedTime
 																						ifPresent: [ textElement phlow fireViewSyncUpdateWish ]
@@ -287,8 +285,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													anEvent target fireEvent: BrDropdownHideWish new ]
 												ifEmpty: [ aCategory parentCategory children remove: aCategory.
 													self calculateHierarchy.
-													self root collection
-														ifNotNil: [ :notNil | notNil class serializeWithLepiter: self root ].
+													self serialize.
 													aContext
 														at: #TtTrackedTime
 														ifPresent: [ aBrButton phlow fireViewSyncUpdateWish ]
@@ -317,7 +314,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													viewElement := categorizeButton phlow firstParentWithViewContent.
 													anEvent consumed: true.
 													aTtTrackedTime category: aCategory.
-													aCollection class serializeWithLepiter: aTtTrackedTime.
+													aTtTrackedTime serialize.
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													viewElement phlow fireViewSyncUpdateWish.
@@ -341,7 +338,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													aCollection timeEntries
 														do: [ :aTtTrackedTime | 
 															aTtTrackedTime category: aCategory.
-															aCollection class serializeWithLepiter: aTtTrackedTime ] ]) ] ].
+															aTtTrackedTime serialize ] ]) ] ].
 					pane ];
 				with: self.
 			view edges
@@ -396,10 +393,10 @@ TtCategories >> editableCategoryLabel: aCategory [
 									ifNotNil: [ :notNil | 
 										| rootCollection |
 										rootCollection := notNil rootCollection.
-										rootCollection class serializeWithLepiter: self root.
+											self root serialize.
 										(rootCollection timeEntries
 											select: [ :aTrackedTime | aTrackedTime category = aCategory ])
-											do: [ :aTrackedTime | rootCollection class serializeWithLepiter: aTrackedTime ] ] ] ] ].
+											do: [ :aTrackedTime |  aTrackedTime serialize ] ] ] ] ].
 	^ label
 ]
 
@@ -555,4 +552,9 @@ TtCategories >> sampleCategories [
 				leaf2.
 				leaf3}.
 	^ self
+]
+
+{ #category : 'view' }
+TtCategories >> serialize [
+	self collection ifNotNil: [ :notNil | self root serialize ]
 ]

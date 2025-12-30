@@ -542,7 +542,6 @@ TtEventCollection >> buildEntriesByDay: aContext [
 								viewElement := aBrButton phlow firstParentWithViewContent phlow
 										firstParentWithViewContent.
 								each value do: [ :aTrackedTime | aTrackedTime delete ].
-								each value do: [ :aTrackedTime | self items remove: aTrackedTime ].
 								aBrButton phlow fireToolUpdateWish ] ]
 					ifFalse: [ BlElement new size: 1 @ 1 ] ];
 		send: [ :each | each isAssociation ifTrue: [ each value ] ifFalse: [ each ] ];
@@ -2008,6 +2007,7 @@ TtEventCollection >> loadCategories [
 			ifFound: [ :aSnippet | TtCategories fromRoot: aSnippet object ]
 			ifNone: [ TtCategories basicNew ].
 	aCategoryHierarchy collection: self.
+	aCategoryHierarchy root collection: self.
 	self categories: aCategoryHierarchy
 ]
 

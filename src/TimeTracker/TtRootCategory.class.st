@@ -1,10 +1,8 @@
 Class {
 	#name : 'TtRootCategory',
 	#superclass : 'TtCategory',
-	#instVars : [
-		'collection',
-		'uid'
-	],
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
@@ -24,16 +22,6 @@ TtRootCategory class >> leJsonV3Name [
 { #category : 'lepiter-store' }
 TtRootCategory class >> leJsonV4Name [
 	^ #TtRootCategory
-]
-
-{ #category : 'accessing' }
-TtRootCategory >> collection [
-	^ collection
-]
-
-{ #category : 'accessing' }
-TtRootCategory >> collection: aTtEventCollection [
-	collection := aTtEventCollection
 ]
 
 { #category : 'views' }
@@ -60,11 +48,6 @@ TtRootCategory >> gtSpotterForCategoryFor: aSearch [
 ]
 
 { #category : 'accessing' }
-TtRootCategory >> uid [
-	^ uid
-]
-
-{ #category : 'accessing' }
-TtRootCategory >> uid: anObject [
-	uid := anObject
+TtRootCategory >> rootCollection [
+	^ self collection rootCollection
 ]
