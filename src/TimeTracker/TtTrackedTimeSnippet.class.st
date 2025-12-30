@@ -22,11 +22,6 @@ TtTrackedTimeSnippet class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtTrackedTimeSnippet class >> leJsonV3Name [
-	^ #TtTrackedTimeSnippet
-]
-
-{ #category : 'lepiter-store' }
 TtTrackedTimeSnippet class >> leJsonV4Name [
 	^ #TtTrackedTimeSnippet
 ]

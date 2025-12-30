@@ -15,11 +15,6 @@ TtRootCategory class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtRootCategory class >> leJsonV3Name [
-	^ #TtRootCategory
-]
-
-{ #category : 'lepiter-store' }
 TtRootCategory class >> leJsonV4Name [
 	^ #TtRootCategory
 ]

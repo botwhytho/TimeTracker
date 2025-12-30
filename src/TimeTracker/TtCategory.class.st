@@ -21,42 +21,12 @@ TtCategory class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtCategory class >> leFromJsonV3Dictionary: aDictionary [
-	| aTtCategory |
-	aTtCategory := super leFromJsonV4Dictionary: aDictionary.
-	aTtCategory colorOverride
-		ifNotNil: [ :aHexString | aTtCategory colorOverride: (Color fromHexString: aHexString) ].
-	^ aTtCategory
-]
-
-{ #category : 'lepiter-store' }
 TtCategory class >> leFromJsonV4Dictionary: aDictionary [
 	| aTtCategory |
 	aTtCategory := super leFromJsonV4Dictionary: aDictionary.
 	aTtCategory colorOverride
 		ifNotNil: [ :aHexString | aTtCategory colorOverride: (Color fromHexString: aHexString) ].
 	^ aTtCategory
-]
-
-{ #category : 'serialization' }
-TtCategory class >> leJsonV3MappingFor: aNeoJSONMapper [
-	aNeoJSONMapper
-		for: self
-		do: [ :aMapping | 
-			aMapping
-				mapProperty: #__type
-				getter: [ :aCategory | aCategory class leJsonV4Name ]
-				setter: [ :um | self error: 'Objects should not be read here' ].
-			aMapping
-				mapProperty: #colorOverride
-				getter: [ :aCategory | aCategory colorOverride ifNotNil: [ :notNil | notNil asHexString ] ]
-				setter: [ :um | self error: 'Objects should not be read here' ].
-			aMapping mapInstVars: #(children name) ]
-]
-
-{ #category : 'lepiter-store' }
-TtCategory class >> leJsonV3Name [
-	^ #TtCategory
 ]
 
 { #category : 'serialization' }

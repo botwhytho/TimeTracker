@@ -22,11 +22,6 @@ TtNoteSnippet class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtNoteSnippet class >> leJsonV3Name [
-	^ #TtNoteSnippet
-]
-
-{ #category : 'lepiter-store' }
 TtNoteSnippet class >> leJsonV4Name [
 	^ #TtNoteSnippet
 ]

@@ -19,36 +19,6 @@ TtNote2 class >> initialize [
 ]
 
 { #category : 'serialization' }
-TtNote2 class >> leJsonV3MappingFor: aNeoJSONMapper [
-	| database |
-	aNeoJSONMapper
-		for: self
-		do: [ :aMapping | 
-			aMapping
-				mapProperty: #__type
-				getter: [ :object | object class leJsonV4Name ]
-				setter: [ :um | self error: 'Objects should not be read here' ].
-			aMapping
-				mapProperty: #database
-				getter: [ :aTtNote | [ aTtNote database uuidString ] on: MessageNotUnderstood do: [ nil ] ]
-				setter: [ :aString | 
-					database := (LeLogicalDatabase allSubInstances
-							collect: [ :each | each databaseWithID: aString ifNone: [ nil ] ])
-							detect: #isNotNil
-							ifNone: [ nil ] ].
-			aMapping
-				mapProperty: #page
-				getter: [ :aTtNote | [ aTtNote page uidString ] on: MessageNotUnderstood do: [ nil ] ]
-				setter: [ :aString | database pageWithID: aString ifAbsent: [ nil ] ].
-			aMapping mapInstVars: #(duration start) ]
-]
-
-{ #category : 'lepiter-store' }
-TtNote2 class >> leJsonV3Name [
-	^ #TtNote
-]
-
-{ #category : 'serialization' }
 TtNote2 class >> leJsonV4MappingFor: aNeoJSONMapper [
 	| database |
 	aNeoJSONMapper

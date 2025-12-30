@@ -22,11 +22,6 @@ TtCategoriesSnippet class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtCategoriesSnippet class >> leJsonV3Name [
-	^ #TtCategoriesSnippet
-]
-
-{ #category : 'lepiter-store' }
 TtCategoriesSnippet class >> leJsonV4Name [
 	^ #TtCategoriesSnippet
 ]

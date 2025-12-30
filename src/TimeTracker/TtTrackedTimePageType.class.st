@@ -16,11 +16,6 @@ TtTrackedTimePageType class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtTrackedTimePageType class >> leJsonV3Name [
-	^ #TtTrackedTimePageType
-]
-
-{ #category : 'lepiter-store' }
 TtTrackedTimePageType class >> leJsonV4Name [
 	^ #TtTrackedTimePageType
 ]
