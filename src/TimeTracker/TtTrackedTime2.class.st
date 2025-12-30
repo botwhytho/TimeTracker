@@ -26,8 +26,9 @@ TtTrackedTime2 class >> initialize [
 ]
 
 { #category : 'lepiter-store' }
-TtTrackedTime2 class >> leFromJsonV4Dictionary: aDictionary [
+TtTrackedTime2 class >> leFromJsonV4Dictionary2: aDictionary [
 	| aTrackedTime |
+	self flag: #TODO. "DELETE once I confirm this logic can happen when loading into collection"
 	aTrackedTime := super leFromJsonV4Dictionary: aDictionary.
 	aTrackedTime
 		category: (aTrackedTime category

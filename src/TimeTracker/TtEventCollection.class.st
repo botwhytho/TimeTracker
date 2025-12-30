@@ -2034,7 +2034,17 @@ TtEventCollection >> loadFromLepiter [
 		ifTrue: [ self loadCategories.
 			self page children asArray
 				select: [ :aSnippet | self class supportedSnippetTypes includes: aSnippet class ]
-				thenDo: [ :aSnippet | self add: (aSnippet object collection: self) ].
+				thenDo: [ :aSnippet | 
+					| object |
+					object := aSnippet object.
+					object collection: self.
+					((object respondsTo: #category)
+						and: [ object category isNotNil and: [ object category isString ] ])
+						ifTrue: [ object
+								category: (self categories
+										detect: [ :aCategory | aCategory name = object category ]
+										ifNone: [ TtPlaceholderCategory fromName: object category ]) ].
+					self add: object ].
 			self beSerializable ]
 ]
 
