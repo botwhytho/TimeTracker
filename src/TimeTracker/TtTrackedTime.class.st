@@ -49,7 +49,7 @@ TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
 						aCollection := thisContext stack
 								detect: [ :each | each receiver class = TtEventCollection ]
 								ifFound: [ :found | found receiver ]
-								ifNone: [ TtEventCollection default ].
+								ifNone: [ TtEventCollection defaultCollection ].
 						categoryName := jsonReader next.
 						aCollection categories
 							detect: [ :each | each name = categoryName ]

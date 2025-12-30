@@ -21,13 +21,29 @@ Class {
 }
 
 { #category : 'initialization' }
-TtEventCollection class >> defaultPage [
+TtEventCollection class >> createDefaultPage [
 	| newPage |
 	newPage := LePage new.
 	newPage type: (TtTrackedTimePageType title: self defaultPageName page: newPage).
 	LeDatabasesRegistry defaultLogicalDatabase primaryDB addPage: newPage.
 	newPage addFirstSnippet: (LeTextSnippet string: '').
 	^ newPage
+]
+
+{ #category : 'defaults' }
+TtEventCollection class >> defaultCollection [
+	^ self pageRegistry associations
+		detect: [ :anAssociation | anAssociation key title = self defaultPageName ]
+		ifFound: [ :anAssociation | anAssociation value ]
+		ifNone: [ nil ]
+]
+
+{ #category : 'defaults' }
+TtEventCollection class >> defaultPage [
+	^ self pageRegistry associations
+		detect: [ :anAssociation | anAssociation key title = self defaultPageName ]
+		ifFound: [ :anAssociation | anAssociation key ]
+		ifNone: [ nil ]
 ]
 
 { #category : 'accessing' }
@@ -69,7 +85,7 @@ TtEventCollection class >> pageRegistry [
 			flatCollect: [ :aDatabase | (aDatabase pagesByType at: TtTrackedTimePageType) values ].
 	pages
 		ifEmpty: [ | newPage |
-			newPage := self defaultPage.
+			newPage := self createDefaultPage.
 			pageRegistry at: newPage put: (self new page: newPage) ]
 		ifNotEmpty: [ pages
 				do: [ :aPage | pageRegistry at: aPage ifAbsentPut: [ self new page: aPage ] ] ].
