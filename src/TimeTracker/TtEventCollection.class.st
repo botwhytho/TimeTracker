@@ -2002,8 +2002,8 @@ TtEventCollection >> loadCategories [
 	| aCategoryHierarchy |
 	aCategoryHierarchy := self page children
 			detect: [ :aSnippet | aSnippet isKindOf: TtCategoriesSnippet ]
-			ifFound: #object
-			ifNone: [ TtCategories basicNew collection: self ].
+			ifFound: [ :aSnippet | TtCategories fromRoot: aSnippet object ]
+			ifNone: [ TtCategories basicNew ].
 	aCategoryHierarchy collection: self.
 	self categories: aCategoryHierarchy
 ]
