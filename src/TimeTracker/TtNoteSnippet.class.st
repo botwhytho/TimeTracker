@@ -1,22 +1,12 @@
 Class {
 	#name : 'TtNoteSnippet',
-	#superclass : 'LeSerializedObjectSnippet',
+	#superclass : 'LeAbstractSerializedObjectSnippet',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
 
-{ #category : 'api - accessing menu' }
-TtNoteSnippet class >> contextMenuItemSpecification [
-	"<leSnippetSpecification>"
-
-	^ LeContextMenuItemSpecification new
-		snippetClass: self;
-		title: self description
-]
-
 { #category : 'initialization' }
 TtNoteSnippet class >> initialize [
-	super initialize.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
