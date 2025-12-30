@@ -55,7 +55,10 @@ TtTrackedTime2 class >> leJsonV4MappingFor: aNeoJSONMapper [
 				setter: [ :um | self error: 'Objects should not be read here' ].
 			aMapping
 				mapProperty: #category
-				getter: [ :aTrackedTime | aTrackedTime category name ]
+				getter: [ :aTrackedTime | 
+					| category |
+					category := aTrackedTime category.
+					category isString ifTrue: [ category ] ifFalse: [ category name ] ]
 				setter: [ :um | self error: 'Objects should not be read here' ].
 			aMapping
 				mapInstVars: #(daySerializedFrom description details duration firstTimeScheduled isPlanned isRecurring rawData start) ]
