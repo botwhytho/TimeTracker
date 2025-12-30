@@ -186,7 +186,9 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 												categories collection: aCollection.
 												categories root collection: aCollection.
 												categories ]) ]
-							ifFalse: [ self initialize ].
+							ifFalse: [ self
+									initialize;
+									collection: self collection ].
 						self serialize.
 						aBrButton phlow fireToolUpdateWish ].
 					BrHorizontalPane new

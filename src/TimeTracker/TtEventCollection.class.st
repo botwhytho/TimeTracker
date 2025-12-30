@@ -2007,7 +2007,8 @@ TtEventCollection >> loadCategories [
 			ifFound: [ :aSnippet | TtCategories fromRoot: aSnippet object ]
 			ifNone: [ TtCategories basicNew ].
 	aCategoryHierarchy collection: self.
-	aCategoryHierarchy root collection: self.
+	aCategoryHierarchy root
+		ifNotNil: [ :aRootCategory | aRootCategory collection: self ].
 	self categories: aCategoryHierarchy
 ]
 
