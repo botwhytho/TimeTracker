@@ -61,7 +61,10 @@ TtEventCollection class >> newFrom: aCollection [
 { #category : 'accessing' }
 TtEventCollection class >> pageRegistry [
 	| pages |
-	pageRegistry ifNil: [ pageRegistry := Dictionary new ].
+	pageRegistry
+		ifNil: [ pageRegistry := Dictionary new.
+			self flag: #HACK.	"Running below code as Lepiter DB reload seems to undo the code I ran at package load time. Mentioned on Discord, should be able to remove once fixed upstream."
+			TtTrackedTimePageType initialize ].
 	pages := LeDatabasesRegistry defaultLogicalDatabase databases
 			flatCollect: [ :aDatabase | (aDatabase pagesByType at: TtTrackedTimePageType) values ].
 	pages
