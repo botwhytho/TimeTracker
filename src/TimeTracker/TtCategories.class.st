@@ -33,8 +33,6 @@ TtCategories class >> fromRoot: aRootCategory [
 { #category : 'initialization' }
 TtCategories class >> initialize [
 	super initialize.
-	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
-	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter.
 	SystemCategories := Dictionary new.
 	SystemCategories
 		at: 'Uncategorized'
@@ -69,56 +67,6 @@ TtCategories class >> initialize [
 			put: (TtCategory new
 					name: 'Rescheduled';
 					colorOverride: BrGlamorousColors failureBackgroundColor)
-]
-
-{ #category : 'serialization' }
-TtCategories class >> leJsonV3MappingFor: aNeoJSONMapper [
-	aNeoJSONMapper
-		for: self
-		do: [ :aMapping | 
-			aMapping
-				mapProperty: #__type
-				getter: [ :object | object class leJsonV3Name ]
-				setter: [ :um | self error: 'Objects should not be read here' ].
-			aMapping
-				mapProperty: #categories
-				getter: [ :aTtCategories | NeoJSONReader fromString: (NeoJSONWriter toStringPretty: aTtCategories root) ]
-				setter: [ :aDictionary | 
-					TtCategories
-						fromRoot: (NeoJSONReader
-								fromString: (NeoJSONWriter toString: aDictionary)
-								as: TtRootCategory) ] ]
-]
-
-{ #category : 'lepiter-store' }
-TtCategories class >> leJsonV3Name [
-
- ^ #TtCategories
-]
-
-{ #category : 'serialization' }
-TtCategories class >> leJsonV4MappingFor: aNeoJSONMapper [
-	aNeoJSONMapper
-		for: self
-		do: [ :aMapping | 
-			aMapping
-				mapProperty: #__type
-				getter: [ :object | object class leJsonV4Name ]
-				setter: [ :um | self error: 'Objects should not be read here' ].
-			aMapping
-				mapProperty: #categories
-				getter: [ :aTtCategories | NeoJSONReader fromString: (NeoJSONWriter toStringPretty: aTtCategories root) ]
-				setter: [ :aDictionary | 
-					TtCategories
-						fromRoot: (NeoJSONReader
-								fromString: (NeoJSONWriter toString: aDictionary)
-								as: TtRootCategory) ] ]
-]
-
-{ #category : 'lepiter-store' }
-TtCategories class >> leJsonV4Name [
-
- ^ #TtCategories
 ]
 
 { #category : 'accessing' }
