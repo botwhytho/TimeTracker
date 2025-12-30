@@ -1217,7 +1217,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			collect: [ :each | 
 				each
 					-> ((self reject: [ :_ | true ])
-							add: (TtTrackedTime new
+							add: (TtTrackedTime2 new
 									start: self first start;
 									description: 'NO TIME TRACKED');
 							yourself) ].
@@ -1568,7 +1568,7 @@ TtEventCollection >> gtNotesFor: aView [
 								ifTrue: [  ];
 								ifFalse: [ contiguousGroups
 										do: [ :aTimespan | 
-											note := TtNote new
+											note := TtNote2 new
 													start: aTimespan start;
 													duration: aTimespan duration;
 													database: aPage database;
@@ -2219,7 +2219,7 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 					collect: [ :each | 
 						each
 							-> ((self reject: [ :_ | true ])
-									add: (TtTrackedTime new
+									add: (TtTrackedTime2 new
 											start: self first start;
 											description: 'NO TIME TRACKED');
 									yourself) ].

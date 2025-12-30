@@ -56,7 +56,7 @@ TtTrelloParser >> minOrHour [
 
 { #category : 'parsing' }
 TtTrelloParser >> parseTimeSpan: anArray date: aDate [
-	^ TtTrackedTime
+	^ TtTrackedTime2
 		starting:
 			aDate + (anArray first first asNumber * 3600)
 				+ (anArray first second asNumber * 60)
