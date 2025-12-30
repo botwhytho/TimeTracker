@@ -9,6 +9,13 @@ Class {
 	#package : 'TimeTracker'
 }
 
+{ #category : 'initialization' }
+TtRootCategory class >> initialize [
+	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
+]
+
 { #category : 'lepiter-store' }
 TtRootCategory class >> leJsonV3Name [
 	^ #TtRootCategory
