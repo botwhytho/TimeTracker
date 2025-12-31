@@ -1,8 +1,8 @@
 Class {
 	#name : 'TtEventCollection',
 	#superclass : 'Object',
-	#traits : 'TGtGroupWithItems + TGtUniqueInstance',
-	#classTraits : 'TGtGroupWithItems classTrait + TGtUniqueInstance classTrait',
+	#traits : 'TGtGroupWithItems',
+	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
 		'categories',
 		'page',
