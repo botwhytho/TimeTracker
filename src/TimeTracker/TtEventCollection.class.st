@@ -66,7 +66,12 @@ TtEventCollection class >> gtPageRegistryFor: aView [
 		send: [ :each | 
 			each value
 				loadFromLepiter;
-				latestWeek ]
+				latestWeek ];
+		actionButtonIcon: BrGlamorousVectorIcons add
+			label: 'Add Page'
+			action: [ :one :two :three :four :five :six | 
+				self flag: #TODO.
+				self inform: 'TODO' ]
 ]
 
 { #category : 'instance creation' }
