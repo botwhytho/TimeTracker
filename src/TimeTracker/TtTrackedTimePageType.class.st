@@ -20,6 +20,23 @@ TtTrackedTimePageType class >> leJsonV4Name [
 	^ #TtTrackedTimePageType
 ]
 
+{ #category : 'lepiter' }
+TtTrackedTimePageType >> asLepiterPagePhlowToolFocusStatus: aBoolean [
+	^ GtPhlowCompositeTool new
+		addTool: (GtInspectorTool new withLabelAndIconAptitude
+				name: 'Time Tracker';
+				object: (TtEventCollection pageRegistry at: self page));
+		addTool: (GtInspectorTool new withLabelAndIconAptitude
+				name: 'Page Type';
+				object: self);
+		addTool: (GtInspectorTool new withLabelAndIconAptitude
+				name: 'Page';
+				object: self page);
+		addTool: (LePagePhlowTool new
+				shouldFocusFirstSnippet: aBoolean;
+				page: self page)
+]
+
 { #category : 'printing' }
 TtTrackedTimePageType >> printOn: aStream [
 
