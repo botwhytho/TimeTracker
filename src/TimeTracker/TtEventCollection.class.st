@@ -103,45 +103,6 @@ TtEventCollection class >> pageRegistry: aDictionary [
 ]
 
 { #category : 'serialization' }
-TtEventCollection class >> serializeSnippet: aTextSnippet [
-	^ NeoJSONObject
-		fromString: (String
-				streamContents: [ :s | 
-					LeJsonV4 uniqueInstance
-						serialize: aTextSnippet
-						on: s
-						prettyPrint: true ])
-]
-
-{ #category : 'serialization' }
-TtEventCollection class >> serializeWithLepiter: anEntity [
-	| anUnknownSnippet aTextSnippet lepiterPage serialized snippetJSON |
-	lepiterPage := anEntity collection page.
-	lepiterPage children
-		detect: [ :aSnippet | aSnippet uidString = anEntity uid ]
-		ifFound: [ :foundSnippet | 
-			snippetJSON := self serializeSnippet: foundSnippet.
-			snippetJSON data: anEntity.
-			serialized := NeoJSONWriter toStringPretty: snippetJSON.
-			foundSnippet jsonString: serialized source: lepiterPage.
-			foundSnippet domainObject ifNil: [ foundSnippet domainObject: anEntity ] ]
-		ifNone: [ aTextSnippet := LeTextSnippet string: ''.
-			lepiterPage addSnippet: aTextSnippet.
-			snippetJSON := self serializeSnippet: aTextSnippet.
-			snippetJSON __type: anEntity class snippetClass leJsonV4Name.
-			snippetJSON data: anEntity.
-			serialized := NeoJSONWriter toStringPretty: snippetJSON.
-			anUnknownSnippet := anEntity class snippetClass new
-					jsonString: serialized
-					source: lepiterPage.
-			aTextSnippet removeSelf.
-			lepiterPage addSnippet: anUnknownSnippet.
-			anUnknownSnippet domainObject
-				ifNil: [ anUnknownSnippet domainObject: anEntity ].
-			anEntity uid: anUnknownSnippet uidString ]
-]
-
-{ #category : 'serialization' }
 TtEventCollection class >> supportedSnippetTypes [
 	^ {TtTrackedTimeSnippet.
 		TtNoteSnippet}
@@ -2174,11 +2135,6 @@ TtEventCollection >> toggleUntrackedAction [
 		action: [ :aButton :aBrTab | 
 			self toggleUntracked.
 			aButton phlow fireViewUpdateWish ] ]
-]
-
-{ #category : 'accessing' }
-TtEventCollection >> valueHolder: anObject [
-	collection := anObject
 ]
 
 { #category : 'accessing' }
