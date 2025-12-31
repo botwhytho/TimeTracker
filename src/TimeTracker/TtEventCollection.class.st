@@ -1347,35 +1347,6 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 									aBrButton phlow fireToolUpdateWish ] ] ].
 			aMenuItems
 				addItem: (BrMenuSubmenuItem new
-						label: 'List Pending Days';
-						submenuItem: (BrMenuExplicitItem new
-								stencil: [ :aBrMenuExplicitItem | 
-									| daysWithoutData |
-									daysWithoutData := self listUnimportedDays.
-									(MyGtCalendarElement
-										forDate: self datesWithData max
-										asElementDo: [ :calendarElement | 
-											| daysInMonth |
-											daysInMonth := daysWithoutData
-													select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
-													thenCollect: #dayOfMonth.
-											calendarElement dayElements
-												associationsDo: [ :anAssociation | 
-													(daysInMonth includes: anAssociation key)
-														ifTrue: [ anAssociation value background: Color lightOrange ] ] ])
-										when: GtCalendarDateClickedEvent
-										do: [ :anEvent | 
-											| weekIncludingDate |
-											anEvent consumed: true.
-											self importFromTrello: anEvent date.
-											weekIncludingDate := self rootCollection weekFromDate: anEvent date.
-											aContext navigationContext object
-												in: [ :aTtEventCollection | 
-													aTtEventCollection class = TtEventCollection
-														ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
-															aBrButton phlow fireToolUpdateWish ] ] ] ])).
-			aMenuItems
-				addItem: (BrMenuSubmenuItem new
 						label: 'Re-Import Partial Day';
 						submenuItem: (BrMenuExplicitItem new
 								stencil: [ :aBrMenuExplicitItem | 
@@ -1392,6 +1363,35 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 												associationsDo: [ :anAssociation | 
 													(daysInMonth includes: anAssociation key)
 														ifTrue: [ anAssociation value background: Color lightGreen ] ] ])
+										when: GtCalendarDateClickedEvent
+										do: [ :anEvent | 
+											| weekIncludingDate |
+											anEvent consumed: true.
+											self importFromTrello: anEvent date.
+											weekIncludingDate := self rootCollection weekFromDate: anEvent date.
+											aContext navigationContext object
+												in: [ :aTtEventCollection | 
+													aTtEventCollection class = TtEventCollection
+														ifTrue: [ aTtEventCollection becomeForward: weekIncludingDate.
+															aBrButton phlow fireToolUpdateWish ] ] ] ])).
+			aMenuItems
+				addItem: (BrMenuSubmenuItem new
+						label: 'List Pending Days';
+						submenuItem: (BrMenuExplicitItem new
+								stencil: [ :aBrMenuExplicitItem | 
+									| daysWithoutData |
+									daysWithoutData := self listUnimportedDays.
+									(MyGtCalendarElement
+										forDate: self datesWithData max
+										asElementDo: [ :calendarElement | 
+											| daysInMonth |
+											daysInMonth := daysWithoutData
+													select: [ :aDay | calendarElement currentMonth asMonth includes: aDay ]
+													thenCollect: #dayOfMonth.
+											calendarElement dayElements
+												associationsDo: [ :anAssociation | 
+													(daysInMonth includes: anAssociation key)
+														ifTrue: [ anAssociation value background: Color lightOrange ] ] ])
 										when: GtCalendarDateClickedEvent
 										do: [ :anEvent | 
 											| weekIncludingDate |
