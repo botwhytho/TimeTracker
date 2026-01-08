@@ -34,7 +34,9 @@ TtTrackedTimePageType >> asLepiterPagePhlowToolFocusStatus: aBoolean [
 		toolStencil: [ GtPhlowCompositeTool new
 				addTool: (GtInspectorTool new withLabelAndIconAptitude
 						name: 'Time Tracker';
-						object: (TtEventCollection pageRegistry at: self page));
+						object: ((TtEventCollection pageRegistry at: self page)
+								loadFromLepiter;
+								latestWeek));
 				addTool: (GtInspectorTool new withLabelAndIconAptitude
 						name: 'Page Type';
 						object: self);
@@ -43,7 +45,8 @@ TtTrackedTimePageType >> asLepiterPagePhlowToolFocusStatus: aBoolean [
 						object: self page);
 				addTool: (LePagePhlowTool new
 						shouldFocusFirstSnippet: aBoolean;
-						page: self page) ]
+						page: self page) ];
+			in: [ :aTool | aTool instVarNamed: 'toolName' put: self page title. aTool ]
 ]
 
 { #category : 'printing' }
