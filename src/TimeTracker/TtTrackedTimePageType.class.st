@@ -12,7 +12,10 @@ TtTrackedTimePageType class >> initialize [
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
 	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter.
 	LeDatabasesRegistry defaultLogicalDatabase databases
-		do: [ :aDatabase | aDatabase pagesByType at: self pageTypeClass ifAbsentPut: [ GtStringContentDictionary new ] ]
+		do: [ :aDatabase | 
+			aDatabase pagesByType
+				at: self pageTypeClass
+				ifAbsentPut: [ GtStringContentDictionary new ] ]
 ]
 
 { #category : 'lepiter-store' }
@@ -22,9 +25,6 @@ TtTrackedTimePageType class >> leJsonV4Name [
 
 { #category : 'accessing' }
 TtTrackedTimePageType class >> pageTypeClass [
-	"Answer the class used to store the pages in ${class:name=LeDatabase}$.
-	Daily notes are stored with named pages (using the date as a title)."
-
 	^ LeNamedPageType
 ]
 
