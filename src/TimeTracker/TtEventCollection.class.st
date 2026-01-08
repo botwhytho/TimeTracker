@@ -87,7 +87,7 @@ TtEventCollection class >> pageRegistry [
 			self flag: #HACK.	"Running below code as Lepiter DB reload seems to undo the code I ran at package load time. Mentioned on Discord, should be able to remove once fixed upstream."
 			TtTrackedTimePageType initialize ].
 	pages := LeDatabasesRegistry defaultLogicalDatabase databases
-			flatCollect: [ :aDatabase | (aDatabase pagesByType at: TtTrackedTimePageType) values ].
+			flatCollect: [ :aDatabase | (aDatabase pagesByType at: TtTrackedTimePageType pageTypeClass) values select: [ :aPage | aPage type class = TtTrackedTimePageType ] ].
 	pages
 		ifEmpty: [ | newPage |
 			newPage := self createDefaultPage.
