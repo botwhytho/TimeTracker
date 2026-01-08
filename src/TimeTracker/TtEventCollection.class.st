@@ -1308,8 +1308,10 @@ TtEventCollection >> gtImportActionFor: anAction context: aContext [
 	self flag: #TODO.	"Generalize import through some type of interface"
 	(aContext navigation previousContext
 		ifNil: [ false ]
-		ifNotNil: [ :notNil | notNil object isKindOf: TtEventCollection ])
-		ifTrue: [ ^ anAction noAction ].
+		ifNotNil: [ :notNil | 
+			(notNil phlowViewModel isKindOf: GtPhlowToolCompositeViewModel)
+				ifTrue: [ false ]
+				ifFalse: [ true ] ]) ifTrue: [ ^ anAction noAction ].
 	^ anAction dropdown
 		priority: 0.5;
 		icon: BrGlamorousVectorIcons inspect;
