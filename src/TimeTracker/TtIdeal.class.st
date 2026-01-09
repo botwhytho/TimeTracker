@@ -9,11 +9,45 @@ Class {
 		'priority',
 		'timePeriod',
 		'computation',
-		'description'
+		'description',
+		'ideals'
 	],
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
+
+{ #category : 'initialization' }
+TtIdeal class >> initialize [
+	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
+]
+
+{ #category : 'serialization' }
+TtIdeal class >> leJsonV4MappingFor: aNeoJSONMapper [
+	aNeoJSONMapper
+		for: self
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #category
+				getter: [ :aTtIdeal | aTtIdeal category ifNotNil: #name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #computation
+				getter: [ :aTtIdeal | aTtIdeal computation asString ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapInstVars: #(#description #leeway #maxValue #minValue #priority #timePeriod) ]
+]
+
+{ #category : 'lepiter-store' }
+TtIdeal class >> leJsonV4Name [
+	^ #TtIdeal
+]
 
 { #category : 'accessing' }
 TtIdeal >> category [
@@ -43,6 +77,16 @@ TtIdeal >> description [
 { #category : 'accessing' }
 TtIdeal >> description: anObject [
 	description := anObject
+]
+
+{ #category : 'accessing' }
+TtIdeal >> ideals [
+	^ ideals
+]
+
+{ #category : 'accessing' }
+TtIdeal >> ideals: aTtIdeals [
+	ideals := aTtIdeals
 ]
 
 { #category : 'accessing' }
