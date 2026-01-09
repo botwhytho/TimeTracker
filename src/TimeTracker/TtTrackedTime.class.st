@@ -1,60 +1,54 @@
 Class {
 	#name : 'TtTrackedTime',
 	#superclass : 'Timespan',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
 		'description',
 		'details',
-		'uid',
 		'rawData',
 		'daySerializedFrom',
 		'category',
 		'labels',
 		'isPlanned',
 		'isRecurring',
-		'firstTimeScheduled',
-		'collection'
+		'firstTimeScheduled'
 	],
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
 
-{ #category : 'accessing' }
-TtTrackedTime class >> dataPageName [
-	^ 'Time Tracker Entries'
+{ #category : 'initialization' }
+TtTrackedTime class >> initialize [
+	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
 ]
 
 { #category : 'serialization' }
-TtTrackedTime class >> neoJsonMapping: aNeoJSONMapper [
+TtTrackedTime class >> leJsonV4MappingFor: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
-			do: [ :aMapping | 
-				aMapping
-					mapInstVars: #(description details firstTimeScheduled isPlanned isRecurring rawData daySerializedFrom).
-				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
-				(aMapping mapInstVar: #duration) valueSchema: Duration.
-				(aMapping mapInstVar: #category) valueSchema: #Category ];
-		for: DateAndTime
-			customDo: [ :mapping | 
-				mapping decoder: [ :string | DateAndTime fromString: string ].
-				mapping encoder: [ :dateAndTime | dateAndTime printString ] ];
-		for: Duration
-			customDo: [ :mapping | 
-				mapping decoder: [ :aString | aString asDuration ].
-				mapping encoder: [ :aDuration | aDuration asString ] ];
-		for: #Category
-			customDo: [ :categoryMapping | 
-				categoryMapping
-					reader: [ :jsonReader | 
-						| categoryName aCollection |
-						aCollection := thisContext stack
-								detect: [ :each | each receiver class = TtEventCollection ]
-								ifFound: [ :found | found receiver ]
-								ifNone: [ TtEventCollection defaultCollection ].
-						categoryName := jsonReader next.
-						aCollection categories
-							detect: [ :each | each name = categoryName ]
-							ifNone: [ categoryName ifNotNil: [ TtPlaceholderCategory fromName: categoryName ] ] ];
-					writer: [ :jsonWriter :aCategory | aCategory name neoJsonOn: jsonWriter ] ]
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #category
+				getter: [ :aTrackedTime | 
+					| category |
+					category := aTrackedTime category.
+					category
+						ifNotNil: [ category isString ifTrue: [ category ] ifFalse: [ category name ] ] ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapInstVars: #(daySerializedFrom description details duration firstTimeScheduled isPlanned isRecurring rawData start) ]
+]
+
+{ #category : 'lepiter-store' }
+TtTrackedTime class >> leJsonV4Name [
+	^ #TtTrackedTime
 ]
 
 { #category : 'serialization' }
@@ -74,11 +68,6 @@ TtTrackedTime >> <= other [
 ]
 
 { #category : 'accessing' }
-TtTrackedTime >> asTimespan [
-	^ self as: self value class superclass
-]
-
-{ #category : 'accessing' }
 TtTrackedTime >> category [
 	^ category
 ]
@@ -86,16 +75,6 @@ TtTrackedTime >> category [
 { #category : 'accessing' }
 TtTrackedTime >> category: anObject [
 	category := anObject
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> collection [
-	^ collection
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> collection: aTtEventCollection [
-	collection := aTtEventCollection
 ]
 
 { #category : 'accessing' }
@@ -110,15 +89,6 @@ TtTrackedTime >> daySerializedFrom [
 { #category : 'accessing' }
 TtTrackedTime >> daySerializedFrom: anObject [
 	daySerializedFrom := anObject
-]
-
-{ #category : 'deleting' }
-TtTrackedTime >> delete [
-	self collection page
-		ifNotNil: [ :aPage | 
-			(aPage children detect: [ :aSnippet | aSnippet uidString = self uid ])
-				removeSelf ].
-	self rootCollection items remove: self
 ]
 
 { #category : 'accessing' }
@@ -168,7 +138,7 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			entity := anEvent target phlow firstParentWithViewContent phlow
 					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(true).
-			self collection class serializeWithLepiter: self.
+			self serialize.
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
@@ -178,7 +148,7 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 			entity := anEvent target phlow firstParentWithViewContent phlow
 					firstParentWithViewContent phlow entity.
 			self perform: aSelector asMutator withArguments: #(false).
-			self collection class serializeWithLepiter: self.
+			self serialize.
 			entity buildContext context navigationContext object viewFilterContext
 				asLowercase = aSelector asLowercase
 				ifTrue: [ entity definingMethodProvider definingMethod selector = #gtSummaryFor:context:
@@ -237,8 +207,7 @@ TtTrackedTime >> gtPreviewFor: aView [
 									each key = 'Description'
 										ifTrue: [ self description: newValue ]
 										ifFalse: [ self details: newValue ].
-									self collection rootCollection
-										ifNotNil: [ :notNil | notNil class serializeWithLepiter: self ] ] ]
+									self serialize ] ]
 					ifFalse: [ BrLabel new
 							aptitude: BrGlamorousLabelAptitude;
 							text: each value ] ];
@@ -336,30 +305,4 @@ TtTrackedTime >> rawData [
 { #category : 'accessing' }
 TtTrackedTime >> rawData: anObject [
 	rawData := anObject
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> rootCollection [
-	^ self collection rootCollection
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> serializeSnippet: aTextSnippet [
-	^ NeoJSONObject
-		fromString: (String
-				streamContents: [ :s | 
-					LeJsonV4 uniqueInstance
-						serialize: aTextSnippet
-						on: s
-						prettyPrint: true ])
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> uid [
-	^ uid
-]
-
-{ #category : 'accessing' }
-TtTrackedTime >> uid: anObject [
-	uid := anObject
 ]

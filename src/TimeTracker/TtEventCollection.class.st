@@ -1183,7 +1183,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			collect: [ :each | 
 				each
 					-> ((self reject: [ :_ | true ])
-							add: (TtTrackedTime2 new
+							add: (TtTrackedTime new
 									start: self first start;
 									description: 'NO TIME TRACKED');
 							yourself) ].
@@ -2182,7 +2182,7 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 					collect: [ :each | 
 						each
 							-> ((self reject: [ :_ | true ])
-									add: (TtTrackedTime2 new
+									add: (TtTrackedTime new
 											start: self first start;
 											description: 'NO TIME TRACKED');
 									yourself) ].
