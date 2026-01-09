@@ -1536,7 +1536,7 @@ TtEventCollection >> gtNotesFor: aView [
 								ifTrue: [  ];
 								ifFalse: [ contiguousGroups
 										do: [ :aTimespan | 
-											note := TtNote2 new
+											note := TtNote new
 													start: aTimespan start;
 													duration: aTimespan duration;
 													database: aPage database;

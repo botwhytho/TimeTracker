@@ -1,71 +1,51 @@
 Class {
 	#name : 'TtNote',
 	#superclass : 'Timespan',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
-		'collection',
 		'page',
-		'database',
-		'uid'
+		'database'
 	],
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
 
+{ #category : 'initialization' }
+TtNote class >> initialize [
+	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
+]
+
 { #category : 'serialization' }
-TtNote class >> neoJsonMapping: aNeoJSONMapper [
-	| database |
+TtNote class >> leJsonV4MappingFor: aNeoJSONMapper [
 	aNeoJSONMapper
 		for: self
-			do: [ :aMapping | 
-				(aMapping mapInstVar: #start) valueSchema: DateAndTime.
-				(aMapping mapInstVar: #duration) valueSchema: Duration.
-				(aMapping mapInstVar: #database) valueSchema: LeDatabase.
-				(aMapping mapInstVar: #page) valueSchema: LePage ];
-		for: DateAndTime
-			customDo: [ :mapping | 
-				mapping decoder: [ :string | DateAndTime fromString: string ].
-				mapping encoder: [ :dateAndTime | dateAndTime printString ] ];
-		for: Duration
-			customDo: [ :mapping | 
-				mapping decoder: [ :aString | aString asDuration ].
-				mapping encoder: [ :aDuration | aDuration asString ] ];
-		for: LeDatabase
-			customDo: [ :mapping | 
-				mapping
-					decoder: [ :aString | 
-						database := (LeLogicalDatabase allSubInstances
-								collect: [ :each | each databaseWithID: aString ifNone: [ nil ] ])
-								detect: #isNotNil
-								ifNone: [ nil ] ].
-				mapping
-					encoder: [ :aLeDatabase | [ aLeDatabase uuidString ] on: MessageNotUnderstood do: [ nil ] ] ];
-		for: LePage
-			customDo: [ :mapping | 
-				mapping decoder: [ :aString | 
-				self flag: #TODO. "Do better error handling. Create custom (or re-use) error for db/page not found and wrap IDs"
-				database pageWithID: aString ifAbsent: [ nil ] ].
-				mapping
-					encoder: [ :aLePage | [ aLePage uidString ] on: MessageNotUnderstood do: [ nil ] ] ]
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #database
+				getter: [ :aTtNote | aTtNote database ifNotNil: #uuidString ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping
+				mapProperty: #page
+				getter: [ :aTtNote | aTtNote page ifNotNil: #uidString ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping mapInstVars: #(duration start) ]
+]
+
+{ #category : 'lepiter-store' }
+TtNote class >> leJsonV4Name [
+	^ #TtNote
 ]
 
 { #category : 'serialization' }
 TtNote class >> snippetClass [
 	^ TtNoteSnippet
-]
-
-{ #category : 'accessing' }
-TtNote >> asTimespan [
-	^ self as: self value class superclass
-]
-
-{ #category : 'accessing' }
-TtNote >> collection [
-	^ collection
-]
-
-{ #category : 'accessing' }
-TtNote >> collection: aTtEventCollection [
-	collection := aTtEventCollection
 ]
 
 { #category : 'accessing' }
@@ -76,15 +56,6 @@ TtNote >> database [
 { #category : 'accessing' }
 TtNote >> database: aLeDatabase [
 	database := aLeDatabase
-]
-
-{ #category : 'deleting' }
-TtNote >> delete [
-	self collection page
-		ifNotNil: [ :aPage | 
-			(aPage children detect: [ :aSnippet | aSnippet uidString = self uid ])
-				removeSelf ].
-	self rootCollection items remove: self
 ]
 
 { #category : 'views' }
@@ -122,19 +93,4 @@ TtNote >> page [
 { #category : 'accessing' }
 TtNote >> page: aLePage [
 	page := aLePage
-]
-
-{ #category : 'accessing' }
-TtNote >> rootCollection [
-	^ self collection rootCollection
-]
-
-{ #category : 'accessing' }
-TtNote >> uid [
-	^ uid
-]
-
-{ #category : 'accessing' }
-TtNote >> uid: anObject [
-	uid := anObject
 ]

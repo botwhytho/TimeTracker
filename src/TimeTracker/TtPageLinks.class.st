@@ -24,7 +24,7 @@ TtPageLinks >> addPageLinkButton [
 								ifTrue: [ anItem ]
 								ifFalse: [ anItem createWithoutPager ].
 						((self pageLinks collect: #page) includes: aPage)
-							ifFalse: [ note := TtNote2 new
+							ifFalse: [ note := TtNote new
 										start: self timespan start;
 										duration: self timespan duration;
 										database: aPage database;
