@@ -1,8 +1,8 @@
 Class {
 	#name : 'TtTrackedTime',
 	#superclass : 'Timespan',
-	#traits : 'TtSerializedObjetTrait',
-	#classTraits : 'TtSerializedObjetTrait classTrait',
+	#traits : 'TLeSerializedObject + TtSerializedObjetTrait',
+	#classTraits : 'TLeSerializedObject classTrait + TtSerializedObjetTrait classTrait',
 	#instVars : [
 		'description',
 		'details',
