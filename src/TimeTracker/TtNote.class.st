@@ -59,18 +59,6 @@ TtNote >> database: aLeDatabase [
 ]
 
 { #category : 'views' }
-TtNote >> gtDeleteActionFor: anAction [
-	<gtAction>
-	^ anAction button
-		icon: BrGlamorousVectorIcons remove;
-		tooltip: 'Delete the Note.';
-		priority: 2;
-		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
-			anEvent consumed: true.
-			self delete ]
-]
-
-{ #category : 'views' }
 TtNote >> gtPreviewFor: aView [
 	<gtView>
 	self page ifNil: [ ^ aView empty ].

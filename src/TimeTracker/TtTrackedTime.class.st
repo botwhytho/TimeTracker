@@ -156,18 +156,6 @@ TtTrackedTime >> generateCheckboxForBoolean: aSelector [
 ]
 
 { #category : 'action' }
-TtTrackedTime >> gtDeleteActionFor: anAction [
-	<gtAction>
-	^ anAction button
-		icon: BrGlamorousVectorIcons remove;
-		tooltip: 'Delete the Tracked Time.';
-		priority: 2;
-		action: [ :aBrButton :aBrTab :aBrButtonModel :anEvent | 
-			anEvent consumed: true.
-			self delete ]
-]
-
-{ #category : 'action' }
 TtTrackedTime >> gtGoToTrelloFor: anAction [
 	<gtAction>
 	self daySerializedFrom ifNil: [ ^ anAction noAction ].
