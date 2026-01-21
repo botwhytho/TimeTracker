@@ -1,8 +1,8 @@
 Class {
 	#name : 'TtNote',
 	#superclass : 'Timespan',
-	#traits : 'TLeSerializedObject + TtSerializedObjetTrait',
-	#classTraits : 'TLeSerializedObject classTrait + TtSerializedObjetTrait classTrait',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
 		'page',
 		'database'

@@ -1,8 +1,8 @@
 Class {
 	#name : 'TtRootCategory',
 	#superclass : 'TtCategory',
-	#traits : 'TLeSerializedObject + TtSerializedObjetTrait',
-	#classTraits : 'TLeSerializedObject classTrait + TtSerializedObjetTrait classTrait',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }

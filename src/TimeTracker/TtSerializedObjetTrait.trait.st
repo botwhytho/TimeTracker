@@ -3,6 +3,8 @@ Trait {
 	#instVars : [
 		'collection'
 	],
+	#traits : 'TLeSerializedProtoObject',
+	#classTraits : 'TLeSerializedProtoObject classTrait',
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
@@ -26,16 +28,17 @@ TtSerializedObjetTrait >> collection: aTtEventCollection [
 
 { #category : 'serialization' }
 TtSerializedObjetTrait >> findPage [
-	^ self rootCollection page
+	^ self rootCollection ifNotNil: #page
 ]
 
 { #category : 'deleting' }
 TtSerializedObjetTrait >> preDeleteAction [
-	[ self collection remove: self ] on: NotFound do: [  ].
-	[ self rootCollection remove: self ] on: NotFound do: [  ]
+	self collection
+		ifNotNil: [ [ self collection remove: self ] on: NotFound do: [  ].
+			[ self rootCollection remove: self ] on: NotFound do: [  ] ]
 ]
 
 { #category : 'accessing' }
 TtSerializedObjetTrait >> rootCollection [
-	^ self collection rootCollection
+	^ self collection ifNotNil: #rootCollection
 ]
