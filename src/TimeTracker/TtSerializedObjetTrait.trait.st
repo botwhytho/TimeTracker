@@ -31,6 +31,10 @@ TtSerializedObjetTrait >> findPage [
 	^ self rootCollection ifNotNil: #page
 ]
 
+{ #category : 'loading' }
+TtSerializedObjetTrait >> onLoadedFromLepiter [
+]
+
 { #category : 'deleting' }
 TtSerializedObjetTrait >> preDeleteAction [
 	self collection

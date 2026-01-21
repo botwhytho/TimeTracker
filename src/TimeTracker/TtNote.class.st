@@ -73,6 +73,24 @@ TtNote >> isNote [
 	^ true
 ]
 
+{ #category : 'loading' }
+TtNote >> onLoadedFromLepiter [
+	| aDatabase aPage |
+	aPage isString
+		ifTrue: [ aDatabase := (LeLogicalDatabase allSubInstances
+					collect: [ :each | each databaseWithID: self database ifNone: [ nil ] ])
+					detect: #isNotNil
+					ifNone: [ nil ].
+
+			aPage := aDatabase
+					ifNil: [ nil ]
+					ifNotNil: [ :notNil | notNil pageWithID: self page ifAbsent: [ nil ] ].
+
+			aPage
+				ifNotNil: [ self database: aDatabase.
+					self page: aPage ] ]
+]
+
 { #category : 'accessing' }
 TtNote >> page [
 	^ page

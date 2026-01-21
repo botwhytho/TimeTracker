@@ -190,3 +190,23 @@ TtIdeals >> notes [
 TtIdeals >> notes: anObject [
 	notes := anObject
 ]
+
+{ #category : 'loading' }
+TtIdeals >> onLoadedFromLepiter [
+	self ideals
+		do: [ :aTtIdeal | 
+			(aTtIdeal computation isNotNil and: [ aTtIdeal computation isString ])
+				ifTrue: [ :aSerializedClosure | 
+					(RBParser parseFaultyExpression: aTtIdeal computation)
+						in: [ :aNode | 
+							aNode class = RBBlockNode
+								ifTrue: [ aTtIdeal computation: aNode evaluate ]
+								ifFalse: [ self flag: #TODO.	"Better error handling"
+									self inform: 'The code is NOT parsable into a Closure' ] ] ].
+
+			(aTtIdeal category isNotNil and: [ aTtIdeal category isString ])
+				ifTrue: [ aTtIdeal
+						category: (self rootCollection categories
+								detect: [ :aCategory | aCategory name = aTtIdeal category ]
+								ifNone: [ TtPlaceholderCategory fromName: aTtIdeal category ]) ] ]
+]

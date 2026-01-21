@@ -105,7 +105,8 @@ TtEventCollection class >> pageRegistry: aDictionary [
 { #category : 'serialization' }
 TtEventCollection class >> supportedSnippetTypes [
 	^ {TtTrackedTimeSnippet.
-		TtNoteSnippet}
+		TtNoteSnippet.
+		TtIdealsSnippet}
 ]
 
 { #category : 'views' }
@@ -1995,20 +1996,15 @@ TtEventCollection >> loadCategories [
 { #category : 'initialization' }
 TtEventCollection >> loadFromLepiter [
 	self size = 0
-		ifTrue: [ self loadCategories.
+		ifTrue: [ self categories ifNil: [ self loadCategories ].
 			self page children asArray
 				select: [ :aSnippet | self class supportedSnippetTypes includes: aSnippet class ]
 				thenDo: [ :aSnippet | 
 					| object |
 					object := aSnippet object.
 					object collection: self.
-					((object respondsTo: #category)
-						and: [ object category isNotNil and: [ object category isString ] ])
-						ifTrue: [ object
-								category: (self categories
-										detect: [ :aCategory | aCategory name = object category ]
-										ifNone: [ TtPlaceholderCategory fromName: object category ]) ].
-					self add: object ].
+					self add: object.
+					object onLoadedFromLepiter ].
 			self beSerializable ]
 ]
 
