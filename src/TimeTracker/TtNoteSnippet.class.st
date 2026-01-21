@@ -16,16 +16,6 @@ TtNoteSnippet class >> leJsonV4Name [
 	^ #TtNoteSnippet
 ]
 
-{ #category : 'as yet unclassified' }
-TtNoteSnippet >> gtInspectNoteFor: anAction [
-	<gtAction>
-	self object ifNil: [ ^ anAction noAction ].
-	^ anAction button
-		icon: BrGlamorousVectorIcons inspect;
-		label: 'Inspect Note';
-		action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self object ]
-]
-
 { #category : 'views' }
 TtNoteSnippet >> gtPageFor: aView [
 	<gtView>
