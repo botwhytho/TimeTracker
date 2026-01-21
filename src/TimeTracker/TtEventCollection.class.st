@@ -1777,11 +1777,7 @@ TtEventCollection >> hourlyTicksElement [
 
 { #category : 'accessing' }
 TtEventCollection >> ideals [
-	self flag: #TODO.	"Including both classes here temporarily to try and not break existing views in the meantime. This may probably cause issues anyways, FIX once transition is done."
-	^ self rootCollection items
-		select: [ :each | 
-			{TtIdeals.
-				TtIdealTimeUsage} includes: each class ]
+	^ self rootCollection items select: [ :each | each isKindOf: TtIdeals ]
 ]
 
 { #category : 'views' }

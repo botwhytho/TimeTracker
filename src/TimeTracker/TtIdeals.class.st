@@ -1,6 +1,8 @@
 Class {
 	#name : 'TtIdeals',
 	#superclass : 'Timespan',
+	#traits : 'TtSerializedObjetTrait',
+	#classTraits : 'TtSerializedObjetTrait classTrait',
 	#instVars : [
 		'ideals',
 		'description',
@@ -11,6 +13,35 @@ Class {
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
 }
+
+{ #category : 'initialization' }
+TtIdeals class >> initialize [
+	super initialize.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newReader.
+	self leJsonV4MappingFor: LeJsonV4 uniqueInstance newWriter
+]
+
+{ #category : 'serialization' }
+TtIdeals class >> leJsonV4MappingFor: aNeoJSONMapper [
+	aNeoJSONMapper
+		for: self
+		do: [ :aMapping | 
+			aMapping
+				mapProperty: #__type
+				getter: [ :object | object class leJsonV4Name ]
+				setter: [ :um | self error: 'Objects should not be read here' ].
+			aMapping mapInstVars: #(description duration ideals notes start) ]
+]
+
+{ #category : 'lepiter-store' }
+TtIdeals class >> leJsonV4Name [
+	^ #TtIdeals
+]
+
+{ #category : 'accessing' }
+TtIdeals class >> snippetClass [
+	^ TtIdealsSnippet
+]
 
 { #category : 'accessing' }
 TtIdeals >> collection [
