@@ -1168,19 +1168,17 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 { #category : 'views' }
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
-	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
-	activeIdeals := (aContext at: 'ideals')
-			ifNil: [ self ideals select: [ :each | each duration = Duration zero ] ]
-			ifNotNil: #yourself.
+	ideals := self ideals.
+	activeIdeals := ideals last.
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
-				activeIdeals
+				activeIdeals ideals
 					detect: [ :anIdeal | 
 						anIdeal category
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | (aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
-	idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
+	idealsWithNoTrackedTime := (activeIdeals ideals difference: groupedByIdeals keys)
 			collect: [ :each | 
 				each
 					-> ((self reject: [ :_ | true ])
@@ -1252,14 +1250,13 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 				menu: [ :aBrButton :aBrTab | 
 					| groupByLabelMapping menuItems |
 					menuItems := BrMenuItems new.
-					self flag: #NOTE.	"Below displays odd list at the moment as defining ideals as 'latest' or ones with no duration, which may have different start dates. Later will wrap individual ideals in Ideals collection wrapper and use that."
 					groupByLabelMapping := {'Ideal for Date range' -> nil}
-							, (ideals associations
+							, (ideals
 									collect: [ :each | 
-										(each key start asDate yyyymmdd , ' - '
-											, (each key duration isZero
+										(each start asDate yyyymmdd , ' - '
+											, (each duration isZero
 													ifTrue: [ 'Today' ]
-													ifFalse: [ each key end asDate yyyymmdd ])) -> each value ]).
+													ifFalse: [ each end asDate yyyymmdd ])) -> each ]).
 
 					groupByLabelMapping
 						do: [ :each | 
@@ -2032,7 +2029,7 @@ TtEventCollection >> noteToTrackedTimeAssociations [
 
 { #category : 'accessing' }
 TtEventCollection >> notes [
-	^ self select: #isNote
+	^ self items select: #isNote
 ]
 
 { #category : 'accessing' }
@@ -2152,17 +2149,17 @@ TtEventCollection >> weekFromDate: aDate [
 { #category : 'views' }
 TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime idealProgress |
-	ideals := self ideals groupedBy: [ :each | each as: Timespan ].
-	^ (self ideals
+	ideals := self ideals.
+	^ (ideals
 		anySatisfy: [ :anIdeal | aTtEventCollection first start asDate >= anIdeal start asDate ])
-		ifTrue: [ activeIdeals := ideals associations
-					detect: [ :each | each key includes: self first start ]
-					ifFound: [ :found | found value ]
-					ifNone: [ ideals associations last value ].
+		ifTrue: [ activeIdeals := ideals
+					detect: [ :each | each includes: self first start ]
+					ifFound: #yourself
+					ifNone: [ ideals last ].
 
 			groupedByIdeals := aTtEventCollection timeEntries
 					groupedBy: [ :aTrackedTime | 
-						activeIdeals
+						activeIdeals ideals
 							detect: [ :anIdeal | 
 								anIdeal category
 									ifNil: [ anIdeal computation value: aTrackedTime ]
@@ -2170,7 +2167,7 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 										(aTrackedTime category ifNil: [ TtCategory new ]) categoryLineage
 											includes: notNil ] ]
 							ifNone: [ 'Time Without Ideals' ] ].
-			idealsWithNoTrackedTime := (activeIdeals difference: groupedByIdeals keys)
+			idealsWithNoTrackedTime := (activeIdeals ideals difference: groupedByIdeals keys)
 					collect: [ :each | 
 						each
 							-> ((self reject: [ :_ | true ])
