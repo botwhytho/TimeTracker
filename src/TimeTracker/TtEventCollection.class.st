@@ -1156,7 +1156,11 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 																	aClickEvent consumed: true.
 																	aClickEvent target phlow spawnObject: association value ].
 														(ideals
-															anySatisfy: [ :anIdeal | (aWeek start asDate - 1 day) start asDate >= anIdeal start asDate ])
+															anySatisfy: [ :anIdeal | 
+																(aWeek start asDate - 1 day) start asDate
+																	in: [ :aDate | 
+																		aDate >= anIdeal start asDate
+																			and: [ aDate <= anIdeal end asDate or: [ anIdeal duration = Duration zero ] ] ] ])
 															ifTrue: [ aVerticalPane background: Color lightGreen ] ].
 												aVerticalPane ]) ].
 
