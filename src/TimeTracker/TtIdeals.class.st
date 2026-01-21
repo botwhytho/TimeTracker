@@ -196,8 +196,7 @@ TtIdeals >> onLoadedFromLepiter [
 	self ideals
 		do: [ :aTtIdeal | 
 			aTtIdeal computation isString
-				ifTrue: [ :aSerializedClosure | 
-					(RBParser parseFaultyExpression: aTtIdeal computation)
+				ifTrue: [ (RBParser parseFaultyExpression: aTtIdeal computation)
 						in: [ :aNode | 
 							aNode class = RBBlockNode
 								ifTrue: [ aTtIdeal computation: aNode evaluate ]
