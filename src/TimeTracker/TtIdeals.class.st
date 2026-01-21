@@ -195,7 +195,7 @@ TtIdeals >> notes: anObject [
 TtIdeals >> onLoadedFromLepiter [
 	self ideals
 		do: [ :aTtIdeal | 
-			(aTtIdeal computation isNotNil and: [ aTtIdeal computation isString ])
+			aTtIdeal computation isString
 				ifTrue: [ :aSerializedClosure | 
 					(RBParser parseFaultyExpression: aTtIdeal computation)
 						in: [ :aNode | 
@@ -204,9 +204,11 @@ TtIdeals >> onLoadedFromLepiter [
 								ifFalse: [ self flag: #TODO.	"Better error handling"
 									self inform: 'The code is NOT parsable into a Closure' ] ] ].
 
-			(aTtIdeal category isNotNil and: [ aTtIdeal category isString ])
-				ifTrue: [ aTtIdeal
-						category: (self rootCollection categories
-								detect: [ :aCategory | aCategory name = aTtIdeal category ]
-								ifNone: [ TtPlaceholderCategory fromName: aTtIdeal category ]) ] ]
+			aTtIdeal category isString
+				ifTrue: [ self rootCollection
+						ifNotNil: [ :aRootCollection | 
+							aTtIdeal
+								category: (aRootCollection categories
+										detect: [ :aCategory | aCategory name = aTtIdeal category ]
+										ifNone: [ TtPlaceholderCategory fromName: aTtIdeal category ]) ] ] ]
 ]

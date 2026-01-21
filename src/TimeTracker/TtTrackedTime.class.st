@@ -259,11 +259,13 @@ TtTrackedTime >> max: aValue [
 
 { #category : 'loading' }
 TtTrackedTime >> onLoadedFromLepiter [
-	(self category isNotNil and: [ self category isString ])
-		ifTrue: [ self
-				category: (self rootCollection categories
-						detect: [ :aCategory | aCategory name = self category ]
-						ifNone: [ TtPlaceholderCategory fromName: self category ]) ]
+	self category isString
+		ifTrue: [ self rootCollection
+				ifNotNil: [ :aRootCollection | 
+					self
+						category: (aRootCollection categories
+								detect: [ :aCategory | aCategory name = self category ]
+								ifNone: [ TtPlaceholderCategory fromName: self category ]) ] ]
 ]
 
 { #category : 'printing' }
