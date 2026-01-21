@@ -38,7 +38,7 @@ TtIdeal class >> leJsonV4MappingFor: aNeoJSONMapper [
 				setter: [ :um | self error: 'Objects should not be read here' ].
 			aMapping
 				mapProperty: #computation
-				getter: [ :aTtIdeal | aTtIdeal computation asString ]
+				getter: [ :aTtIdeal | aTtIdeal computation ifNotNil: #asString ]
 				setter: [ :um | self error: 'Objects should not be read here' ].
 			aMapping
 				mapInstVars: #(#description #leeway #maxValue #minValue #priority #timePeriod) ]
