@@ -1182,7 +1182,8 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 							ifNil: [ anIdeal computation value: aTrackedTime ]
 							ifNotNil: [ :notNil | (aTrackedTime category ifNil: [ TtCategory new ]) = notNil ] ]
 					ifNone: [ 'Time Without Ideals' ] ].
-	idealsWithNoTrackedTime := (activeIdeals ideals difference: groupedByIdeals keys)
+	idealsWithNoTrackedTime := (activeIdeals ideals
+			difference: groupedByIdeals keys)
 			collect: [ :each | 
 				each
 					-> ((self reject: [ :_ | true ])
@@ -1206,9 +1207,7 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 			text: [ :each | 
 				each key isString
 					ifTrue: [ each key ]
-					ifFalse: [ each key category
-							ifNil: [ each key description ]
-							ifNotNil: [ :notNil | notNil name ] ] ]
+					ifFalse: [ each key description ifNil: [ each key category ] ] ]
 			weight: 0.75;
 		column: 'Progress'
 			text: [ :each | 
@@ -1258,9 +1257,8 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 							, (ideals
 									collect: [ :each | 
 										(each start asDate yyyymmdd , ' - '
-											, (each duration isZero
-													ifTrue: [ 'Today' ]
-													ifFalse: [ each end asDate yyyymmdd ])) -> each ]).
+											, (each duration isZero ifTrue: [ 'Today' ] ifFalse: [ each end asDate yyyymmdd ]))
+											-> each ]).
 
 					groupByLabelMapping
 						do: [ :each | 
