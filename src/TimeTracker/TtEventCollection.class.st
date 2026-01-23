@@ -1159,8 +1159,8 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 															anySatisfy: [ :anIdeal | 
 																(aWeek start asDate - 1 day) start asDate
 																	in: [ :aDate | 
-																		aDate >= anIdeal start asDate
-																			and: [ aDate <= anIdeal end asDate or: [ anIdeal duration = Duration zero ] ] ] ])
+																		(anIdeal includes: aDate)
+																			or: [ aDate start >= ideals last start and: [ ideals last duration = Duration zero ] ] ] ])
 															ifTrue: [ aVerticalPane background: Color lightGreen ] ].
 												aVerticalPane ]) ].
 
@@ -1173,7 +1173,11 @@ TtEventCollection >> gtIdealTimeUsageMultipleWeeks: aView context: aContext [
 TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	| activeIdeals daysWithData dynamicPriority groupedByIdeals ideals idealsWithNoTrackedTime |
 	ideals := self ideals.
-	activeIdeals := ideals last.
+	activeIdeals := (aContext at: 'ideals')
+			ifNil: [ ideals
+					detect: [ :each | each includes: self first start ]
+					ifFound: #yourself
+					ifNone: [ ideals last ] ].
 	groupedByIdeals := self timeEntries
 			groupedBy: [ :aTrackedTime | 
 				activeIdeals ideals
@@ -1202,12 +1206,16 @@ TtEventCollection >> gtIdealTimeUsageSingleWeek: aView context: aContext [
 	^ aView columnedList
 		title: 'Ideals Progress';
 		priority: dynamicPriority;
-		items: [ groupedByIdeals associations ];
+		items: [ groupedByIdeals associations
+				flag: #HACK;
+				sorted: [ :a :b | 
+					(a key isString ifTrue: [ 'AAA' ] ifFalse: [ a key asString ])
+						< (b key isString ifTrue: [ 'AAA' ] ifFalse: [ b key asString ]) ]	"Move to domain models to have a proper and more useful sorts." ];
 		column: 'Ideal Time Usage'
 			text: [ :each | 
 				each key isString
 					ifTrue: [ each key ]
-					ifFalse: [ each key description ifNil: [ each key category ] ] ]
+					ifFalse: [ each key description ifNil: [ each key category name ] ] ]
 			weight: 0.75;
 		column: 'Progress'
 			text: [ :each | 
@@ -2153,9 +2161,12 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 	| activeIdeals daysWithData groupedByIdeals ideals idealsWithNoTrackedTime idealProgress |
 	ideals := self ideals.
 	^ (ideals
-		anySatisfy: [ :anIdeal | aTtEventCollection first start asDate >= anIdeal start asDate ])
+		anySatisfy: [ :anIdeal | 
+			(anIdeal includes: aTtEventCollection first)
+				or: [ aTtEventCollection first start >= ideals last start
+						and: [ ideals last start duration = Duration zero ] ] ])
 		ifTrue: [ activeIdeals := ideals
-					detect: [ :each | each includes: self first start ]
+					detect: [ :each | each includes: aTtEventCollection first start ]
 					ifFound: #yourself
 					ifNone: [ ideals last ].
 
@@ -2169,7 +2180,8 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 										(aTrackedTime category ifNil: [ TtCategory new ]) categoryLineage
 											includes: notNil ] ]
 							ifNone: [ 'Time Without Ideals' ] ].
-			idealsWithNoTrackedTime := (activeIdeals ideals difference: groupedByIdeals keys)
+			idealsWithNoTrackedTime := (activeIdeals ideals
+					difference: groupedByIdeals keys)
 					collect: [ :each | 
 						each
 							-> ((self reject: [ :_ | true ])
