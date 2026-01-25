@@ -2198,11 +2198,11 @@ TtEventCollection >> weeklyIdealGrade: aTtEventCollection [
 						progressPercent := ((each value items
 								sum: self partialDurationWhenMultiTasking) / daysWithData days) asFloat
 								/ each key minValue min: 1.
-						{progressPercent >= 1 ifTrue: [ 1 ] ifFalse: [ 0 ].
+						each key -> {progressPercent >= 1 ifTrue: [ 1 ] ifFalse: [ 0 ].
 							progressPercent} ].
-			(idealProgress collect: #first) sum asString , '/'
+			(idealProgress collect: [:each | each value first]) sum asString , '/'
 				, groupedByIdeals size asString , ' , '
-				, ((idealProgress collect: #second) sum / groupedByIdeals size * 100
+				, ((idealProgress collect: [:each | each value second]) sum / groupedByIdeals size * 100
 						printShowingDecimalPlaces: 0) , '%' ]
 		ifFalse: [ '' ]
 ]
