@@ -957,7 +957,6 @@ TtEventCollection >> groupingLevelLabelMapping [
 { #category : 'as yet unclassified' }
 TtEventCollection >> gtCalendarViewFor: aView [
 	<gtView>
-	self groupedByCategory keys size > 2 ifTrue: [ ^ aView empty ].
 	^ aView explicit
 		title: 'Calendar View';
 		priority: 4;
