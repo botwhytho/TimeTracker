@@ -164,7 +164,7 @@ TtEventCollection >> acceptProposalsElementFor: aDayOrEntry [
 
 { #category : 'filtering' }
 TtEventCollection >> allCategorized [
-	^ self select: [ :each | each category isNotNil ]
+	^ self timeEntries select: [ :each | each category isNotNil ]
 ]
 
 { #category : 'filtering' }
@@ -213,7 +213,7 @@ TtEventCollection >> allOverlappingWith: aTtTrackedTime [
 
 { #category : 'filtering' }
 TtEventCollection >> allUncategorized [
-	^ self select: [ :each | each category isNil ]
+	^ self timeEntries select: [ :each | each category isNil ]
 ]
 
 { #category : 'accessing' }
