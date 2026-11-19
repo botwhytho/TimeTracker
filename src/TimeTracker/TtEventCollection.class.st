@@ -569,7 +569,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 				ifFound: [ :aTrackedTime | 
 					| anIndex aBrTree indexInTree |
 					anIndex := self timeEntries items identityIndexOf: aTrackedTime.
-					aBrTree := element childAt: 2.
+					aBrTree := element children first.
 					indexInTree := anIndex + aBrTree viewModel root value size.
 					aBrTree
 						scrollToIndex: (indexInTree - 3 - entriesByDay size max: 1);
@@ -2144,7 +2144,8 @@ TtEventCollection >> select: aBlock [
 
 { #category : 'suggestions' }
 TtEventCollection >> styleUncategorizedButton: aButton for: aTrackedTime [
-	"The Categorize button of an entry without a category; a proposer may decorate it with a proposal."
+	"The Categorize button of an entry without a category; a proposer may decorate it with a proposal.
+	Answers the button: the Category column's stencil uses this as the cell element."
 
 	aButton
 		label: 'Categorize' asRopedText;
@@ -2153,7 +2154,8 @@ TtEventCollection >> styleUncategorizedButton: aButton for: aTrackedTime [
 				geometry: BlCircleGeometry new;
 				background: Color transparent).
 	self class proposer
-		ifNotNil: [ :aProposer | aProposer decorateCategorizeButton: aButton for: aTrackedTime ]
+		ifNotNil: [ :aProposer | aProposer decorateCategorizeButton: aButton for: aTrackedTime ].
+	^ aButton
 ]
 
 { #category : 'accessing' }
