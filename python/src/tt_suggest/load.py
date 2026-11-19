@@ -1,4 +1,7 @@
-"""Parse a TimeTracker Lepiter page (JSON) into entries and the category tree."""
+"""Parse a TimeTracker Lepiter page (JSON) into entries and the category tree.
+
+Developer tooling for offline experiments. The GT integration does not use the file parser: GT owns
+storage and sends plain data (see tt_suggest.gt.train), which Entry.from_dict and link_siblings handle."""
 
 from __future__ import annotations
 
@@ -26,15 +29,35 @@ class Entry:
     group: int = -1
 
     def as_dict(self) -> dict:
-        """Plain dict mirroring TtTrackedTime; the shape GT would send."""
+        """Plain dict mirroring TtTrackedTime: the shape GT sends (see from_dict)."""
         return {
             "description": self.description,
             "details": self.details,
             "start": self.start.isoformat(),
             "duration": self.duration_s,
             "isPlanned": self.is_planned,
-            "siblings": list(self.siblings),
+            "category": self.category,
+            "rawData": self.raw,
+            "day": self.day,
         }
+
+    @classmethod
+    def from_dict(cls, d: dict, idx: int = 0) -> "Entry":
+        """Inverse of as_dict. Only description, start and duration are required; category is
+        absent for entries that still need a suggestion. Siblings are not read here: call
+        link_siblings on the whole batch."""
+        start = datetime.fromisoformat(d["start"])
+        return cls(
+            idx=idx,
+            category=d.get("category") or "",
+            description=d.get("description") or "",
+            details=d.get("details") or "",
+            start=start,
+            duration_s=int(d["duration"]),
+            is_planned=bool(d.get("isPlanned")),
+            raw=d.get("rawData") or "",
+            day=d.get("day") or start.date().isoformat(),
+        )
 
 
 def load(path: str | Path, include_planned: bool = True) -> tuple[list[Entry], CategoryTree]:
@@ -66,8 +89,15 @@ def load(path: str | Path, include_planned: bool = True) -> tuple[list[Entry], C
     if tree is None:
         raise ValueError("no TtCategoriesSnippet found")
 
-    # Group activities split from the same raw line (same start, raw text, duration).
-    # Note: isPlanned can differ between activities of one line, so it is not part of the key.
+    link_siblings(entries)
+    entries.sort(key=lambda e: (e.start, e.idx))
+    return entries, tree
+
+
+def link_siblings(entries: list[Entry]) -> None:
+    """Group activities split from the same raw line (same start, raw text, duration) and record
+    each entry's siblings. isPlanned can differ between activities of one line, so it is not part
+    of the key."""
     groups: dict[tuple, list[Entry]] = {}
     for e in entries:
         groups.setdefault((e.start, e.raw, e.duration_s), []).append(e)
@@ -75,6 +105,3 @@ def load(path: str | Path, include_planned: bool = True) -> tuple[list[Entry], C
         for e in members:
             e.group = gid
             e.siblings = tuple(m.description for m in members if m is not e)
-
-    entries.sort(key=lambda e: (e.start, e.idx))
-    return entries, tree
