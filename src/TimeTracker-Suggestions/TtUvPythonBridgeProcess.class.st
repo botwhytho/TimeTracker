@@ -1,9 +1,9 @@
 "
-I run the Python Bridge server (the gtoolkit_bridge PyPI package) from a uv project instead of a pipenv runtime directory.
+I run the Python Bridge server (the gtoolkit_bridge PyPI package) from a uv project instead of a pipenv runtime directory: `uv run --group gt python -u -m gtoolkit_bridge ...`.
 
-The application's working directory must be the uv project (it holds pyproject.toml, and gtoolkit_bridge is in its `gt` dependency group). It must also contain an empty marker file `complete.log`, so that PBNewPharoPlatform>>#ensureEnvironmentForApp: skips its pipenv install step.
+The application's working directory must be the uv project (it holds pyproject.toml, with gtoolkit_bridge in its `gt` dependency group). {{gtClass:TtPythonBridgeHandler}} syncs that environment before starting me.
 
-Dependencies are managed with `uv add`, not through #installModule:in:.
+uv is located with GtOsSystemInfo>>#findExecutable: (see #uvPath); set #uvPath: to override. Dependencies are managed with `uv add`, not through #installModule:in:.
 "
 Class {
 	#name : 'TtUvPythonBridgeProcess',

@@ -15,3 +15,29 @@ TtPythonBridgeHandler >> initializeHandler [
 	process := self application settings serverProcessClass
 			application: self application
 ]
+
+{ #category : 'starting' }
+TtPythonBridgeHandler >> start [
+	"Instead of PBPlatform>>#ensureEnvironmentForApp: (which runs `pipenv install` unless a
+	complete.log marker exists), make sure the uv project's environment is in sync, then start."
+
+	self syncUvProject.
+	^ process start
+]
+
+{ #category : 'starting' }
+TtPythonBridgeHandler >> syncUvProject [
+	"Idempotent and fast when up to date. On first use it downloads Python and the packages,
+	before the bridge starts, so the bridge's startup wait never covers downloads."
+
+	| output |
+	output := GtExternalProcessBuilder new
+			command: TtUvPythonBridgeProcess uvPath fullName;
+			args: #('sync' '--group' 'gt');
+			workingDirectory: self application settings workingDirectory;
+			output.
+	output status isSuccess
+		ifFalse: [ self
+				error: 'uv sync failed in ' , self application settings workingDirectory fullName
+						, ': ' , output stderr ]
+]

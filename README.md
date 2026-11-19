@@ -47,10 +47,9 @@ Requirements:
 - A platform with `vowpalwabbit` wheels. Linux x86-64 is tested; other platforms are unverified.
 - The repository loaded from git (Metacello does this for `github://` loads), because the Python code is read from its `python/` folder.
 
-How it works: TimeTracker-Suggestions runs its own Python bridge process from the repository's `python/` uv project. It is separate from GT's default Python bridge, which is left untouched. Training uses only your local entries, and nothing is sent anywhere.
+How it works: TimeTracker-Suggestions runs its own Python bridge process from the repository's `python/` uv project, running `uv sync` first (on first use this downloads the packages, so it takes longer). It is separate from GT's default Python bridge, which is left untouched. Training uses only your local entries, and nothing is sent anywhere.
 
 Current limitations, which the next development stage addresses:
-- GT's stock Python setup runs `pipenv install` unless an empty `python/complete.log` file exists. Create it once (it is gitignored).
 - Errors surface in the debugger rather than as a notification.
 
 See [`python/README.md`](python/README.md) for the Python side and its offline experiments.
