@@ -51,6 +51,9 @@ How it works: TimeTracker-Suggestions runs its own Python bridge process from th
 
 If something goes wrong (for example uv is missing), suggestions become unavailable and GT shows one notification; click it, or inspect `TtSuggestionService default`, to see the reason. The rest of TimeTracker is unaffected.
 
-Current limitation: suggestions are not yet shown in the Time Tracker views.
+Using it: open a Time Tracker page's **Entries By Day** view. Training starts in the background when the page loads (a few seconds; refresh the view if you open it before training finishes).
+- An uncategorized entry's Category button shows the proposed category in italics with a hollow ring. Entries worth a look are marked **new** (a description never seen before) or **check** (an uncertain proposal). Click the button to confirm or pick another category as usual.
+- A day with proposals that are not flagged shows **Accept N** in its Category cell. It accepts only those, for entries that are still uncategorized; entries you categorized yourself are never changed.
+- Proposals are not saved until you accept them, and the model learns from every category you set.
 
 See [`python/README.md`](python/README.md) for the Python side and its offline experiments.
