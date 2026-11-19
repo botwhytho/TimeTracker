@@ -18,11 +18,12 @@ Class {
 
 { #category : 'accessing' }
 TtUvPythonBridgeProcess class >> uvPath [
-	"The mise shim keeps working across uv upgrades; set #uvPath: if uv lives elsewhere."
+	"An explicit #uvPath: wins; otherwise ask GT, the same way PythonBridge locates pipenv:
+	GtOsSystemInfo>>#findExecutable: runs `which uv` in the user's login shell, so whatever
+	installed uv (official installer, Homebrew, mise, ...) is found. Cached; reset with #uvPath: nil.
+	Signals an Error when uv cannot be found."
 
-	^ uvPath
-		ifNil: [ FileLocator home asFileReference / '.local' / 'share' / 'mise' / 'shims'
-				/ 'uv' ]
+	^ uvPath ifNil: [ uvPath := GtOsSystemInfo current findExecutable: 'uv' ]
 ]
 
 { #category : 'accessing' }
