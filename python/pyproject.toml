@@ -1,0 +1,27 @@
+[project]
+name = "tt-suggest"
+version = "0.1.0"
+description = "Online category suggestions for TimeTracker entries (Vowpal Wabbit POC)"
+readme = "README.md"
+authors = [
+    { name = "Alberto" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "vowpalwabbit>=9.11.9",
+]
+
+[project.scripts]
+tt-suggest = "tt_suggest:main"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+gt = [
+    "gtoolkit-bridge>=0.4.0",
+]
