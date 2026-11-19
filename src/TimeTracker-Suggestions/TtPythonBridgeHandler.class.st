@@ -30,9 +30,11 @@ TtPythonBridgeHandler >> syncUvProject [
 	"Idempotent and fast when up to date. On first use it downloads Python and the packages,
 	before the bridge starts, so the bridge's startup wait never covers downloads."
 
-	| output |
+	| uv output |
+	uv := TtUvPythonBridgeProcess uvPath.
+	uv isFile ifFalse: [ ^ self error: 'Unable to find: uv at ' , uv fullName ].
 	output := GtExternalProcessBuilder new
-			command: TtUvPythonBridgeProcess uvPath fullName;
+			command: uv fullName;
 			args: #('sync' '--group' 'gt');
 			workingDirectory: self application settings workingDirectory;
 			output.

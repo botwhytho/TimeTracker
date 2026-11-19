@@ -49,7 +49,8 @@ Requirements:
 
 How it works: TimeTracker-Suggestions runs its own Python bridge process from the repository's `python/` uv project, running `uv sync` first (on first use this downloads the packages, so it takes longer). It is separate from GT's default Python bridge, which is left untouched. Training uses only your local entries, and nothing is sent anywhere.
 
-Current limitations, which the next development stage addresses:
-- Errors surface in the debugger rather than as a notification.
+If something goes wrong (for example uv is missing), suggestions become unavailable and GT shows one notification; click it, or inspect `TtSuggestionService default`, to see the reason. The rest of TimeTracker is unaffected.
+
+Current limitation: suggestions are not yet shown in the Time Tracker views.
 
 See [`python/README.md`](python/README.md) for the Python side and its offline experiments.
