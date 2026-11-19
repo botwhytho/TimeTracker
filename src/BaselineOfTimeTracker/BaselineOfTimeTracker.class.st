@@ -1,14 +1,17 @@
 Class {
-	#name : #BaselineOfTimeTracker,
-	#superclass : #BaselineOf,
-	#category : 'BaselineOfTimeTracker'
+	#name : 'BaselineOfTimeTracker',
+	#superclass : 'BaselineOf',
+	#category : 'BaselineOfTimeTracker',
+	#package : 'BaselineOfTimeTracker'
 }
 
-{ #category : #baseline }
+{ #category : 'baseline' }
 BaselineOfTimeTracker >> baseline: spec [
 	<baseline>
-	spec for: #'common' do: [
-		spec
-			package: 'TimeTracker'. ].
-
+	spec
+		for: #common
+		do: [ spec
+				package: 'TimeTracker';
+				package: 'TimeTracker-Suggestions'
+					with: [ spec requires: #('TimeTracker') ] ]
 ]
