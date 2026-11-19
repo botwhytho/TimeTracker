@@ -10,11 +10,13 @@ Class {
 		'includeUntracked',
 		'groupingLevel',
 		'categoryPicker',
-		'categoryContext'
+		'categoryContext',
+		'items'
 	],
 	#classInstVars : [
 		'uniqueInstance',
-		'pageRegistry'
+		'pageRegistry',
+		'proposer'
 	],
 	#category : 'TimeTracker',
 	#package : 'TimeTracker'
@@ -102,6 +104,24 @@ TtEventCollection class >> pageRegistry: aDictionary [
 	pageRegistry := aDictionary
 ]
 
+{ #category : 'suggestions' }
+TtEventCollection class >> proposer [
+	"An optional category proposer (e.g. TtSuggester from the TimeTracker-Suggestions package), or nil.
+	TimeTracker never depends on it: every use goes through ifNotNil:. Protocol it must answer:
+	collectionLoaded: aTtEventCollection
+	entryCategorized: aTtTrackedTime
+	decorateCategorizeButton: aBrButton for: aTtTrackedTime
+	acceptableProposalsIn: aCollectionOfTtTrackedTime
+	acceptProposalsIn: aCollectionOfTtTrackedTime"
+
+	^ proposer
+]
+
+{ #category : 'suggestions' }
+TtEventCollection class >> proposer: aProposer [
+	proposer := aProposer
+]
+
 { #category : 'serialization' }
 TtEventCollection class >> supportedSnippetTypes [
 	^ {TtTrackedTimeSnippet.
@@ -121,6 +141,25 @@ TtEventCollection >> TtCategoriesFor: aView context: aContext [
 		actionButtonIcon: BrGlamorousVectorIcons inspect
 			label: 'Categories'
 			action: [ :aBrButton :aBrTab :aBrButtonModel :aBlClickEvent | aBrButton phlow spawnObject: self categories ]
+]
+
+{ #category : 'suggestions' }
+TtEventCollection >> acceptProposalsElementFor: aDayOrEntry [
+	"For a day row: an 'Accept N' button when a proposer has unflagged proposals for that day's
+	uncategorized entries; otherwise an empty element (also when no proposer is installed)."
+
+	| acceptable |
+	(aDayOrEntry isAssociation and: [ self class proposer notNil ])
+		ifFalse: [ ^ BlElement new size: 1 @ 1 ].
+	acceptable := self class proposer acceptableProposalsIn: aDayOrEntry value.
+	acceptable ifEmpty: [ ^ BlElement new size: 1 @ 1 ].
+	^ BrButton new
+		aptitude: BrGlamorousButtonWithLabelAptitude;
+		label: 'Accept ' , acceptable size printString;
+		action: [ :aBrButton :aBrButtonModel :anEvent | 
+			anEvent consumed: true.
+			self class proposer acceptProposalsIn: aDayOrEntry value.
+			aBrButton phlow fireToolUpdateWish ]
 ]
 
 { #category : 'filtering' }
@@ -463,7 +502,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 			stencil: [ :each :rowIndex :columnIndex | 
 				self flag: #TODO.	"Wrap category view in domain object, have a unique Instance and re-use/cache?"
 				each isAssociation
-					ifTrue: [ BlElement new size: 1 @ 1 ]
+					ifTrue: [ self acceptProposalsElementFor: each ]
 					ifFalse: [ | aButton |
 						aButton := BrButton new.
 						aButton
@@ -491,12 +530,7 @@ TtEventCollection >> buildEntriesByDay: aContext [
 											size: 15 @ 15;
 											geometry: BlCircleGeometry new;
 											background: each category color) ]
-							ifNil: [ aButton
-									label: 'Categorize' asRopedText;
-									icon: (BlElement new
-											size: 15 @ 15;
-											geometry: BlCircleGeometry new;
-											background: Color transparent) ] ] ];
+							ifNil: [ self styleUncategorizedButton: aButton for: each ] ] ];
 		column: 'Notes'
 			stencil: [ :each | 
 				| aTimespan pageLinks |
@@ -2011,7 +2045,9 @@ TtEventCollection >> loadFromLepiter [
 					object collection: self.
 					self add: object.
 					object onLoadedFromLepiter ].
-			self beSerializable ]
+			self beSerializable.
+			self class proposer
+				ifNotNil: [ :aProposer | aProposer collectionLoaded: self ] ]
 ]
 
 { #category : 'views' }
@@ -2104,6 +2140,20 @@ TtEventCollection >> select: aBlock [
 		viewFilterContext: self viewFilterContext;
 		includeUntracked: self includeUntracked;
 		groupingLevel: self groupingLevel
+]
+
+{ #category : 'suggestions' }
+TtEventCollection >> styleUncategorizedButton: aButton for: aTrackedTime [
+	"The Categorize button of an entry without a category; a proposer may decorate it with a proposal."
+
+	aButton
+		label: 'Categorize' asRopedText;
+		icon: (BlElement new
+				size: 15 @ 15;
+				geometry: BlCircleGeometry new;
+				background: Color transparent).
+	self class proposer
+		ifNotNil: [ :aProposer | aProposer decorateCategorizeButton: aButton for: aTrackedTime ]
 ]
 
 { #category : 'accessing' }

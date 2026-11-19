@@ -264,7 +264,7 @@ TtCategories >> TtCategoriesFor: aView context: aContext [
 													viewElement := categorizeButton phlow firstParentWithViewContent.
 													anEvent consumed: true.
 													aTtTrackedTime category: aCategory.
-													aTtTrackedTime serialize.
+													aTtTrackedTime serialize. TtEventCollection proposer ifNotNil: [ :aProposer | aProposer entryCategorized: aTtTrackedTime ].
 													categorizeButton label: aCategory name.
 													categorizeButton icon background: aCategory color.
 													viewElement phlow fireViewSyncUpdateWish.
