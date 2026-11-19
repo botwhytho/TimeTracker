@@ -53,24 +53,36 @@ TtSuggestion >> confidence [
 
 { #category : 'ui' }
 TtSuggestion >> decorate: aButton [
-	"Proposed, not chosen: italic grey name (plus a marker when flagged) and a hollow ring."
+	"Proposed, not chosen: italic grey name and a hollow ring; flagged ones get a heavy darker-orange
+	marker (new / check). The button's label aptitude restyles its whole label (dropping per-part colour
+	and weight), so the built-in label is emptied and the styled text is added as a plain BlTextElement,
+	in the label's own font (Source Sans Pro, 14 at normal size, see BrGlamorousButtonLabelAptitude).
+	The button's aptitude, including the category picker dropdown, is left untouched."
 
 	| text color |
 	text := categoryName asRopedText italic foreground: Color gray.
 	needsCheck
 		ifTrue: [ text := text
 					, ((isNew ifTrue: [ '  new' ] ifFalse: [ '  check' ]) asRopedText
-							foreground: Color orange) ].
+							weight: 900;
+							foreground: Color orange darker;
+							yourself) ].
+	text
+		fontName: 'Source Sans Pro';
+		fontSize: 14.
 	color := self category
 			ifNil: [ Color gray ]
 			ifNotNil: [ :aCategory | aCategory color ].
 	aButton
-		label: text;
+		label: '' asRopedText;
 		icon: (BlElement new
 				size: 15 @ 15;
 				geometry: BlCircleGeometry new;
 				background: Color transparent;
-				border: (BlBorder paint: color width: 2))
+				border: (BlBorder paint: color width: 2));
+		addChild: (BlTextElement new
+				text: text;
+				constraintsDo: [ :c | c linear vertical alignCenter ])
 ]
 
 { #category : 'accessing' }
